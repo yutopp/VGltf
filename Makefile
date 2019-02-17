@@ -1,7 +1,9 @@
 PROJECT_NAME:=VGltf
+PROJECT_VERSION:=0.1.0
 
 PROJECT_DIR:=${PROJECT_NAME}.standalone
 PROJECT_TEST_DIR:=${PROJECT_DIR}/${PROJECT_NAME}.Editor.Tests
+
 NUNIT_CONSOLE:=.nuget/NUnit.ConsoleRunner/tools/nunit3-console.exe
 
 .PHONY: all
@@ -68,3 +70,13 @@ coverage-netcore20: build-debug-netcore20
 .PHONY: benchmark-netcore20
 benchmark-netcore20:
 	dotnet run -p ${PROJECT_DIR}/Benchmarks/Benchmarks.csproj -c Release -f netcoreapp2.0 -- --job short --runtimes core
+
+#
+.PHONY: publish
+publish:
+	dotnet pack ${PROJECT_DIR}/${PROJECT_NAME} -c Release -p:PackageVersion=${PROJECT_VERSION}
+	# export NuGetKey="~~"
+	cd ${PROJECT_DIR}/${PROJECT_NAME}/bin/Release/ && \
+		dotnet nuget push \
+			-k $(NuGetKey) ${PROJECT_NAME}.${PROJECT_VERSION}.nupkg \
+			-s https://api.nuget.org/v3/index.json

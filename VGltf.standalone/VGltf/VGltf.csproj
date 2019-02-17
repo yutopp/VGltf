@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net35;net45;netcoreapp2.0</TargetFrameworks>
+    <LangVersion>4</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Assets/VGltf/Runtime/**/*.cs" />
+  </ItemGroup>
+
+  <!--ItemGroup>
+    <Compile Include="../../../VJson/Assets/VJson/Runtime/**/*.cs" />
+  </ItemGroup-->
+
+  <ItemGroup>
+    <PackageReference Include="VJson" Version="0.1.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <FrameworkPathOverride Condition="'$(OS)' == 'Unix' and '$(TargetFramework)' == 'net35'">/usr/lib/mono/2.0-api/</FrameworkPathOverride>
+    <FrameworkPathOverride Condition="'$(OS)' == 'Unix' and '$(TargetFramework)' == 'net45'">/usr/lib/mono/4.5/</FrameworkPathOverride>
+  </PropertyGroup>
+
+</Project>

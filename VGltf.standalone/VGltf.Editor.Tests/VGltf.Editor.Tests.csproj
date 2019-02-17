@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net35;net45;netcoreapp2.0</TargetFrameworks>
+    <LangVersion>4</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.msbuild" Version="2.5.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="nunit" Version="3.10.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../VGltf/VGltf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Assets/VGltf/Editor/Tests/**/*.cs" />
+  </ItemGroup>
+
+  <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+    <ItemGroup>
+      <MyBinFolder Include="../../SampleModels/**/*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(MyBinFolder)" DestinationFiles="$(OutDir)/SampleModels/%(RecursiveDir)%(Filename)%(Extension)" />
+  </Target>
+</Project>
