@@ -1,0 +1,73 @@
+version: 2
+jobs:
+  test_net35:
+    docker:
+      - image: mono:latest
+    working_directory: ~/workspace-net35
+    steps:
+      - checkout
+      - run: apt-get update -yy && apt-get install -yy make git python3
+      - run: make setup-net
+      - run: make test-net35
+      - store_test_results:
+          path: test-results
+
+  test_net45:
+    docker:
+      - image: mono:latest
+    working_directory: ~/workspace-net45
+    steps:
+      - checkout
+      - run: apt-get update -yy && apt-get install -yy make git python3
+      - run: make setup-net
+      - run: make test-net45
+      - store_test_results:
+          path: test-results
+
+  test_netcoreapp2_0:
+    docker:
+      - image: microsoft/dotnet:2.2-sdk
+    working_directory: ~/workspace-netcoreapp2_0
+    steps:
+      - checkout
+      - run: apt-get update -yy && apt-get install -yy make git python3
+      - run: make setup
+      - run: make test-netcore20
+      - store_test_results:
+          path: test-results
+
+  coverage:
+    docker:
+      - image: microsoft/dotnet:2.2-sdk
+    working_directory: ~/workspace-netcoreapp2_0
+    steps:
+      - checkout
+      - run: curl -s https://codecov.io/bash > codecov
+      - run: chmod +x codecov
+      - run: mkdir coverage
+      - run: apt-get update -yy && apt-get install -yy make git python3
+      - run: dotnet add VGltf.standalone/VGltf.Editor.Tests/VGltf.Editor.Tests.csproj package coverlet.msbuild
+      - run: make setup
+      - run: make coverage-netcore20
+      - run: ./codecov -f coverage/lcov.info
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - test_net35
+      - test_net45
+      - test_netcoreapp2_0
+      - coverage
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - test_net35
+      - test_net45
+      - test_netcoreapp2_0
