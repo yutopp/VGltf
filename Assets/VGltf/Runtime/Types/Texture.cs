@@ -13,27 +13,26 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "texture.schema.json")]
-    public class Texture
+    public class Texture : GltfChildOfRootProperty
     {
         [JsonField(Name = "sampler")]
-        // TODO
+        // TODO: "$ref": "glTFid.schema.json"
         public int Sampler;
 
         [JsonField(Name = "source")]
-        // TODO
+        // TODO: "$ref": "glTFid.schema.json"
         public int Source;
-
-        [JsonField(Name = "name")]
-        public object Name; // TODO: ignorable
-
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
     }
 
-    public class TextureInfo
+    public class TextureInfo : GltfProperty
     {
+        [JsonField(Name = "index")]
+        [JsonSchemaRequired]
+        // TODO: "$ref": "glTFid.schema.json"
+        public int Index;
+
+        [JsonField(Name = "texCoord")]
+        [JsonSchema(Minimum = 0), JsonSchemaRequired]
+        public int TexCoord = 0;
     }
 }

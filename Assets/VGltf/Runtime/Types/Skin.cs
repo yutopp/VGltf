@@ -13,28 +13,19 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "skin.schema.json")]
-    public class Skin
+    public class Skin : GltfChildOfRootProperty
     {
         [JsonField(Name = "inverseBindMatrices")]
-        // TODO
+        // TODO: "$ref": "glTFid.schema.json"
         public int InverseBindMatrices;
 
         [JsonField(Name = "skeleton")]
-        // TODO
+        // TODO: "$ref": "glTFid.schema.json"
         public int Skeleton;
 
         [JsonField(Name = "joints")]
-        [JsonSchema(/*uniqueItems*/MinItems = 1)]
-        [JsonSchemaRequired]
+        [JsonSchema(UniqueItems = true, MinItems = 1), JsonSchemaRequired]
+        // TODO: "$ref": "glTFid.schema.json"
         public int[] Joints;
-
-        [JsonField(Name = "name")]
-        public object Name; // TODO: ignorable
-
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
     }
 }

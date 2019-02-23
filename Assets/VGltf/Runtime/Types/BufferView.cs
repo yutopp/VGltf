@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "bufferView.schema.json")]
-    public class BufferView
+    public class BufferView : GltfChildOfRootProperty
     {
         [JsonField(Name = "buffer")]
         // TODO: allOf": [ { "$ref": "glTFid.schema.json"} ]
@@ -25,8 +25,7 @@ namespace VGltf.Types
         public int ByteOffset = 0; // TODO: ignorable
 
         [JsonField(Name = "byteLength")]
-        [JsonSchema(Minimum = 1)]
-        [JsonSchemaRequired]
+        [JsonSchema(Minimum = 1), JsonSchemaRequired]
         public int ByteLength;
 
         [JsonField(Name = "byteStride")]
@@ -34,16 +33,14 @@ namespace VGltf.Types
         public int ByteStride; // TODO: ignorable
 
         [JsonField(Name = "target")]
-        // TODO: enum
-        public int Target; // TODO: ignorable
+        public TargetEnum Target; // TODO: ignorable
 
-        [JsonField(Name = "name")]
-        public object name; // TODO: ignorable
+        //
 
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
+        public enum TargetEnum
+        {
+            ARRAY_BUFFER = 34962,
+            ELEMENT_ARRAY_BUFFER = 34963,
+        }
     }
 }

@@ -15,42 +15,67 @@ namespace VGltf.Types
     [JsonSchema(Id = "camera.schema.json")]
     // TODO: allof
     // TODO: not
-    public class Camera
+    public class Camera : GltfChildOfRootProperty
     {
         [JsonField(Name = "orthographic")]
-        // TODO: allof
         public OrthographicType Orthographic; // TODO: ignorable
 
         [JsonField(Name = "perspective")]
-        // TODO: allof
         public PerspectiveType Perspective; // TODO: ignorable
 
         [JsonField(Name = "type")]
         [JsonSchemaRequired]
-        // TODO: enum
-        public string Type;
-
-        [JsonField(Name = "name")]
-        public object name; // TODO: ignorable
-
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
+        public TypeEnum Type;
 
         //
 
-        [JsonSchema(Id="camera.orthographic.schema.json")]
-        public class OrthographicType
+        [JsonSchema(Id = "camera.orthographic.schema.json")]
+        public class OrthographicType : GltfProperty
         {
-            // TODO
+            [JsonField(Name = "xmag")]
+            [JsonSchemaRequired]
+            public float Xmag; // TODO: ignorable
+
+            [JsonField(Name = "ymag")]
+            [JsonSchemaRequired]
+            public float Ymag; // TODO: ignorable
+
+            [JsonField(Name = "zfar")]
+            [JsonSchema(ExclusiveMinimum = 0.0f), JsonSchemaRequired]
+            public float Zfar; // TODO: ignorable
+
+            [JsonField(Name = "znear")]
+            [JsonSchema(Minimum = 0.0f), JsonSchemaRequired]
+            public float Znear; // TODO: ignorable
         }
 
-        [JsonSchema(Id="camera.perspective.schema.json")]
+        [JsonSchema(Id = "camera.perspective.schema.json")]
         public class PerspectiveType
         {
-            // TODO
+            [JsonField(Name = "aspectRatio")]
+            [JsonSchema(ExclusiveMinimum = 0.0f)]
+            public float AspectRatio; // TODO: ignorable
+
+            [JsonField(Name = "yfov")]
+            [JsonSchema(ExclusiveMinimum = 0.0f), JsonSchemaRequired]
+            public float Yfov; // TODO: ignorable
+
+            [JsonField(Name = "zfar")]
+            [JsonSchema(ExclusiveMinimum = 0.0f)]
+            public float Zfar; // TODO: ignorable
+
+            [JsonField(Name = "znear")]
+            [JsonSchema(ExclusiveMinimum = 0.0f), JsonSchemaRequired]
+            public float Znear; // TODO: ignorable
+        }
+
+        [Json(EnumConversion = EnumConversionType.AsString)]
+        public enum TypeEnum
+        {
+            [JsonField(Name = "perspective")]
+            Perspective,
+            [JsonField(Name = "orthographic")]
+            Orthographic,
         }
     }
 }

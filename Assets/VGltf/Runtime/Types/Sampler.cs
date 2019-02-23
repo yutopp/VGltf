@@ -13,31 +13,43 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "sampler.schema.json")]
-    public class Sampler
+    public class Sampler : GltfChildOfRootProperty
     {
         [JsonField(Name = "magFilter")]
-        // TODO: enum
-        public int MagFilter;
+        public MagFilterEnum MagFilter;
 
         [JsonField(Name = "minFilter")]
-        // TODO: enum
-        public int MinFilter;
+        public MinFilterEnum MinFilter;
 
         [JsonField(Name = "wrapS")]
-        // TODO: enum
-        public int WrapS = 10497;
+        public WrapEnum WrapS = WrapEnum.REPEAT;
 
         [JsonField(Name = "wrapT")]
-        // TODO: enum
-        public int WrapT = 10497;
+        public WrapEnum WrapT = WrapEnum.REPEAT;
 
-        [JsonField(Name = "name")]
-        public object Name; // TODO: ignorable
+        //
 
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
+        public enum MagFilterEnum
+        {
+            NEAREST = 9728,
+            LINEAR = 9729,
+        }
 
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
+        public enum MinFilterEnum
+        {
+            NEAREST = 9728,
+            LINEAR = 9729,
+            NEAREST_MIPMAP_NEAREST = 9984,
+            LINEAR_MIPMAP_NEAREST = 9985,
+            NEAREST_MIPMAP_LINEAR = 9986,
+            LINEAR_MIPMAP_LINEAR = 9987,
+        }
+
+        public enum WrapEnum
+        {
+            CLAMP_TO_EDGE = 33071,
+            MIRRORED_REPEAT = 33648,
+            REPEAT = 10497,
+        }
     }
 }

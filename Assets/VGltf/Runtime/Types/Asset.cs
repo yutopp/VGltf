@@ -13,27 +13,20 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "asset.schema.json")]
-    public class Asset
+    public class Asset : GltfProperty
     {
-        [JsonField(Name="copyright")]
-        public string Copyright; // TODO: ignorable
+        [JsonField(Name = "copyright"), JsonFieldIgnorable]
+        public string Copyright;
 
-        [JsonField(Name="generator")]
-        public string Generator; // TODO: ignorable
+        [JsonField(Name = "generator"), JsonFieldIgnorable]
+        public string Generator;
 
-        [JsonField(Name="version")]
-        [JsonSchema(Pattern="^[0-9]+\\.[0-9]+$")]
-        [JsonSchemaRequired]
+        [JsonField(Name = "version")]
+        [JsonSchema(Pattern = "^[0-9]+\\.[0-9]+$"), JsonSchemaRequired]
         public string Version;
 
-        [JsonField(Name="minVersion")]
-        [JsonSchema(Pattern="^[0-9]+\\.[0-9]+$")]
-        public string MinVersion; // TODO: ignorable
-
-        [JsonField(Name="extensions")]
-        public object extensions; // TODO: ignorable
-
-        [JsonField(Name="extras")]
-        public object Extras; // TODO: ignorable
+        [JsonField(Name = "minVersion"), JsonFieldIgnorable]
+        [JsonSchema(Pattern = "^[0-9]+\\.[0-9]+$")]
+        public string MinVersion;
     }
 }

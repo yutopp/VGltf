@@ -16,19 +16,23 @@ namespace VGltf.UnitTests
     {
         [Test]
         [TestCaseSource("ValuesArgs")]
-        public void ReaderTest(string[] modelPath, object expect)
+        public void ReaderTest(string[] modelPath, Action<Types.Gltf> assertGltf)
         {
             var path = modelPath.Aggregate("SampleModels", (b, p) => Path.Combine(b, p));
             using (var fs = new FileStream(path, FileMode.Open))
             {
                 var c = GltfContainer.FromGlb(fs);
+                assertGltf(c.Gltf);
             }
         }
 
         public static object[] ValuesArgs = {
             new object[] {
-                new string[] {"Alicia","VRM","AliciaSolid.vrm"},
-                null,
+                new string[] {"Alicia", "VRM", "AliciaSolid.vrm"},
+                new Action<Types.Gltf>(
+                    (gltf) => {
+                        // Assert.That(gltf.ExtensionsUsed, Is.EquivalentTo( new string[]{} ));
+                    }),
             }
         };
     }

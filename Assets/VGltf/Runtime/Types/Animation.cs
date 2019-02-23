@@ -13,39 +13,86 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "animation.schema.json")]
-    public class Animation
+    public class Animation : GltfChildOfRootProperty
     {
         [JsonField(Name = "channels")]
-        [JsonSchema(MinItems = 1)]
-        [JsonSchemaRequired]
+        [JsonSchema(MinItems = 1), JsonSchemaRequired]
         public List<ChannelType> Channels;
 
         [JsonField(Name = "samplers")]
-        [JsonSchema(MinItems = 1)]
-        [JsonSchemaRequired]
+        [JsonSchema(MinItems = 1), JsonSchemaRequired]
         public List<SamplerType> Samplers;
-
-        [JsonField(Name = "name")]
-        public object name; // TODO: ignorable
-
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
 
         //
 
         [JsonSchema(Id = "animation.channel.schema.json")]
-        public class ChannelType
+        public class ChannelType : GltfProperty
         {
-            // TODO
+            [JsonField(Name = "sampler")]
+            [JsonSchemaRequired]
+            // TODO: "$ref": "glTFid.schema.json"
+            public int Sampler;
+
+            [JsonField(Name = "target")]
+            [JsonSchemaRequired]
+            public TargetType Target;
+
+            //
+
+            [JsonSchema(Id = "animation.channel.target.schema.json")]
+            public class TargetType : GltfProperty
+            {
+                [JsonField(Name = "node")]
+                // TODO: "$ref": "glTFid.schema.json"
+                public int Node;
+
+                [JsonField(Name = "path")]
+                [JsonSchemaRequired]
+                public PathEnum Path;
+
+                //
+
+                [Json(EnumConversion = EnumConversionType.AsString)]
+                public enum PathEnum
+                {
+                    [JsonField(Name = "translation")]
+                    Translation,
+                    [JsonField(Name = "rotation")]
+                    Rotation,
+                    [JsonField(Name = "scale")]
+                    Scale,
+                    [JsonField(Name = "weights")]
+                    Weights,
+                }
+            }
         }
 
         [JsonSchema(Id = "animation.sampler.schema.json")]
         public class SamplerType
         {
-            // TODO
+            [JsonField(Name = "input")]
+            // TODO: "$ref": "glTFid.schema.json"
+            public int Input;
+
+            [JsonField(Name = "interpolation")]
+            public InterpolationEnum Interpolation = InterpolationEnum.LINEAR;
+
+            [JsonField(Name = "output")]
+            // TODO: "$ref": "glTFid.schema.json"
+            public int Output;
+
+            //
+
+            [Json(EnumConversion = EnumConversionType.AsString)]
+            public enum InterpolationEnum
+            {
+                [JsonField(Name = "LINEAR")]
+                LINEAR,
+                [JsonField(Name = "STEP")]
+                STEP,
+                [JsonField(Name = "CUBICSPLINE" )]
+                CUBICSPLINE,
+            }
         }
     }
 }

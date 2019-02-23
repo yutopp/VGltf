@@ -5,7 +5,6 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
-using System;
 using System.Collections.Generic;
 using VJson;
 using VJson.Schema;
@@ -13,88 +12,76 @@ using VJson.Schema;
 // Reference: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/schema/*
 namespace VGltf.Types
 {
-    [JsonSchema(Title = "glTF",
-                Description = "The root object for a glTF asset.",
-                Id = "glTF.schema.json")]
-    // TODO: support all of
-    public class Gltf
+    [JsonSchema(Id = "glTF.schema.json")]
+    public class Gltf : GltfProperty
     {
-        [JsonField(Name = "extensionsUsed")]
-        [JsonSchema(/*uniqueItems = true*/
-                    MinItems = 1)]
-        public string[] ExtensionsUsed; // TODO: ignorable
+        [JsonField(Name = "extensionsUsed"), JsonFieldIgnorable]
+        [JsonSchema(UniqueItems = true, MinItems = 1)]
+        public string[] ExtensionsUsed;
 
-        [JsonField(Name = "extensionsRequired")]
-        [JsonSchema(/*uniqueItems = true*/
-                    MinItems = 1)]
-        public string[] ExtensionsRequired; // TODO: ignorable
+        [JsonField(Name = "extensionsRequired"), JsonFieldIgnorable]
+        [JsonSchema(UniqueItems = true, MinItems = 1)]
+        public string[] ExtensionsRequired;
 
-        [JsonField(Name = "accessors")]
+        [JsonField(Name = "accessors"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Accessor> Accessors; // TODO: ignorable
+        public List<Accessor> Accessors;
 
-        [JsonField(Name = "animations")]
+        [JsonField(Name = "animations"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Animation> Animations; // TODO: ignorable
+        public List<Animation> Animations;
 
         [JsonField(Name = "asset")]
         [JsonSchemaRequired]
-        /* TODO: allOf */
         public Asset Asset;
 
-        [JsonField(Name = "buffers")]
+        [JsonField(Name = "buffers"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Buffer> Buffers; // TODO: ignorable
+        public List<Buffer> Buffers;
 
-        [JsonField(Name = "bufferViews")]
+        [JsonField(Name = "bufferViews"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<BufferView> BufferViews; // TODO: ignorable
+        public List<BufferView> BufferViews;
 
-        [JsonField(Name = "cameras")]
+        [JsonField(Name = "cameras"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Camera> Cameras; // TODO: ignorable
+        public List<Camera> Cameras;
 
-        [JsonField(Name = "images")]
+        [JsonField(Name = "images"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Image> Images; // TODO: ignorable
+        public List<Image> Images;
 
-        [JsonField(Name = "materials")]
+        [JsonField(Name = "materials"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Material> Materials; // TODO: ignorable
+        public List<Material> Materials;
 
-        [JsonField(Name = "meshes")]
+        [JsonField(Name = "meshes"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Mesh> Meshes; // TODO: ignorable
+        public List<Mesh> Meshes;
 
-        [JsonField(Name = "nodes")]
+        [JsonField(Name = "nodes"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Node> Nodes; // TODO: ignorable
+        public List<Node> Nodes;
 
-        [JsonField(Name = "samplers")]
+        [JsonField(Name = "samplers"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Sampler> Samplers; // TODO: ignorable
+        public List<Sampler> Samplers;
 
-        [JsonField(Name = "scene")]
-        [JsonSchemaDependencies(new string[] { "scenes" })]
+        [JsonField(Name = "scene"), JsonFieldIgnorable]
+        [JsonSchemaDependencies("scenes")]
         // TODO: allOf": [ { "$ref": "glTFid.schema.json"} ]
-        public int Scene; // TODO: ignorable
+        public int Scene;
 
-        [JsonField(Name = "scenes")]
+        [JsonField(Name = "scenes"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Scene> Scenes; // TODO: ignorable
+        public List<Scene> Scenes;
 
-        [JsonField(Name = "skins")]
+        [JsonField(Name = "skins"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Skin> Skins; // TODO: ignorable
+        public List<Skin> Skins;
 
-        [JsonField(Name = "textures")]
+        [JsonField(Name = "textures"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public List<Texture> Textures; // TODO: ignorable
-
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
+        public List<Texture> Textures;
     }
 }

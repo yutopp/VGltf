@@ -5,22 +5,17 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
-using System;
 using VJson;
-using VJson.Schema;
 
 // Reference: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/schema/*
 namespace VGltf.Types
 {
-    [JsonSchema(Id = "buffer.schema.json")]
-    public class Buffer : GltfChildOfRootProperty
+    public class GltfProperty
     {
-        [JsonField(Name = "uri")]
-        // TODO: "format": "uriref"
-        public string Uri;
+        [JsonField(Name = "extensions"), JsonFieldIgnorable]
+        public object Extensions;
 
-        [JsonField(Name = "byteLength")]
-        [JsonSchema(Minimum = 1), JsonSchemaRequired]
-        public int ByteLength;
+        [JsonField(Name = "extras"), JsonFieldIgnorable]
+        public object Extras;
     }
 }

@@ -13,22 +13,18 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "material.schema.json")]
-    public class Material
+    public class Material : GltfChildOfRootProperty
     {
         [JsonField(Name = "pbrMetallicRoughness")]
-        // TODO: allof
         public PbrMetallicRoughnessType PbrMetallicRoughness;
 
         [JsonField(Name = "normalTexture")]
-        // TODO: allof
         public NormalTextureInfoType NormalTexture;
 
         [JsonField(Name = "occlusionTexture")]
-        // TODO: allof
         public OcclusionTextureType OcclusionTexture;
 
         [JsonField(Name = "emissiveTexture")]
-        // TODO: allof
         public TextureInfo EmissiveTexture;
 
         [JsonField(Name = "emissiveFactor")]
@@ -37,8 +33,7 @@ namespace VGltf.Types
         public float[] EmissiveFactor = new float[] { 0.0f, 0.0f, 0.0f };
 
         [JsonField(Name = "alphaMode")]
-        // TODO: enum
-        public string AlphaMode = "OPAQUE";
+        public AlphaModeEnum AlphaMode = AlphaModeEnum.Opaque;
 
         [JsonField(Name = "alphaCutoff")]
         [JsonSchema(Minimum = 0.0)]
@@ -47,15 +42,6 @@ namespace VGltf.Types
 
         [JsonField(Name = "doubleSided")]
         public bool DoubleSided = false;
-
-        [JsonField(Name = "name")]
-        public object Name; // TODO: ignorable
-
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
 
         //
 
@@ -68,9 +54,21 @@ namespace VGltf.Types
         public class NormalTextureInfoType
         {
         }
+
         [JsonSchema(Id = "material.occlusionTexture.schema.json")]
         public class OcclusionTextureType
         {
+        }
+
+        [Json(EnumConversion = EnumConversionType.AsString)]
+        public enum AlphaModeEnum
+        {
+            [JsonField(Name = "OPAQUE")]
+            Opaque,
+            [JsonField(Name = "MASK")]
+            Mask,
+            [JsonField(Name = "BLEND")]
+            Blend,
         }
     }
 }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net35;net45;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net35;net45</TargetFrameworks>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
 

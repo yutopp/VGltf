@@ -5,7 +5,6 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
-using System;
 using VJson;
 using VJson.Schema;
 
@@ -15,28 +14,29 @@ namespace VGltf.Types
     [JsonSchema(Id = "image.schema.json")]
     // TODO: allof
     // TODO: oneOf
-    public class Image
+    public class Image : GltfChildOfRootProperty
     {
         [JsonField(Name = "uri")]
         // TODO: "format": "uriref"
         public string Uri;
 
         [JsonField(Name = "mimeType")]
-        // TODO: enum
-        public string MimeType;
+        public MimeTypeEnum MimeType;
 
         [JsonField(Name = "bufferView")]
-        [JsonSchema(Dependencies = new string[] { "mimeType" })]
+        [JsonSchemaDependencies("mimeType")]
         // TODO: all of
         public int bufferView;
 
-        [JsonField(Name = "name")]
-        public object name; // TODO: ignorable
+        //
 
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
+        [Json(EnumConversion = EnumConversionType.AsString)]
+        public enum MimeTypeEnum
+        {
+            [JsonField(Name = "image/jpeg")]
+            ImageJpeg,
+            [JsonField(Name = "image/png")]
+            ImagePng,
+        }
     }
 }

@@ -13,25 +13,15 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "mesh.schema.json")]
-    public class Mesh
+    public class Mesh : GltfChildOfRootProperty
     {
         [JsonField(Name = "primitives")]
-        [JsonSchema(MinItems=1)]
-        [JsonSchemaRequired]
+        [JsonSchema(MinItems=1), JsonSchemaRequired]
         public PrimitiveType[] Primitives;
 
         [JsonField(Name = "weights")]
         [JsonSchema(MinItems=1)]
         public float[] weights;
-
-        [JsonField(Name = "name")]
-        public object name; // TODO: ignorable
-
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
 
         //
 

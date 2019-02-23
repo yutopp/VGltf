@@ -13,20 +13,11 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "scene.schema.json")]
-    public class Scene
+    public class Scene : GltfChildOfRootProperty
     {
         [JsonField(Name = "nodes")]
-        [JsonSchema(/*UniqueItems=true,*/MinItems = 1)]
-        // TODO
+        [JsonSchema(UniqueItems = true, MinItems = 1)]
+        // "glTFid.schema.json"
         public int[] Nodes;
-
-        [JsonField(Name = "name")]
-        public object Name; // TODO: ignorable
-
-        [JsonField(Name = "extensions")]
-        public object Extensions; // TODO: ignorable
-
-        [JsonField(Name = "extras")]
-        public object Extras; // TODO: ignorable
     }
 }
