@@ -7,19 +7,25 @@
 
 using System;
 using System.IO;
-using VJson;
 
 namespace VGltf
 {
     public class GltfContainer
     {
         public Types.Gltf Gltf { get; private set; }
-        public object Storage { get; private set; }
+        public Glb.StoredBuffer Buffer { get; private set; }
 
-        public GltfContainer(Types.Gltf gltf, object storage)
+        public GltfContainer(Types.Gltf gltf, Glb.StoredBuffer buffer = null)
         {
             Gltf = gltf;
-            Storage = storage;
+            Buffer = buffer;
+        }
+
+        public static GltfContainer FromGltf(Stream s/* TODO: support storage */)
+        {
+            var gltf = GltfReader.Read(s);
+
+            return new GltfContainer(gltf);
         }
 
         public static GltfContainer FromGlb(Stream s)

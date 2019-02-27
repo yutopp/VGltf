@@ -28,6 +28,11 @@ namespace VGltf
             public byte[] ChunkData; // TODO: treat it as Stream to reduce memory usage
         }
 
+        public class StoredBuffer
+        {
+            public ArraySegment<byte> Payload;
+        }
+
         public class Reader : IDisposable
         {
             BinaryReader _r;
@@ -90,10 +95,9 @@ namespace VGltf
                     }
 
                     Types.Gltf gltf = null;
-                    //GLB.Chunk bin = null;
-                    object bin = null;
+                    StoredBuffer buffer = null;
 
-                    for (; ; )
+                    for (var i = 0; ; ++i)
                     {
                         var c = r.ReadChunk();
                         if (c == null)
@@ -104,24 +108,42 @@ namespace VGltf
                         switch (c.ChunkType)
                         {
                             case 0x4E4F534A: // JSON
-                                if (gltf != null)
+                                if (i != 0)
                                 {
+                                    // JSON chunk must be the first chunk
                                     throw new NotImplementedException("Json"); // TODO: change type
                                 }
-                                var jd = new JsonDeserializer(typeof(Types.Gltf));
-                                using (var ms = new MemoryStream(c.ChunkData))
+
+                                if (gltf != null)
                                 {
-                                    gltf = (Types.Gltf)jd.Deserialize(ms);
+                                    // Duplicated
+                                    throw new NotImplementedException("Json"); // TODO: change type
+                                }
+
+                                using (var cs = new MemoryStream(c.ChunkData))
+                                {
+                                    gltf = GltfReader.Read(cs);
                                 }
 
                                 break;
 
                             case 0x004E4942: // BIN
-                                if (bin != null)
+                                if (i != 1)
                                 {
-                                    throw new NotImplementedException("Bin"); // TODO: change type
+                                    // Binary buffer chunk must be the second chunk
+                                    throw new NotImplementedException("BinaryBuffer"); // TODO: change type
                                 }
-                                //bin = c;
+
+                                if (buffer != null)
+                                {
+                                    // Duplicated
+                                    throw new NotImplementedException("BinaryBuffer"); // TODO: change type
+                                }
+
+                                buffer = new StoredBuffer {
+                                    Payload = new ArraySegment<byte>(c.ChunkData),
+                                };
+
                                 break;
 
                             default:
@@ -135,7 +157,7 @@ namespace VGltf
                         throw new NotImplementedException("Json is empty"); // TODO: change type
                     }
 
-                    return new GltfContainer(gltf, null);
+                    return new GltfContainer(gltf, buffer);
                 }
             }
         }
