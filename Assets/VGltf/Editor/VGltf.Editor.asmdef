@@ -1,0 +1,12 @@
+{
+    "name": "VGltf.Editor",
+    "references": [
+        "VGltf"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

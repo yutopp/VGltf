@@ -1,0 +1,15 @@
+{
+    "name": "VGltf.Editor.Tests",
+    "references": [
+        "VGltf",
+        "VGltf.Editor"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

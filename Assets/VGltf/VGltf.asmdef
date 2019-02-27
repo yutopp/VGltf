@@ -1,0 +1,10 @@
+{
+    "name": "VGltf",
+    "references": [
+        "VJson"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
