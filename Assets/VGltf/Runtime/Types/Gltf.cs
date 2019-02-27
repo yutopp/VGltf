@@ -6,6 +6,7 @@
 //
 
 using System.Collections.Generic;
+using System.Linq;
 using VJson;
 using VJson.Schema;
 
@@ -83,5 +84,39 @@ namespace VGltf.Types
         [JsonField(Name = "textures"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
         public List<Texture> Textures;
+    }
+
+    public static class GltfExtensions
+    {
+        /// <summary>
+        ///   NOTE: Throw exceptions if elements are not found.
+        /// </summary>
+        public static Image GetImageByTextureIndex(this Gltf gltf, int index, out int? imageIndex)
+        {
+            var tex = gltf.Textures[index];
+            imageIndex = tex.Source;
+
+            return gltf.Images[imageIndex.Value];
+        }
+
+        public static Image GetImageByTextureIndex(this Gltf gltf, int index)
+        {
+            int? dummy;
+            return GetImageByTextureIndex(gltf, index, out dummy);
+        }
+
+        public static Sampler GetSamplerByTextureIndex(this Gltf gltf, int index, out int? samplerIndex)
+        {
+            var tex = gltf.Textures[index];
+            samplerIndex = tex.Sampler;
+
+            return gltf.Samplers[samplerIndex.Value];
+        }
+
+        public static Sampler GetSamplerByTextureIndex(this Gltf gltf, int index)
+        {
+            int? dummy;
+            return GetSamplerByTextureIndex(gltf, index, out dummy);
+        }
     }
 }

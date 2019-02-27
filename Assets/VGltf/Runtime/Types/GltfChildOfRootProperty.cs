@@ -13,6 +13,6 @@ namespace VGltf.Types
     public class GltfChildOfRootProperty : GltfProperty
     {
         [JsonField(Name = "name"), JsonFieldIgnorable]
-        public object Name; // TODO: ignorable
+        public string Name; // TODO: ignorable
     }
 }

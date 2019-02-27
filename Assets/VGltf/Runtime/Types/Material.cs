@@ -5,7 +5,7 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
-using System;
+using System.Collections.Generic;
 using VJson;
 using VJson.Schema;
 
@@ -22,10 +22,10 @@ namespace VGltf.Types
         public NormalTextureInfoType NormalTexture;
 
         [JsonField(Name = "occlusionTexture")]
-        public OcclusionTextureType OcclusionTexture;
+        public OcclusionTextureInfoType OcclusionTexture;
 
         [JsonField(Name = "emissiveTexture")]
-        public TextureInfo EmissiveTexture;
+        public EmissiveTextureInfoType EmissiveTexture;
 
         [JsonField(Name = "emissiveFactor")]
         [JsonSchema(MinItems = 3, MaxItems = 3)]
@@ -46,18 +46,60 @@ namespace VGltf.Types
         //
 
         [JsonSchema(Id = "material.pbrMetallicRoughness.schema.json")]
-        public class PbrMetallicRoughnessType
+        public class PbrMetallicRoughnessType : GltfProperty
         {
+            [JsonField(Name = "baseColorFactor")]
+            [JsonSchema(MinItems = 4, MaxItems = 4)]
+            [ItemsJsonSchema(Minimum = 0.0f, Maximum = 1.0f)]
+            public float[] BaseColorFactor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+
+            [JsonField(Name = "baseColorTexture"), JsonFieldIgnorable]
+            public BaseColorTextureInfoType BaseColorTexture;
+
+            [JsonField(Name = "metallicFactor")]
+            [JsonSchema(Minimum = 0.0f, Maximum = 1.0f)]
+            public float MetallicFactor = 1.0f;
+
+            [JsonField(Name = "roughnessFactor")]
+            [JsonSchema(Minimum = 0.0f, Maximum = 1.0f)]
+            public float RoughnessFactor = 1.0f;
+
+            [JsonField(Name = "metallicRoughnessTexture"), JsonFieldIgnorable]
+            public MetallicRoughnessTextureInfoType MetallicRoughnessTexture;
+        }
+
+        public class BaseColorTextureInfoType : TextureInfo
+        {
+            public override TextureInfoKind Kind { get { return TextureInfoKind.BaseColor; } }
+        }
+
+        public class MetallicRoughnessTextureInfoType : TextureInfo
+        {
+            public override TextureInfoKind Kind { get { return TextureInfoKind.MetallicRoughness; } }
         }
 
         [JsonSchema(Id = "material.normalTextureInfo.schema.json")]
-        public class NormalTextureInfoType
+        public class NormalTextureInfoType : TextureInfo
         {
+            [JsonField(Name = "scale")]
+            public float Scale = 1.0f;
+
+            public override TextureInfoKind Kind { get { return TextureInfoKind.Normal; } }
         }
 
-        [JsonSchema(Id = "material.occlusionTexture.schema.json")]
-        public class OcclusionTextureType
+        [JsonSchema(Id = "material.occlusionTextureInfo.schema.json")]
+        public class OcclusionTextureInfoType : TextureInfo
         {
+            [JsonField(Name = "strength")]
+            [JsonSchema(Minimum = 0.0f, Maximum = 1.0f)]
+            public float Strength = 1.0f;
+
+            public override TextureInfoKind Kind { get { return TextureInfoKind.Occlusion; } }
+        }
+
+        public class EmissiveTextureInfoType : TextureInfo
+        {
+            public override TextureInfoKind Kind { get { return TextureInfoKind.Emissive; } }
         }
 
         [Json(EnumConversion = EnumConversionType.AsString)]
@@ -69,6 +111,22 @@ namespace VGltf.Types
             Mask,
             [JsonField(Name = "BLEND")]
             Blend,
+        }
+    }
+
+    public static class MaterialExtensions
+    {
+        public static IEnumerable<TextureInfo> GetTextures(this Material mat)
+        {
+            if (mat.PbrMetallicRoughness != null)
+            {
+                yield return mat.PbrMetallicRoughness.BaseColorTexture;
+                yield return mat.PbrMetallicRoughness.MetallicRoughnessTexture;
+            }
+
+            yield return mat.NormalTexture;
+            yield return mat.OcclusionTexture;
+            yield return mat.EmissiveTexture;
         }
     }
 }

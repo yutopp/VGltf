@@ -15,16 +15,25 @@ namespace VGltf.Types
     [JsonSchema(Id = "texture.schema.json")]
     public class Texture : GltfChildOfRootProperty
     {
-        [JsonField(Name = "sampler")]
+        [JsonField(Name = "sampler"), JsonFieldIgnorable]
         // TODO: "$ref": "glTFid.schema.json"
-        public int Sampler;
+        public int? Sampler;
 
-        [JsonField(Name = "source")]
+        [JsonField(Name = "source"), JsonFieldIgnorable]
         // TODO: "$ref": "glTFid.schema.json"
-        public int Source;
+        public int? Source;
     }
 
-    public class TextureInfo : GltfProperty
+    public enum TextureInfoKind
+    {
+        BaseColor,
+        MetallicRoughness,
+        Normal,
+        Occlusion,
+        Emissive
+    }
+
+    public abstract class TextureInfo : GltfProperty
     {
         [JsonField(Name = "index")]
         [JsonSchemaRequired]
@@ -34,5 +43,7 @@ namespace VGltf.Types
         [JsonField(Name = "texCoord")]
         [JsonSchema(Minimum = 0), JsonSchemaRequired]
         public int TexCoord = 0;
+
+        public abstract TextureInfoKind Kind { get; }
     }
 }

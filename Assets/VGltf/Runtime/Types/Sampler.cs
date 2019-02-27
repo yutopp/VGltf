@@ -22,10 +22,10 @@ namespace VGltf.Types
         public MinFilterEnum MinFilter;
 
         [JsonField(Name = "wrapS")]
-        public WrapEnum WrapS = WrapEnum.REPEAT;
+        public WrapEnum WrapS = WrapEnum.Repeat;
 
         [JsonField(Name = "wrapT")]
-        public WrapEnum WrapT = WrapEnum.REPEAT;
+        public WrapEnum WrapT = WrapEnum.Repeat;
 
         //
 
@@ -47,9 +47,9 @@ namespace VGltf.Types
 
         public enum WrapEnum
         {
-            CLAMP_TO_EDGE = 33071,
-            MIRRORED_REPEAT = 33648,
-            REPEAT = 10497,
+            ClampToEdge = 33071,
+            MirroredRepeat = 33648,
+            Repeat = 10497,
         }
     }
 }

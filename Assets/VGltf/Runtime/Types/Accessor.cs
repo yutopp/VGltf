@@ -14,12 +14,11 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "accessor.schema.json")]
-    // TODO: support all of
     public class Accessor : GltfChildOfRootProperty
     {
         // TODO: allOf": [ { "$ref": "glTFid.schema.json"} ]
-        [JsonField(Name = "BufferView"), JsonFieldIgnorable] // TODO: fix default value. Use optional?
-        public int BufferView; // TODO: ignorable
+        [JsonField(Name = "bufferView"), JsonFieldIgnorable]
+        public int? BufferView;
 
         [JsonField(Name = "byteOffset")]
         [JsonSchema(Minimum = 0), JsonSchemaDependencies("bufferView")]
@@ -40,16 +39,16 @@ namespace VGltf.Types
         [JsonSchemaRequired]
         public TypeEnum Type;
 
-        [JsonField(Name = "max")]
+        [JsonField(Name = "max"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1, MaxItems = 16)]
-        public float[] Max; // TODO: ignorable
+        public float[] Max;
 
-        [JsonField(Name = "min")]
+        [JsonField(Name = "min"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1, MaxItems = 16)]
-        public float[] Min; // TODO: ignorable
+        public float[] Min;
 
-        [JsonField(Name = "sparse")]
-        public SparseType Sparse; // TODO: ignorable
+        [JsonField(Name = "sparse"), JsonFieldIgnorable]
+        public SparseType Sparse;
 
         //
 
@@ -137,6 +136,127 @@ namespace VGltf.Types
                 [JsonSchema(Minimum = 0)]
                 public int ByteOffset = 0;
             }
+        }
+    }
+
+    public static class AccessorComponentTypeEnumExtensions
+    {
+        public static int SizeInBytes(this Accessor.ComponentTypeEnum e)
+        {
+            switch (e)
+            {
+                case Accessor.ComponentTypeEnum.BYTE:
+                    return 1;
+
+                case Accessor.ComponentTypeEnum.UNSIGNED_BYTE:
+                    return 1;
+
+                case Accessor.ComponentTypeEnum.SHORT:
+                    return 2;
+
+                case Accessor.ComponentTypeEnum.UNSIGNED_SHORT:
+                    return 2;
+
+                case Accessor.ComponentTypeEnum.UNSIGNED_INT:
+                    return 4;
+
+                case Accessor.ComponentTypeEnum.FLOAT:
+                    return 4;
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public static Type TypeOf(this Accessor.ComponentTypeEnum e)
+        {
+            switch (e)
+            {
+                case Accessor.ComponentTypeEnum.BYTE:
+                    return typeof(sbyte);
+
+                case Accessor.ComponentTypeEnum.UNSIGNED_BYTE:
+                    return typeof(byte);
+
+                case Accessor.ComponentTypeEnum.SHORT:
+                    return typeof(short);
+
+                case Accessor.ComponentTypeEnum.UNSIGNED_SHORT:
+                    return typeof(ushort);
+
+                case Accessor.ComponentTypeEnum.UNSIGNED_INT:
+                    return typeof(uint);
+
+                case Accessor.ComponentTypeEnum.FLOAT:
+                    return typeof(float);
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+    }
+
+    public static class AccessorTypeEnumExtensions
+    {
+        public static int NumOfComponents(this Accessor.TypeEnum t)
+        {
+            switch (t)
+            {
+                case Accessor.TypeEnum.Scalar:
+                    return 1;
+
+                case Accessor.TypeEnum.Vec2:
+                    return 2;
+
+                case Accessor.TypeEnum.Vec3:
+                    return 3;
+
+                case Accessor.TypeEnum.Vec4:
+                    return 4;
+
+                case Accessor.TypeEnum.Mat2:
+                    return 4;
+
+                case Accessor.TypeEnum.Mat3:
+                    return 9;
+
+                case Accessor.TypeEnum.Mat4:
+                    return 16;
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+    }
+
+    public static class AccessorSparseIndicesComponentTypeEnumExtensions
+    {
+        public static Accessor.ComponentTypeEnum CommonType(this Accessor.SparseType.IndicesType.ComponentTypeEnum e)
+        {
+            switch (e)
+            {
+                case Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_BYTE:
+                    return Accessor.ComponentTypeEnum.UNSIGNED_BYTE;
+
+                case Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_SHORT:
+                    return Accessor.ComponentTypeEnum.UNSIGNED_SHORT;
+
+                case Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_INT:
+                    return Accessor.ComponentTypeEnum.UNSIGNED_INT;
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public static int SizeInBytes(this Accessor.SparseType.IndicesType.ComponentTypeEnum e)
+        {
+            return e.CommonType().SizeInBytes();
+        }
+
+        public static Type TypeOf(this Accessor.SparseType.IndicesType.ComponentTypeEnum e)
+        {
+            return e.CommonType().TypeOf();
         }
     }
 }

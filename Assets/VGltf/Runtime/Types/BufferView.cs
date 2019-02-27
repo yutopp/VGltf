@@ -28,9 +28,9 @@ namespace VGltf.Types
         [JsonSchema(Minimum = 1), JsonSchemaRequired]
         public int ByteLength;
 
-        [JsonField(Name = "byteStride")]
+        [JsonField(Name = "byteStride"), JsonFieldIgnorable]
         [JsonSchema(Minimum = 4, Maximum = 252, MultipleOf = 4)]
-        public int ByteStride; // TODO: ignorable
+        public int? ByteStride;
 
         [JsonField(Name = "target")]
         public TargetEnum Target; // TODO: ignorable

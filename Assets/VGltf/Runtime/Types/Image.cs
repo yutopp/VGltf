@@ -5,6 +5,7 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System.IO;
 using VJson;
 using VJson.Schema;
 
@@ -12,8 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "image.schema.json")]
-    // TODO: allof
-    // TODO: oneOf
+    // TODO: oneOf required: Uri OR bufferView
     public class Image : GltfChildOfRootProperty
     {
         [JsonField(Name = "uri")]
@@ -21,12 +21,12 @@ namespace VGltf.Types
         public string Uri;
 
         [JsonField(Name = "mimeType")]
-        public MimeTypeEnum MimeType;
+        public MimeTypeEnum? MimeType;
 
         [JsonField(Name = "bufferView")]
         [JsonSchemaDependencies("mimeType")]
-        // TODO: all of
-        public int bufferView;
+        // TODO: all of "glTFid.schema.json"
+        public int? bufferView;
 
         //
 
@@ -37,6 +37,34 @@ namespace VGltf.Types
             ImageJpeg,
             [JsonField(Name = "image/png")]
             ImagePng,
+        }
+    }
+
+    public static class ImageExtensions
+    {
+        public static string GetExtension(this Image img)
+        {
+            switch(img.MimeType)
+            {
+                case Image.MimeTypeEnum.ImageJpeg:
+                    return ".jpg";
+                case Image.MimeTypeEnum.ImagePng:
+                    return ".png";
+            }
+
+
+            if (img.Uri.StartsWith("data:image/jpeg;"))
+            {
+                return ".jpg";
+            }
+            else if (img.Uri.StartsWith("data:image/png;"))
+            {
+                return ".png";
+            }
+            else
+            {
+                return Path.GetExtension(img.Uri).ToLower();
+            }
         }
     }
 }
