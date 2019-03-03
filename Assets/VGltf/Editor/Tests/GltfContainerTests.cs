@@ -14,6 +14,43 @@ namespace VGltf.UnitTests
 {
     public class GltfContainerTests
     {
+        // For testing purpose
+        struct Vec2
+        {
+            float x;
+            float y;
+
+            public Vec2(float x, float y)
+            {
+                this.x = x;
+                this.y = y;
+            }
+
+            public override string ToString()
+            {
+                return string.Format("{{{0}, {1}}}", x, y);
+            }
+        }
+
+        struct Vec3
+        {
+            float x;
+            float y;
+            float z;
+
+            public Vec3(float x, float y, float z)
+            {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+
+            public override string ToString()
+            {
+                return string.Format("{{{0}, {1}, {2}}}", x, y, z);
+            }
+        }
+
         [Test]
         [TestCaseSource("GltfArgs")]
         public void FromGltfTest(string[] modelPath, Action<Types.Gltf, Glb.StoredBuffer> assertGltf)
@@ -41,7 +78,7 @@ namespace VGltf.UnitTests
         public static object[] GltfArgs = {
             new object[] {
                 // See: https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SimpleSparseAccessor/screenshot/simpleSparseAccessorStructure.png
-                new string[] {"SimpleSparseAccessor", "SimpleSparseAccessor.gltf"},
+                new string[] {"SimpleSparseAccessor", "glTF-Embedded", "SimpleSparseAccessor.gltf"},
                 new Action<Types.Gltf, Glb.StoredBuffer>(
                     (gltf, buffer) => {
                         var store = new ResourcesStore(gltf, buffer, new ResourceLoaderFromStorage());
@@ -53,9 +90,10 @@ namespace VGltf.UnitTests
                             var typedBuffer = store.GetOrLoadTypedBufferByAccessorIndex(0);
                             Assert.AreEqual(Types.Accessor.ComponentTypeEnum.UNSIGNED_SHORT,
                                             typedBuffer.Accessor.ComponentType);
+                            Assert.AreEqual(Types.Accessor.TypeEnum.Scalar, typedBuffer.Accessor.Type);
 
-                            var view = typedBuffer.GetUnsignedShortView();
-                            Assert.AreEqual(36 * 1 /* 1(Scalar) */, view.Length);
+                            var entiry = typedBuffer.GetEntity<ushort>();
+                            Assert.AreEqual(36, entiry.Length);
                         }
 
                         // positionView
@@ -63,45 +101,139 @@ namespace VGltf.UnitTests
                             var typedBuffer = store.GetOrLoadTypedBufferByAccessorIndex(1);
                             Assert.AreEqual(Types.Accessor.ComponentTypeEnum.FLOAT,
                                             typedBuffer.Accessor.ComponentType);
-
-                            var view = typedBuffer.GetFloatView();
-                            Assert.AreEqual(14 * 3 /* 3(VEC3) */, view.Length);
+                            Assert.AreEqual(Types.Accessor.TypeEnum.Vec3, typedBuffer.Accessor.Type);
 
                             Assert.NotNull(typedBuffer.Accessor.Sparse);
                             Assert.AreEqual(3, typedBuffer.Accessor.Sparse.Count);
 
+                            var entiry = typedBuffer.GetEntity<Vec3>();
+                            Assert.AreEqual(14, entiry.Length);
+
                             // For indices
-                            var indices = view.SparceIndices;
+                            var indices = entiry.SparceIndices;
                             Assert.AreEqual(3, indices.GetEnumerable().Count());
                             Assert.That(indices.GetEnumerable(), Is.EquivalentTo(new int[] { 8, 10, 12 }));
 
                             // For values
-                            var values = view.SparceValues;
-                            Assert.AreEqual(3 * 3 /* 3(VEC3) */, values.GetEnumerable().Count());
-                            Assert.That(values.GetEnumerable(), Is.EquivalentTo(new float[] {
-                                        1.0f, 2.0f, 0.0f,
-                                        3.0f, 3.0f, 0.0f,
-                                        5.0f, 4.0f, 0.0f
+                            var values = entiry.SparceValues;
+                            Assert.AreEqual(3, values.GetEnumerable().Count());
+                            Assert.That(values.GetEnumerable(), Is.EquivalentTo(new Vec3[] {
+                                        new Vec3(1.0f, 2.0f, 0.0f),
+                                        new Vec3(3.0f, 3.0f, 0.0f),
+                                        new Vec3(5.0f, 4.0f, 0.0f),
                                     }));
 
                             // For merged view
-                            Assert.That(view.GetEnumerable(), Is.EquivalentTo(new float[] {
-                                        0.0f, 0.0f, 0.0f,
-                                        1.0f, 0.0f, 0.0f,
-                                        2.0f, 0.0f, 0.0f,
-                                        3.0f, 0.0f, 0.0f,
-                                        4.0f, 0.0f, 0.0f,
-                                        5.0f, 0.0f, 0.0f,
-                                        6.0f, 0.0f, 0.0f,
-                                        0.0f, 1.0f, 0.0f,
-                                        1.0f, 2.0f, 0.0f, // 8 (sparse)
-                                        2.0f, 1.0f, 0.0f,
-                                        3.0f, 3.0f, 0.0f, // 10 (sparse)
-                                        4.0f, 1.0f, 0.0f,
-                                        5.0f, 4.0f, 0.0f, // 12 (sparse)
-                                        6.0f, 1.0f, 0.0f
+                            Assert.That(entiry.GetEnumerable(), Is.EquivalentTo(new Vec3[] {
+                                        new Vec3(0.0f, 0.0f, 0.0f),
+                                        new Vec3(1.0f, 0.0f, 0.0f),
+                                        new Vec3(2.0f, 0.0f, 0.0f),
+                                        new Vec3(3.0f, 0.0f, 0.0f),
+                                        new Vec3(4.0f, 0.0f, 0.0f),
+                                        new Vec3(5.0f, 0.0f, 0.0f),
+                                        new Vec3(6.0f, 0.0f, 0.0f),
+                                        new Vec3(0.0f, 1.0f, 0.0f),
+                                        new Vec3(1.0f, 2.0f, 0.0f), // 8 (sparse)
+                                        new Vec3(2.0f, 1.0f, 0.0f),
+                                        new Vec3(3.0f, 3.0f, 0.0f), // 10 (sparse)
+                                        new Vec3(4.0f, 1.0f, 0.0f),
+                                        new Vec3(5.0f, 4.0f, 0.0f), // 12 (sparse)
+                                        new Vec3(6.0f, 1.0f, 0.0f),
                                     }));
                         }
+                    })
+            },
+
+            new object[] {
+                // See: https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/BoxTextured
+                new string[] {"BoxTextured", "glTF-Embedded", "BoxTextured.gltf"},
+                new Action<Types.Gltf, Glb.StoredBuffer>(
+                    (gltf, buffer) => {
+                        var store = new ResourcesStore(gltf, buffer, new ResourceLoaderFromStorage());
+
+                        Assert.NotNull(gltf.Scene);
+                        var rootNodes = gltf.RootNodes.ToList();
+
+                        Assert.AreEqual(1, rootNodes.Count);
+
+                        var node = rootNodes[0];
+                        Assert.That(node.Matrix, Is.EquivalentTo(new float[] {
+                                                    1.0f, 0.0f, 0.0f, 0.0f,
+                                                    0.0f, 0.0f,-1.0f, 0.0f,
+                                                    0.0f, 1.0f, 0.0f, 0.0f,
+                                                    0.0f, 0.0f, 0.0f, 1.0f,
+                                }));
+                        Assert.That(node.Children, Is.EquivalentTo(new int[] { 1 }));
+
+                        var childNode = gltf.Nodes[node.Children[0]];
+                        Assert.NotNull(childNode);
+
+                        Assert.AreEqual(0, childNode.Mesh);
+
+                        var mesh = gltf.Meshes[childNode.Mesh.Value];
+                        Assert.AreEqual("Mesh", mesh.Name);
+                        Assert.AreEqual(1, mesh.Primitives.Count);
+
+                        var primitive = mesh.Primitives[0];
+                        Assert.AreEqual(1, primitive.Attributes["NORMAL"]);
+                        Assert.AreEqual(2, primitive.Attributes["POSITION"]);
+                        Assert.AreEqual(3, primitive.Attributes["TEXCOORD_0"]);
+                        Assert.AreEqual(0, primitive.Indices);
+                        Assert.AreEqual(Types.Mesh.PrimitiveType.ModeEnum.TRIANGLES, primitive.Mode);
+                        Assert.AreEqual(0, primitive.Material);
+
+                        // Accesses
+                        // index 1
+                        var normal = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["NORMAL"]);
+                        Assert.AreEqual(24, normal.GetEntity<Vec3>().GetEnumerable().Count());
+
+                        // index 2
+                        var position = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["POSITION"]);
+                        Assert.AreEqual(24, position.GetEntity<Vec3>().GetEnumerable().Count());
+
+                        // index 3
+                        var texCoord0 = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["TEXCOORD_0"]);
+                        Assert.AreEqual(24, texCoord0.GetEntity<Vec2>().GetEnumerable().Count());
+
+                        // index 0
+                        var indicies = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Indices.Value);
+                        Assert.AreEqual(36, indicies.GetPrimitivesAsCasted<int>().Count());
+
+                        // Materials
+                        // index0
+                        var material = gltf.Materials[primitive.Material.Value];
+                        Assert.AreEqual("Texture", material.Name);
+
+                        Assert.NotNull(material.PbrMetallicRoughness);
+                        Assert.NotNull(material.PbrMetallicRoughness.BaseColorTexture);
+                        Assert.AreEqual(0, material.PbrMetallicRoughness.BaseColorTexture.Index);
+                        Assert.AreEqual(0.0f, material.PbrMetallicRoughness.MetallicFactor);
+
+                        // Textures
+                        var texture = gltf.Textures[material.PbrMetallicRoughness.BaseColorTexture.Index];
+                        Assert.AreEqual(0, texture.Sampler);
+                        Assert.AreEqual(0, texture.Source);
+
+                        // Samplers
+                        var sampler = gltf.Samplers[texture.Sampler.Value];
+
+                        // Images(source)
+                        var imageResource = store.GetOrLoadImageResourceAt(texture.Source.Value);
+                        Assert.AreEqual(23516, imageResource.Data.Count);
+
+                        var imageBytes = new byte[imageResource.Data.Count];
+                        Array.Copy(imageResource.Data.Array, imageResource.Data.Offset, imageBytes, 0, imageResource.Data.Count);
+
+                        // Compare to the base texture image
+                        var baseImagePath = new string[]{
+                            "BoxTextured",
+                            "glTF",
+                            "CesiumLogoFlat.png"
+                        }.Aggregate("SampleModels", (b, p) => Path.Combine(b, p));
+                        var baseImageBytes = File.ReadAllBytes(baseImagePath);
+
+                        Assert.AreEqual(BitConverter.ToString(baseImageBytes),
+                                        BitConverter.ToString(imageBytes));
                     })
             },
         };
@@ -145,6 +277,43 @@ namespace VGltf.UnitTests
 
                             // imgN.Data
                             // Console.WriteLine(img.Name);
+                        }
+
+                        //
+                        {
+                            var img = gltf.Images[0];
+                            Assert.AreEqual("body", img.Name);
+                            Assert.AreEqual(null, img.Uri);
+                            Assert.AreEqual(0, img.bufferView);
+
+                            var r = store.GetOrLoadImageResourceAt(img.bufferView.Value);
+
+                            var imageBytes = new byte[r.Data.Count];
+                            Array.Copy(r.Data.Array, r.Data.Offset, imageBytes, 0, r.Data.Count);
+
+                            Assert.AreEqual(1821190, imageBytes.Count());
+                            Assert.That(imageBytes.Take(8), Is.EquivalentTo(new byte[] {
+                                        // Header of PNG
+                                        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+                                    }));
+                        }
+
+                        {
+                            var img = gltf.Images[1];
+                            Assert.AreEqual("eye", img.Name);
+                            Assert.AreEqual(null, img.Uri);
+                            Assert.AreEqual(1, img.bufferView);
+
+                            var r = store.GetOrLoadImageResourceAt(img.bufferView.Value);
+
+                            var imageBytes = new byte[r.Data.Count];
+                            Array.Copy(r.Data.Array, r.Data.Offset, imageBytes, 0, r.Data.Count);
+
+                            Assert.AreEqual(65934, imageBytes.Count());
+                            Assert.That(imageBytes.Take(8), Is.EquivalentTo(new byte[] {
+                                        // Header of PNG
+                                        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+                                    }));
                         }
 
                         Assert.That(gltf.ExtensionsUsed, Is.EquivalentTo( new string[]{ "KHR_materials_unlit", "VRM" } ));
