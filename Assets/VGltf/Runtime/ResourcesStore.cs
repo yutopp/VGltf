@@ -42,7 +42,9 @@ namespace VGltf
             if (buffer.Uri != null)
             {
                 r = _loader.Load(buffer.Uri);
-                r.Data = new ArraySegment<byte>(r.Data.Array, 0, buffer.ByteLength); // TODO: Check length
+
+                // TODO: Check length
+                r.Data = new ArraySegment<byte>(r.Data.Array, r.Data.Offset, buffer.ByteLength);
             }
             else
             {
@@ -59,7 +61,8 @@ namespace VGltf
 
                 r = new Resource
                 {
-                    Data = new ArraySegment<byte>(Buffer.Payload.Array, 0, buffer.ByteLength), // TODO: Check length
+                    // TODO: Check length
+                    Data = new ArraySegment<byte>(Buffer.Payload.Array, Buffer.Payload.Offset, buffer.ByteLength),
                 };
             }
 
@@ -80,7 +83,7 @@ namespace VGltf
 
             var data = new ArraySegment<byte>(
                 bufferResource.Data.Array,
-                bufferView.ByteOffset,
+                bufferResource.Data.Offset + bufferView.ByteOffset,
                 bufferView.ByteLength
                 ); // TODO: Check length
             return new Resource
