@@ -5,6 +5,7 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using VJson;
@@ -71,7 +72,7 @@ namespace VGltf.Types
         [JsonField(Name = "scene"), JsonFieldIgnorable]
         [JsonSchemaDependencies("scenes")]
         // TODO: allOf": [ { "$ref": "glTFid.schema.json"} ]
-        public int Scene;
+        public int? Scene;
 
         [JsonField(Name = "scenes"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
@@ -84,6 +85,39 @@ namespace VGltf.Types
         [JsonField(Name = "textures"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
         public List<Texture> Textures;
+
+        //
+
+        /// <summary>
+        ///   Returns indices of root nodes if the Scene is defined.
+        ///   Returns empty IE<int> if the Scene is undefined or nodes are not defined in the scene.
+        /// </summary>
+        public IEnumerable<int> RootNodesIndices {
+            get {
+                if (Scene == null)
+                {
+                    return Enumerable.Empty<int>();
+                }
+
+                var node = Scenes[Scene.Value];
+                if (node.Nodes == null) {
+                    return Enumerable.Empty<int>();
+                }
+
+                return node.Nodes;
+            }
+        }
+
+        /// <summary>
+        ///   Returns root nodes if the Scene is defined.
+        ///   Returns empty IE<Node> if the Scene is undefined or nodes are not defined in the scene.
+        ///   Raise exceptions if any elements can not be found.
+        /// </summary>
+        public IEnumerable<Node> RootNodes {
+            get {
+                return RootNodesIndices.Select(i => Nodes[i]);
+            }
+        }
     }
 
     public static class GltfExtensions

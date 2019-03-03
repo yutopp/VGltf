@@ -15,13 +15,13 @@ namespace VGltf.Types
     [JsonSchema(Id = "skin.schema.json")]
     public class Skin : GltfChildOfRootProperty
     {
-        [JsonField(Name = "inverseBindMatrices")]
+        [JsonField(Name = "inverseBindMatrices"), JsonFieldIgnorable]
         // TODO: "$ref": "glTFid.schema.json"
-        public int InverseBindMatrices;
+        public int? InverseBindMatrices;
 
-        [JsonField(Name = "skeleton")]
+        [JsonField(Name = "skeleton"), JsonFieldIgnorable]
         // TODO: "$ref": "glTFid.schema.json"
-        public int Skeleton;
+        public int? Skeleton;
 
         [JsonField(Name = "joints")]
         [JsonSchema(UniqueItems = true, MinItems = 1), JsonSchemaRequired]

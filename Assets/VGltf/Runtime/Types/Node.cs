@@ -15,42 +15,42 @@ namespace VGltf.Types
     // TODO: not
     public class Node : GltfChildOfRootProperty
     {
-        [JsonField(Name = "camera")]
+        [JsonField(Name = "camera"), JsonFieldIgnorable]
         // TODO: glTFid.schema.json
-        public int Camera;
+        public int? Camera;
 
-        [JsonField(Name = "children")]
+        [JsonField(Name = "children"), JsonFieldIgnorable]
         [JsonSchema(UniqueItems = true, MinItems = 1)]
         // TODO: glTFid.schema.json
         public int[] Children;
 
-        [JsonField(Name = "skin")]
+        [JsonField(Name = "skin"), JsonFieldIgnorable]
         // TODO: glTFid.schema.json
         [JsonSchemaDependencies("mesh")]
-        public int Skin;
+        public int? Skin;
 
-        [JsonField(Name = "matrix")]
+        [JsonField(Name = "matrix"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 16, MaxItems = 16)]
         public float[] Matrix = new float[] { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 
-        [JsonField(Name = "mesh")]
+        [JsonField(Name = "mesh"), JsonFieldIgnorable]
         // TODO: glTFid.schema.json
-        public int Mesh;
+        public int? Mesh;
 
-        [JsonField(Name = "rotation")]
+        [JsonField(Name = "rotation"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 4, MaxItems = 4)]
         [ItemsJsonSchema(Minimum = -1.0, Maximum = 1.0)]
         public float[] Rotation = new float[] { 0.0f, 0.0f, 0.0f, 1.0f };
 
-        [JsonField(Name = "scale")]
+        [JsonField(Name = "scale"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 3, MaxItems = 3)]
         public float[] Scale = new float[] { 1.0f, 1.0f, 1.0f };
 
-        [JsonField(Name = "translation")]
+        [JsonField(Name = "translation"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 3, MaxItems = 3)]
         public float[] Translation = new float[] { 0.0f, 0.0f, 0.0f };
 
-        [JsonField(Name = "weights")]
+        [JsonField(Name = "weights"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1), JsonSchemaDependencies("mesh")]
         public float[] Weights;
     }

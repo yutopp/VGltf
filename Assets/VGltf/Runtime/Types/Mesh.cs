@@ -37,11 +37,11 @@ namespace VGltf.Types
 
             [JsonField(Name = "indices"), JsonFieldIgnorable]
             // TODO: { "$ref": "glTFid.schema.json" }
-            public int? indices;
+            public int? Indices;
 
             [JsonField(Name = "material"), JsonFieldIgnorable]
             // TODO: { "$ref": "glTFid.schema.json" }
-            public int? material;
+            public int? Material;
 
             [JsonField(Name = "mode"), JsonFieldIgnorable]
             public ModeEnum? Mode = ModeEnum.TRIANGLES;
