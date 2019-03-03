@@ -31,6 +31,7 @@ namespace VGltf
         {
             RepairUniGLTFInvalidNamesForImages(node);
             RepairUniGLTFInvalidTargets(node);
+            RepairUniGLTFInvalidIndexValues(node);
         }
 
         public static void RepairUniGLTFInvalidNamesForImages(INode node)
@@ -38,12 +39,12 @@ namespace VGltf
             // If (Root)["images"][i]["extra"]["name"] exists,
             // re-assign them to (Root)["images"][i]["name"].
             var images = node["images"] as ArrayNode;
-            if (images == null || images.Elems == null)
+            if (images == null)
             {
                 return;
             }
 
-            foreach (var image in images.Elems)
+            foreach (var image in images)
             {
                 var tValue = image as ObjectNode;
                 if (tValue == null)
@@ -72,23 +73,23 @@ namespace VGltf
             // If (Root)["meshes"][i]["primitives"][j]["targets"][k]["extra"]["name"] exists,
             // re-assign them to (Root)["meshes"][i]["primitives"]["extras"]["targetNames"].
             var meshes = node["meshes"] as ArrayNode;
-            if (meshes == null || meshes.Elems == null)
+            if (meshes == null)
             {
                 return;
             }
 
-            foreach (var mesh in meshes.Elems)
+            foreach (var mesh in meshes)
             {
                 var primitives = mesh["primitives"] as ArrayNode;
-                if (primitives == null || primitives.Elems == null)
+                if (primitives == null)
                 {
                     continue;
                 }
 
-                foreach (var primitive in primitives.Elems)
+                foreach (var primitive in primitives)
                 {
                     var targets = primitive["targets"] as ArrayNode;
-                    if (targets == null || targets.Elems == null)
+                    if (targets == null)
                     {
                         continue;
                     }
@@ -119,17 +120,20 @@ namespace VGltf
                         continue;
                     }
 
-                    var deletionKeys = new List<string>();
-                    foreach (var target in targets.Elems)
+
+                    foreach (var target in targets)
                     {
                         var tValue = target as ObjectNode;
-                        if (tValue == null || tValue.Elems == null)
+                        if (tValue == null)
                         {
                             continue;
                         }
 
-                        foreach (var key in tValue.Elems.Keys)
+                        var deletionKeys = new List<string>();
+                        foreach (var kv in tValue)
                         {
+                            var key = kv.Key;
+
                             // Invalid extension
                             if (key == "extra")
                             {
@@ -155,7 +159,84 @@ namespace VGltf
 
                         foreach(var key in deletionKeys)
                         {
-                            tValue.Elems.Remove(key);
+                            tValue.RemoveElement(key);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void RepairUniGLTFInvalidIndexValues(INode node)
+        {
+            // TODO: Support animations
+            RepairUniGLTFInvalidIndexValuesForMeshes(node);
+        }
+
+        public static void RepairUniGLTFInvalidIndexValuesForMeshes(INode node)
+        {
+            var meshes = node["meshes"] as ArrayNode;
+            if (meshes == null)
+            {
+                return;
+            }
+
+            foreach (var mesh in meshes)
+            {
+                var primitives = mesh["primitives"] as ArrayNode;
+                if (primitives == null)
+                {
+                    continue;
+                }
+
+                foreach (var primitive in primitives)
+                {
+                    var tPrimitive = primitive as ObjectNode;
+                    if (tPrimitive == null)
+                    {
+                        continue;
+                    }
+
+                    var indices = primitive["indices"] as IntegerNode;
+                    if (indices != null && indices.Value == -1) {
+                        tPrimitive.RemoveElement("indices");
+                    }
+
+                    var material = primitive["material"] as IntegerNode;
+                    if (material != null && material.Value == -1) {
+                        tPrimitive.RemoveElement("material");
+                    }
+
+                    var mode = primitive["mode"] as IntegerNode;
+                    if (mode != null && mode.Value == -1) {
+                        tPrimitive.RemoveElement("mode");
+                    }
+
+                    var targets = primitive["targets"] as ArrayNode;
+                    if (targets == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var target in targets)
+                    {
+                        var tTarget = target as ObjectNode;
+                        if (tTarget == null)
+                        {
+                            continue;
+                        }
+
+                        var deletionKeys = new List<string>();
+                        foreach (var kv in tTarget)
+                        {
+                            var index = kv.Value as IntegerNode;
+                            if (index != null && index.Value == -1) {
+                                deletionKeys.Add(kv.Key);
+                            }
+                        }
+
+                        foreach(var key in deletionKeys)
+                        {
+                            tTarget.RemoveElement(key);
                         }
                     }
                 }
