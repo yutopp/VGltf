@@ -2,7 +2,8 @@
     "name": "VGltf.Editor.Tests",
     "references": [
         "VGltf",
-        "VGltf.Editor"
+        "VGltf.Editor",
+        "VJson"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"
