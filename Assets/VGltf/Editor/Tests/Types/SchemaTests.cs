@@ -16,8 +16,8 @@ namespace VGltf.Types.UnitTests
         [TestCaseSource("ValuesArgs")]
         public void GLTFTest(Type ty, string expectedSchema)
         {
-            var serializer = new VJson.JsonSerializer(typeof(VJson.Schema.JsonSchema));
-            var schema = serializer.Serialize(VJson.Schema.JsonSchema.CreateFromType(ty));
+            var serializer = new VJson.JsonSerializer(typeof(VJson.Schema.JsonSchemaAttribute));
+            var schema = serializer.Serialize(VJson.Schema.JsonSchemaAttribute.CreateFromType(ty));
 
             //Assert.AreEqual(expectedSchema, schema);
         }

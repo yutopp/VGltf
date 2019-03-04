@@ -17,7 +17,6 @@ namespace VGltf.Types
     {
         [JsonField(Name = "nodes")]
         [JsonSchema(UniqueItems = true, MinItems = 1)]
-        // "glTFid.schema.json"
-        public int[] Nodes;
+        public uint[] Nodes; // glTFid
     }
 }

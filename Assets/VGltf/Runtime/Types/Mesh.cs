@@ -30,17 +30,14 @@ namespace VGltf.Types
         {
             [JsonField(Name = "attributes")]
             [JsonSchema(MinProperties = 1), JsonSchemaRequired]
-            // TODO: "additionalProperties": {
-            //   "$ref": "glTFid.schema.json"
-            // }
-            public Dictionary<string, int> Attributes;
+            public Dictionary<string, uint> Attributes; // glTFid
 
             [JsonField(Name = "indices"), JsonFieldIgnorable]
-            // TODO: { "$ref": "glTFid.schema.json" }
+            [JsonSchemaRef(typeof(GltfID))]
             public int? Indices;
 
             [JsonField(Name = "material"), JsonFieldIgnorable]
-            // TODO: { "$ref": "glTFid.schema.json" }
+            [JsonSchemaRef(typeof(GltfID))]
             public int? Material;
 
             [JsonField(Name = "mode"), JsonFieldIgnorable]
@@ -49,10 +46,7 @@ namespace VGltf.Types
             [JsonField(Name = "targets"), JsonFieldIgnorable]
             [JsonSchema(MinItems = 1)]
             [ItemsJsonSchema(MinProperties = 1)]
-            // TODO(items: "additionalProperties": {
-            //   "$ref": "glTFid.schema.json"
-            // }
-            public List<Dictionary<string, int>> Targets;
+            public List<Dictionary<string, uint>> Targets; // glTFid
 
             //
 

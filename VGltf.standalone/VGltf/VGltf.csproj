@@ -20,13 +20,13 @@
     <Compile Include="../../Assets/VGltf/Runtime/**/*.cs" />
   </ItemGroup>
 
-  <!--ItemGroup>
-    <Compile Include="../../../VJson/Assets/VJson/Runtime/**/*.cs" />
-  </ItemGroup-->
-
   <ItemGroup>
-    <PackageReference Include="VJson" Version="0.6.1" />
+    <Compile Include="../../../VJson/Assets/VJson/Runtime/**/*.cs" />
   </ItemGroup>
+
+  <!--ItemGroup>
+    <PackageReference Include="VJson" Version="0.7.0" />
+  </ItemGroup-->
 
   <PropertyGroup>
     <FrameworkPathOverride Condition="'$(OS)' == 'Unix' and '$(TargetFramework)' == 'net35'">/usr/lib/mono/2.0-api/</FrameworkPathOverride>

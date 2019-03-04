@@ -24,8 +24,7 @@ namespace VGltf.Types
         public MimeTypeEnum? MimeType;
 
         [JsonField(Name = "bufferView")]
-        [JsonSchemaDependencies("mimeType")]
-        // TODO: all of "glTFid.schema.json"
+        [JsonSchemaDependencies("mimeType"), JsonSchemaRef(typeof(GltfID))]
         public int? bufferView;
 
         //

@@ -70,8 +70,7 @@ namespace VGltf.Types
         public List<Sampler> Samplers;
 
         [JsonField(Name = "scene"), JsonFieldIgnorable]
-        [JsonSchemaDependencies("scenes")]
-        // TODO: allOf": [ { "$ref": "glTFid.schema.json"} ]
+        [JsonSchemaDependencies("scenes"), JsonSchemaRef(typeof(GltfID))]
         public int? Scene;
 
         [JsonField(Name = "scenes"), JsonFieldIgnorable]

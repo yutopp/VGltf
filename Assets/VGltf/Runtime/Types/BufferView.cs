@@ -16,8 +16,7 @@ namespace VGltf.Types
     public class BufferView : GltfChildOfRootProperty
     {
         [JsonField(Name = "buffer")]
-        // TODO: allOf": [ { "$ref": "glTFid.schema.json"} ]
-        [JsonSchemaRequired]
+        [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
         public int Buffer;
 
         [JsonField(Name = "byteOffset")]

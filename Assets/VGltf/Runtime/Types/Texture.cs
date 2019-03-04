@@ -16,11 +16,11 @@ namespace VGltf.Types
     public class Texture : GltfChildOfRootProperty
     {
         [JsonField(Name = "sampler"), JsonFieldIgnorable]
-        // TODO: "$ref": "glTFid.schema.json"
+        [JsonSchemaRef(typeof(GltfID))]
         public int? Sampler;
 
         [JsonField(Name = "source"), JsonFieldIgnorable]
-        // TODO: "$ref": "glTFid.schema.json"
+        [JsonSchemaRef(typeof(GltfID))]
         public int? Source;
     }
 
@@ -36,8 +36,7 @@ namespace VGltf.Types
     public abstract class TextureInfo : GltfProperty
     {
         [JsonField(Name = "index")]
-        [JsonSchemaRequired]
-        // TODO: "$ref": "glTFid.schema.json"
+        [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
         public int Index;
 
         [JsonField(Name = "texCoord")]
