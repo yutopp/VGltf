@@ -29,8 +29,7 @@ namespace VGltf.Types
         public class ChannelType : GltfProperty
         {
             [JsonField(Name = "sampler")]
-            [JsonSchemaRequired]
-            // TODO: "$ref": "glTFid.schema.json"
+            [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
             public int Sampler;
 
             [JsonField(Name = "target")]
@@ -43,7 +42,7 @@ namespace VGltf.Types
             public class TargetType : GltfProperty
             {
                 [JsonField(Name = "node")]
-                // TODO: "$ref": "glTFid.schema.json"
+                [JsonSchemaRef(typeof(GltfID))]
                 public int Node;
 
                 [JsonField(Name = "path")]
@@ -71,15 +70,15 @@ namespace VGltf.Types
         public class SamplerType
         {
             [JsonField(Name = "input")]
-            // TODO: "$ref": "glTFid.schema.json"
-            public int Input;
+            [JsonSchemaRef(typeof(GltfID))]
+            public int Input; // TODO: ignorable
 
             [JsonField(Name = "interpolation")]
-            public InterpolationEnum Interpolation = InterpolationEnum.LINEAR;
+            public InterpolationEnum Interpolation = InterpolationEnum.LINEAR; // TODO: ignorable
 
             [JsonField(Name = "output")]
-            // TODO: "$ref": "glTFid.schema.json"
-            public int Output;
+            [JsonSchemaRef(typeof(GltfID))]
+            public int Output; // TODO: ignorable
 
             //
 
@@ -90,7 +89,7 @@ namespace VGltf.Types
                 LINEAR,
                 [JsonField(Name = "STEP")]
                 STEP,
-                [JsonField(Name = "CUBICSPLINE" )]
+                [JsonField(Name = "CUBICSPLINE")]
                 CUBICSPLINE,
             }
         }

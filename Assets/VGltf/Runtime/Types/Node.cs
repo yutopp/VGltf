@@ -16,17 +16,16 @@ namespace VGltf.Types
     public class Node : GltfChildOfRootProperty
     {
         [JsonField(Name = "camera"), JsonFieldIgnorable]
-        // TODO: glTFid.schema.json
+        [JsonSchemaRef(typeof(GltfID))]
         public int? Camera;
 
         [JsonField(Name = "children"), JsonFieldIgnorable]
         [JsonSchema(UniqueItems = true, MinItems = 1)]
-        // TODO: glTFid.schema.json
+        [ItemsJsonSchemaRef(typeof(GltfID))]
         public int[] Children;
 
         [JsonField(Name = "skin"), JsonFieldIgnorable]
-        // TODO: glTFid.schema.json
-        [JsonSchemaDependencies("mesh")]
+        [JsonSchemaDependencies("mesh"), JsonSchemaRef(typeof(GltfID))]
         public int? Skin;
 
         [JsonField(Name = "matrix"), JsonFieldIgnorable]
@@ -34,7 +33,7 @@ namespace VGltf.Types
         public float[] Matrix = new float[] { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f };
 
         [JsonField(Name = "mesh"), JsonFieldIgnorable]
-        // TODO: glTFid.schema.json
+        [JsonSchemaRef(typeof(GltfID))]
         public int? Mesh;
 
         [JsonField(Name = "rotation"), JsonFieldIgnorable]

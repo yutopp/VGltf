@@ -6,7 +6,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using VJson;
 using VJson.Schema;
 
@@ -16,8 +15,8 @@ namespace VGltf.Types
     [JsonSchema(Id = "accessor.schema.json")]
     public class Accessor : GltfChildOfRootProperty
     {
-        // TODO: allOf": [ { "$ref": "glTFid.schema.json"} ]
         [JsonField(Name = "bufferView"), JsonFieldIgnorable]
+        [JsonSchemaRef(typeof(GltfID))]
         public int? BufferView;
 
         [JsonField(Name = "byteOffset")]
@@ -26,7 +25,7 @@ namespace VGltf.Types
 
         [JsonField(Name = "componentType")]
         [JsonSchemaRequired]
-        public ComponentTypeEnum ComponentType; // TODO enum
+        public ComponentTypeEnum ComponentType;
 
         [JsonField(Name = "normalized")]
         public bool Normalized = false;
@@ -102,8 +101,7 @@ namespace VGltf.Types
             public class IndicesType : GltfProperty
             {
                 [JsonField(Name = "bufferView")]
-                [JsonSchemaRequired]
-                // TODO: "$ref": "glTFid.schema.json"
+                [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
                 public int BufferView;
 
                 [JsonField(Name = "byteOffset")]
@@ -128,8 +126,7 @@ namespace VGltf.Types
             public class ValuesType : GltfProperty
             {
                 [JsonField(Name = "bufferView")]
-                [JsonSchemaRequired]
-                // TODO: "$ref": "glTFid.schema.json"
+                [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
                 public int BufferView;
 
                 [JsonField(Name = "byteOffset")]

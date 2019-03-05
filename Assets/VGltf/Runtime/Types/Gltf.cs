@@ -5,7 +5,6 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using VJson;
@@ -70,8 +69,7 @@ namespace VGltf.Types
         public List<Sampler> Samplers;
 
         [JsonField(Name = "scene"), JsonFieldIgnorable]
-        [JsonSchemaDependencies("scenes")]
-        // TODO: allOf": [ { "$ref": "glTFid.schema.json"} ]
+        [JsonSchemaDependencies("scenes"), JsonSchemaRef(typeof(GltfID))]
         public int? Scene;
 
         [JsonField(Name = "scenes"), JsonFieldIgnorable]
