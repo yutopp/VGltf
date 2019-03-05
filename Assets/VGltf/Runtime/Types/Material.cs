@@ -15,19 +15,19 @@ namespace VGltf.Types
     [JsonSchema(Id = "material.schema.json")]
     public class Material : GltfChildOfRootProperty
     {
-        [JsonField(Name = "pbrMetallicRoughness")]
+        [JsonField(Name = "pbrMetallicRoughness"), JsonFieldIgnorable]
         public PbrMetallicRoughnessType PbrMetallicRoughness;
 
-        [JsonField(Name = "normalTexture")]
+        [JsonField(Name = "normalTexture"), JsonFieldIgnorable]
         public NormalTextureInfoType NormalTexture;
 
-        [JsonField(Name = "occlusionTexture")]
+        [JsonField(Name = "occlusionTexture"), JsonFieldIgnorable]
         public OcclusionTextureInfoType OcclusionTexture;
 
-        [JsonField(Name = "emissiveTexture")]
+        [JsonField(Name = "emissiveTexture"), JsonFieldIgnorable]
         public EmissiveTextureInfoType EmissiveTexture;
 
-        [JsonField(Name = "emissiveFactor")]
+        [JsonField(Name = "emissiveFactor"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 3, MaxItems = 3)]
         [ItemsJsonSchema(Minimum = 0.0, Maximum = 1.0)]
         public float[] EmissiveFactor = new float[] { 0.0f, 0.0f, 0.0f };

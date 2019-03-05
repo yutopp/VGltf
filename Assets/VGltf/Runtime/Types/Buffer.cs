@@ -15,7 +15,7 @@ namespace VGltf.Types
     [JsonSchema(Id = "buffer.schema.json")]
     public class Buffer : GltfChildOfRootProperty
     {
-        [JsonField(Name = "uri")]
+        [JsonField(Name = "uri"), JsonFieldIgnorable]
         // TODO: "format": "uriref"
         public string Uri;
 

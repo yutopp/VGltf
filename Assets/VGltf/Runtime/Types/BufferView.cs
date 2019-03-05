@@ -19,9 +19,9 @@ namespace VGltf.Types
         [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
         public int Buffer;
 
-        [JsonField(Name = "byteOffset")]
+        [JsonField(Name = "byteOffset"), JsonFieldIgnorable()]
         [JsonSchema(Minimum = 0)]
-        public int ByteOffset = 0; // TODO: ignorable
+        public int ByteOffset = 0;
 
         [JsonField(Name = "byteLength")]
         [JsonSchema(Minimum = 1), JsonSchemaRequired]
@@ -31,8 +31,8 @@ namespace VGltf.Types
         [JsonSchema(Minimum = 4, Maximum = 252, MultipleOf = 4)]
         public int? ByteStride;
 
-        [JsonField(Name = "target")]
-        public TargetEnum Target; // TODO: ignorable
+        [JsonField(Name = "target"), JsonFieldIgnorable]
+        public TargetEnum? Target;
 
         //
 

@@ -13,15 +13,14 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "camera.schema.json")]
-    // TODO: allof
-    // TODO: not
+    // TODO: not: "required": [ "perspective", "orthographic" ]
     public class Camera : GltfChildOfRootProperty
     {
-        [JsonField(Name = "orthographic")]
-        public OrthographicType Orthographic; // TODO: ignorable
+        [JsonField(Name = "orthographic"), JsonFieldIgnorable]
+        public OrthographicType Orthographic;
 
-        [JsonField(Name = "perspective")]
-        public PerspectiveType Perspective; // TODO: ignorable
+        [JsonField(Name = "perspective"), JsonFieldIgnorable]
+        public PerspectiveType Perspective;
 
         [JsonField(Name = "type")]
         [JsonSchemaRequired]
@@ -34,39 +33,39 @@ namespace VGltf.Types
         {
             [JsonField(Name = "xmag")]
             [JsonSchemaRequired]
-            public float Xmag; // TODO: ignorable
+            public float Xmag;
 
             [JsonField(Name = "ymag")]
             [JsonSchemaRequired]
-            public float Ymag; // TODO: ignorable
+            public float Ymag;
 
             [JsonField(Name = "zfar")]
             [JsonSchema(ExclusiveMinimum = 0.0f), JsonSchemaRequired]
-            public float Zfar; // TODO: ignorable
+            public float Zfar;
 
             [JsonField(Name = "znear")]
             [JsonSchema(Minimum = 0.0f), JsonSchemaRequired]
-            public float Znear; // TODO: ignorable
+            public float Znear;
         }
 
         [JsonSchema(Id = "camera.perspective.schema.json")]
         public class PerspectiveType
         {
-            [JsonField(Name = "aspectRatio")]
+            [JsonField(Name = "aspectRatio"), JsonFieldIgnorable]
             [JsonSchema(ExclusiveMinimum = 0.0f)]
-            public float AspectRatio; // TODO: ignorable
+            public float? AspectRatio;
 
             [JsonField(Name = "yfov")]
             [JsonSchema(ExclusiveMinimum = 0.0f), JsonSchemaRequired]
-            public float Yfov; // TODO: ignorable
+            public float Yfov;
 
-            [JsonField(Name = "zfar")]
+            [JsonField(Name = "zfar"), JsonFieldIgnorable]
             [JsonSchema(ExclusiveMinimum = 0.0f)]
-            public float Zfar; // TODO: ignorable
+            public float? Zfar;
 
             [JsonField(Name = "znear")]
             [JsonSchema(ExclusiveMinimum = 0.0f), JsonSchemaRequired]
-            public float Znear; // TODO: ignorable
+            public float Znear;
         }
 
         [Json(EnumConversion = EnumConversionType.AsString)]

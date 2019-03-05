@@ -12,6 +12,8 @@ using NUnit.Framework;
 
 namespace VGltf.UnitTests
 {
+    using VJson.Schema;
+
     public class GltfContainerTests
     {
         // For testing purpose
@@ -59,6 +61,11 @@ namespace VGltf.UnitTests
             using (var fs = new FileStream(path, FileMode.Open))
             {
                 var c = GltfContainer.FromGltf(fs);
+
+                var schema = VJson.Schema.JsonSchemaAttribute.CreateFromClass<Types.Gltf>();
+                var ex = schema.Validate(c.Gltf);
+                Assert.Null(ex);
+
                 assertGltf(c.Gltf, c.Buffer);
             }
         }
@@ -71,6 +78,11 @@ namespace VGltf.UnitTests
             using (var fs = new FileStream(path, FileMode.Open))
             {
                 var c = GltfContainer.FromGlb(fs);
+
+                var schema = VJson.Schema.JsonSchemaAttribute.CreateFromClass<Types.Gltf>();
+                var ex = schema.Validate(c.Gltf);
+                Assert.Null(ex);
+
                 assertGltf(c.Gltf, c.Buffer);
             }
         }

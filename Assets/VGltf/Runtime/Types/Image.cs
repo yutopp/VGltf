@@ -16,14 +16,14 @@ namespace VGltf.Types
     // TODO: oneOf required: Uri OR bufferView
     public class Image : GltfChildOfRootProperty
     {
-        [JsonField(Name = "uri")]
+        [JsonField(Name = "uri"), JsonFieldIgnorable]
         // TODO: "format": "uriref"
         public string Uri;
 
-        [JsonField(Name = "mimeType")]
+        [JsonField(Name = "mimeType"), JsonFieldIgnorable]
         public MimeTypeEnum? MimeType;
 
-        [JsonField(Name = "bufferView")]
+        [JsonField(Name = "bufferView"), JsonFieldIgnorable]
         [JsonSchemaDependencies("mimeType"), JsonSchemaRef(typeof(GltfID))]
         public int? bufferView;
 

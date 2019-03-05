@@ -70,15 +70,15 @@ namespace VGltf.Types
         public class SamplerType
         {
             [JsonField(Name = "input")]
-            [JsonSchemaRef(typeof(GltfID))]
-            public int Input; // TODO: ignorable
+            [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
+            public int Input;
 
             [JsonField(Name = "interpolation")]
-            public InterpolationEnum Interpolation = InterpolationEnum.LINEAR; // TODO: ignorable
+            public InterpolationEnum Interpolation = InterpolationEnum.LINEAR;
 
             [JsonField(Name = "output")]
-            [JsonSchemaRef(typeof(GltfID))]
-            public int Output; // TODO: ignorable
+            [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
+            public int Output;
 
             //
 
