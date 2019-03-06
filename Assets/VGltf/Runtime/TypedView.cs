@@ -281,7 +281,6 @@ namespace VGltf
     {
         public ResourcesStore Store { get; private set; }
         public Types.Accessor Accessor { get; private set; }
-        private object _view;
 
         public TypedBuffer(ResourcesStore store, Types.Accessor accessor)
         {
