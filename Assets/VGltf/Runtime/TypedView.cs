@@ -239,7 +239,7 @@ namespace VGltf
 
         public IEnumerable<T> GetEnumerable()
         {
-            var denceArrayView = DenseView != null ? DenseView.GetEnumerable() : null;
+            var denseArrayView = DenseView != null ? DenseView.GetEnumerable() : null;
             var sparseIndicesArrayView = SparseIndices != null ? SparseIndices.GetEnumerable() : null;
             var sparseValuesArrayView = SparseValues != null ? SparseValues.GetEnumerable() : null;
 
@@ -257,9 +257,9 @@ namespace VGltf
                 {
                     var v = default(T);
 
-                    if (denceArrayView != null)
+                    if (denseArrayView != null)
                     {
-                        v = denceArrayView.ElementAt(i);
+                        v = denseArrayView.ElementAt(i);
                     }
 
                     if (i == nextIndex)
