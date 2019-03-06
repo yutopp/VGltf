@@ -164,8 +164,8 @@ namespace VGltf
     {
         public TypedViewBase<T> DenseView { get; private set; }
 
-        public TypedViewBase<uint> SparceIndices { get; private set; }
-        public TypedViewBase<T> SparceValues { get; private set; }
+        public TypedViewBase<uint> SparseIndices { get; private set; }
+        public TypedViewBase<T> SparseValues { get; private set; }
 
         public int Length { get; private set; }
 
@@ -191,7 +191,7 @@ namespace VGltf
                 switch (indices.ComponentType)
                 {
                     case Types.Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_BYTE:
-                        SparceIndices = new TypedArrayStorageFromBufferView<byte>(
+                        SparseIndices = new TypedArrayStorageFromBufferView<byte>(
                             store, indices.BufferView,
                             indices.ByteOffset,
                             indices.ComponentType.SizeInBytes(),
@@ -201,7 +201,7 @@ namespace VGltf
                         break;
 
                     case Types.Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_SHORT:
-                        SparceIndices = new TypedArrayStorageFromBufferView<ushort>(
+                        SparseIndices = new TypedArrayStorageFromBufferView<ushort>(
                             store, indices.BufferView,
                             indices.ByteOffset,
                             indices.ComponentType.SizeInBytes(),
@@ -211,7 +211,7 @@ namespace VGltf
                         break;
 
                     case Types.Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_INT:
-                        SparceIndices = new TypedArrayStorageFromBufferView<uint>(
+                        SparseIndices = new TypedArrayStorageFromBufferView<uint>(
                             store, indices.BufferView,
                             indices.ByteOffset,
                             indices.ComponentType.SizeInBytes(),
@@ -222,7 +222,7 @@ namespace VGltf
                 }
 
                 var values = sparse.Values;
-                SparceValues = new TypedArrayStorageFromBufferView<T>(
+                SparseValues = new TypedArrayStorageFromBufferView<T>(
                     store, values.BufferView,
                     values.ByteOffset,
                     accessor.ComponentType.SizeInBytes(),
@@ -240,8 +240,8 @@ namespace VGltf
         public IEnumerable<T> GetEnumerable()
         {
             var denceArrayView = DenseView != null ? DenseView.GetEnumerable() : null;
-            var sparseIndicesArrayView = SparceIndices != null ? SparceIndices.GetEnumerable() : null;
-            var sparseValuesArrayView = SparceValues != null ? SparceValues.GetEnumerable() : null;
+            var sparseIndicesArrayView = SparseIndices != null ? SparseIndices.GetEnumerable() : null;
+            var sparseValuesArrayView = SparseValues != null ? SparseValues.GetEnumerable() : null;
 
             using (var sparseIndicesIter = sparseIndicesArrayView != null ? sparseIndicesArrayView.GetEnumerator() : null)
             {

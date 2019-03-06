@@ -122,12 +122,12 @@ namespace VGltf.UnitTests
                             Assert.AreEqual(14, entiry.Length);
 
                             // For indices
-                            var indices = entiry.SparceIndices;
+                            var indices = entiry.SparseIndices;
                             Assert.AreEqual(3, indices.GetEnumerable().Count());
                             Assert.That(indices.GetEnumerable(), Is.EquivalentTo(new int[] { 8, 10, 12 }));
 
                             // For values
-                            var values = entiry.SparceValues;
+                            var values = entiry.SparseValues;
                             Assert.AreEqual(3, values.GetEnumerable().Count());
                             Assert.That(values.GetEnumerable(), Is.EquivalentTo(new Vec3[] {
                                         new Vec3(1.0f, 2.0f, 0.0f),
