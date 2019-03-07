@@ -32,6 +32,7 @@ namespace VGltf
             RepairUniGLTFInvalidNamesForImages(node);
             RepairUniGLTFInvalidTargets(node);
             RepairUniGLTFInvalidIndexValues(node);
+            RepairUniGLTFInvalidScene(node);
         }
 
         public static void RepairUniGLTFInvalidNamesForImages(INode node)
@@ -59,7 +60,8 @@ namespace VGltf
                 }
 
                 var imageNameRaw = image["name"];
-                if (!(imageNameRaw is UndefinedNode)) {
+                if (!(imageNameRaw is UndefinedNode))
+                {
                     // Do not overwrite...
                     continue;
                 }
@@ -157,7 +159,7 @@ namespace VGltf
                             }
                         }
 
-                        foreach(var key in deletionKeys)
+                        foreach (var key in deletionKeys)
                         {
                             tValue.RemoveElement(key);
                         }
@@ -197,17 +199,20 @@ namespace VGltf
                     }
 
                     var indices = primitive["indices"] as IntegerNode;
-                    if (indices != null && indices.Value == -1) {
+                    if (indices != null && indices.Value == -1)
+                    {
                         tPrimitive.RemoveElement("indices");
                     }
 
                     var material = primitive["material"] as IntegerNode;
-                    if (material != null && material.Value == -1) {
+                    if (material != null && material.Value == -1)
+                    {
                         tPrimitive.RemoveElement("material");
                     }
 
                     var mode = primitive["mode"] as IntegerNode;
-                    if (mode != null && mode.Value == -1) {
+                    if (mode != null && mode.Value == -1)
+                    {
                         tPrimitive.RemoveElement("mode");
                     }
 
@@ -229,17 +234,45 @@ namespace VGltf
                         foreach (var kv in tTarget)
                         {
                             var index = kv.Value as IntegerNode;
-                            if (index != null && index.Value == -1) {
+                            if (index != null && index.Value == -1)
+                            {
                                 deletionKeys.Add(kv.Key);
                             }
                         }
 
-                        foreach(var key in deletionKeys)
+                        foreach (var key in deletionKeys)
                         {
                             tTarget.RemoveElement(key);
                         }
                     }
                 }
+            }
+        }
+
+        public static void RepairUniGLTFInvalidScene(INode node)
+        {
+            var tNode = node as ObjectNode;
+            if (tNode == null)
+            {
+                return;
+            }
+
+            var generator = node["asset"]["generator"] as StringNode;
+            if (generator == null)
+            {
+                return;
+            }
+
+            if (generator.Value != "UniGLTF")
+            {
+                return;
+            }
+
+            // If `scene` is not defined, it should be treated as `0` in UniGLTF.
+            var scene = node["scene"];
+            if (scene is UndefinedNode)
+            {
+                tNode.AddElement("scene", new IntegerNode(0));
             }
         }
     }
