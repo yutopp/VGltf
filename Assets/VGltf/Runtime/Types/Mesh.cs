@@ -21,7 +21,7 @@ namespace VGltf.Types
 
         [JsonField(Name = "weights"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
-        public float[] weights;
+        public float[] Weights;
 
         //
 
@@ -61,6 +61,18 @@ namespace VGltf.Types
                 TRIANGLES = 4,
                 TRIANGLE_STRIP = 5,
                 TRIANGLE_FAN = 6,
+            }
+
+            public static class AttributeName
+            {
+                public static readonly string POSITION = "POSITION";
+                public static readonly string NORMAL = "NORMAL";
+                public static readonly string TANGENT = "TANGENT";
+                public static readonly string TEXCOORD_0 = "TEXCOORD_0";
+                public static readonly string TEXCOORD_1 = "TEXCOORD_1";
+                public static readonly string COLOR_0 = "COLOR_0";
+                public static readonly string JOINTS_0 = "JOINTS_0";
+                public static readonly string WEIGHTS_0 = "WEIGHTS_0";
             }
         }
     }
