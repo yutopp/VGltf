@@ -29,7 +29,9 @@ namespace VGltf.UnitTests
                 var ex = schema.Validate(c.Gltf);
                 Assert.Null(ex);
 
-                var loader = new ResourceLoaderFromStorage();
+                var storageDir = Directory.GetParent(path).ToString();
+                var loader = new ResourceLoaderFromFileStorage(storageDir);
+
                 var store = new ResourcesStore(c.Gltf, c.Buffer, loader);
                 tester.TestModel(store);
             }
@@ -48,7 +50,8 @@ namespace VGltf.UnitTests
                 var ex = schema.Validate(c.Gltf);
                 Assert.Null(ex);
 
-                var loader = new ResourceLoaderFromStorage();
+                var loader = new ResourceLoaderFromEmbedOnly(); // Glb files should be packed.
+
                 var store = new ResourcesStore(c.Gltf, c.Buffer, loader);
                 tester.TestModel(store);
             }
@@ -62,6 +65,11 @@ namespace VGltf.UnitTests
 
             new object[] {
                 new string[] {"BoxTextured", "glTF-Embedded", "BoxTextured.gltf"},
+                new ModelTester.BoxTexturedTester(),
+            },
+
+            new object[] {
+                new string[] {"BoxTextured", "glTF", "BoxTextured.gltf"},
                 new ModelTester.BoxTexturedTester(),
             },
 

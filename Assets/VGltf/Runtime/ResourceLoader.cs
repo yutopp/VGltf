@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.IO;
 
 namespace VGltf
 {
@@ -24,15 +25,64 @@ namespace VGltf
         string PathOf(string uri);
     }
 
-    public class ResourceLoaderFromStorage : IResourceLoader
+    public class ResourceLoaderFromFileStorage : IResourceLoader
     {
+        private string _baseDir;
+
+        public ResourceLoaderFromFileStorage(string baseDir)
+        {
+            _baseDir = baseDir;
+        }
+
         public Resource Load(string uri)
         {
-            if (DataUriUtil.IsData(uri)){
+            if (DataUriUtil.IsData(uri))
+            {
                 return DataUriUtil.Extract(uri);
             }
 
+            return LoadFromFile(_baseDir, uri);
+        }
+
+        public string PathOf(string uri)
+        {
             throw new NotImplementedException(uri);
+        }
+
+        public static string EnsureCleanedPath(string baseDir, string uri)
+        {
+            var combined = Path.Combine(baseDir, uri);
+            var fullPath = Path.GetFullPath(combined);
+            if (!fullPath.StartsWith(baseDir))
+            {
+                throw new ArgumentException("Path must be a child of baseDir: Uri = " + uri);
+            }
+
+            return fullPath;
+        }
+
+        public static Resource LoadFromFile(string baseDir, string uri)
+        {
+            var path = EnsureCleanedPath(baseDir, uri);
+
+            var data = File.ReadAllBytes(path);
+            return new Resource
+            {
+                Data = new ArraySegment<byte>(data),
+            };
+        }
+    }
+
+    public class ResourceLoaderFromEmbedOnly : IResourceLoader
+    {
+        public Resource Load(string uri)
+        {
+            if (!DataUriUtil.IsData(uri))
+            {
+                throw new InvalidOperationException("uri is not data form");
+            }
+
+            return DataUriUtil.Extract(uri);
         }
 
         public string PathOf(string uri)
