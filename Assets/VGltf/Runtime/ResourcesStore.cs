@@ -19,14 +19,14 @@ namespace VGltf
         public Types.Gltf Gltf { get; private set; }
         public Glb.StoredBuffer Buffer { get; private set; }
 
-        private IResourceLoader _loader;
+        public IResourceLoader Loader { get; private set; }
 
         public ResourcesStore(Types.Gltf gltf, Glb.StoredBuffer buffer, IResourceLoader loader)
         {
             Gltf = gltf;
             Buffer = buffer;
 
-            _loader = loader;
+            Loader = loader;
         }
 
         // TODO: Provide async version....
@@ -41,7 +41,7 @@ namespace VGltf
             var buffer = Gltf.Buffers[index];
             if (buffer.Uri != null)
             {
-                r = _loader.Load(buffer.Uri);
+                r = Loader.Load(buffer.Uri);
 
                 // TODO: Check length
                 r.Data = new ArraySegment<byte>(r.Data.Array, r.Data.Offset, buffer.ByteLength);
@@ -104,7 +104,7 @@ namespace VGltf
             var image = Gltf.Images[index];
             if (image.Uri != null)
             {
-                r = _loader.Load(image.Uri);
+                r = Loader.Load(image.Uri);
             }
             else
             {
