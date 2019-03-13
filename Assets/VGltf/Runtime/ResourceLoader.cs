@@ -22,7 +22,7 @@ namespace VGltf
     public interface IResourceLoader
     {
         Resource Load(string uri);
-        string PathOf(string uri);
+        string FullPathOf(string uri);
     }
 
     public class ResourceLoaderFromFileStorage : IResourceLoader
@@ -44,9 +44,14 @@ namespace VGltf
             return LoadFromFile(_baseDir, uri);
         }
 
-        public string PathOf(string uri)
+        public string FullPathOf(string uri)
         {
-            throw new NotImplementedException(uri);
+            if (DataUriUtil.IsData(uri))
+            {
+                throw new InvalidOperationException("uri is data form");
+            }
+
+            return EnsureCleanedPath(_baseDir, uri);
         }
 
         public static string EnsureCleanedPath(string baseDir, string uri)
@@ -85,7 +90,7 @@ namespace VGltf
             return DataUriUtil.Extract(uri);
         }
 
-        public string PathOf(string uri)
+        public string FullPathOf(string uri)
         {
             throw new NotImplementedException(uri);
         }
