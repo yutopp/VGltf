@@ -5,6 +5,8 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System;
+using System.Collections.Generic;
 using VJson;
 
 // Reference: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/schema/*
@@ -12,10 +14,33 @@ namespace VGltf.Types
 {
     public class GltfProperty
     {
-        [JsonField(Name = "extensions"), JsonFieldIgnorable]
-        public object Extensions;
+        [JsonField(Name = "extensions", DynamicResolverTag = typeof(ExtensionsResolverTag)), JsonFieldIgnorable]
+        public Dictionary<string, object> Extensions;
 
         [JsonField(Name = "extras"), JsonFieldIgnorable]
         public object Extras;
+
+        //
+
+        public T GetExtension<T>(string name) where T : class
+        {
+            if (Extensions == null) {
+                return null;
+            }
+
+            object ext;
+            if (!Extensions.TryGetValue(name, out ext)) {
+                return null;
+            }
+
+            return ext as T;
+        }
+
+        internal class ExtensionsResolverTag { }
+
+        public static void RegisterExtension(string name, Type type)
+        {
+            DynamicResolver.Register<ExtensionsResolverTag>(name, type);
+        }
     }
 }
