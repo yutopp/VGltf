@@ -21,11 +21,11 @@ namespace VGltf
             Buffer = buffer;
         }
 
-        public static GltfContainer FromGltf(Stream s/* TODO: support storage */)
+        public static GltfContainer FromGltf(Stream s, Glb.StoredBuffer buffer = null)
         {
             var gltf = GltfReader.Read(s);
 
-            return new GltfContainer(gltf);
+            return new GltfContainer(gltf, buffer);
         }
 
         public static GltfContainer FromGlb(Stream s)
