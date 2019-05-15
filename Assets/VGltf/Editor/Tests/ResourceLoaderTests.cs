@@ -26,7 +26,7 @@ namespace VGltf.UnitTests
             {
                 ResourceLoaderFromFileStorage.EnsureCleanedPath("/tmp/aaa", "../bbb.json");
             });
-            Assert.That(ex.Message, Is.EqualTo("Path must be a child of baseDir: Uri = ../bbb.json"));
+            Assert.That(ex.Message, Is.EqualTo("Path must be a child of baseDir: Uri = ../bbb.json, BaseDir = /tmp/aaa, FullPath = /tmp/bbb.json"));
         }
     }
 }

@@ -56,11 +56,15 @@ namespace VGltf
 
         public static string EnsureCleanedPath(string baseDir, string uri)
         {
+            var fullBaseDir = Path.GetFullPath(baseDir);
+
             var combined = Path.Combine(baseDir, uri);
             var fullPath = Path.GetFullPath(combined);
-            if (!fullPath.StartsWith(baseDir))
+            if (!fullPath.StartsWith(fullBaseDir))
             {
-                throw new ArgumentException("Path must be a child of baseDir: Uri = " + uri);
+                throw new ArgumentException(
+                    string.Format("Path must be a child of baseDir: Uri = {0}, BaseDir = {1}, FullPath = {2}",
+                                  uri, baseDir, fullPath));
             }
 
             return fullPath;
