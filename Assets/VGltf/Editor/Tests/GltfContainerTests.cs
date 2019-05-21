@@ -74,6 +74,11 @@ namespace VGltf.UnitTests
             },
 
             new object[] {
+                new string[] {"BoxTextured", "glTF", "BoxTextured.gltf"},
+                new Unity.UnitTests.ModelTester.BoxTexturedImportingTester(),
+            },
+
+            new object[] {
                 new string[] {"RiggedSimple", "glTF-Embedded", "RiggedSimple.gltf"},
                 new ModelTester.RiggedSimpleTester(),
             },
