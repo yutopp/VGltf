@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;net45;net35</TargetFrameworks>
-    <LangVersion>4</LangVersion>
+    <LangVersion>6</LangVersion>
 
     <PackageId>VGltf</PackageId>
     <Version>0.0.0</Version>
