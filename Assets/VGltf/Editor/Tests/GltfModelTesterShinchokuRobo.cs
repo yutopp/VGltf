@@ -36,9 +36,9 @@ namespace VGltf.UnitTests.ModelTester
                 var img = gltf.Images[0];
                 Assert.AreEqual("body", img.Name);
                 Assert.AreEqual(null, img.Uri);
-                Assert.AreEqual(0, img.bufferView);
+                Assert.AreEqual(0, img.BufferView);
 
-                var r = store.GetOrLoadImageResourceAt(img.bufferView.Value);
+                var r = store.GetOrLoadImageResourceAt(img.BufferView.Value);
 
                 var imageBytes = new byte[r.Data.Count];
                 Array.Copy(r.Data.Array, r.Data.Offset, imageBytes, 0, r.Data.Count);
@@ -54,9 +54,9 @@ namespace VGltf.UnitTests.ModelTester
                 var img = gltf.Images[1];
                 Assert.AreEqual("eye", img.Name);
                 Assert.AreEqual(null, img.Uri);
-                Assert.AreEqual(1, img.bufferView);
+                Assert.AreEqual(1, img.BufferView);
 
-                var r = store.GetOrLoadImageResourceAt(img.bufferView.Value);
+                var r = store.GetOrLoadImageResourceAt(img.BufferView.Value);
 
                 var imageBytes = new byte[r.Data.Count];
                 Array.Copy(r.Data.Array, r.Data.Offset, imageBytes, 0, r.Data.Count);
