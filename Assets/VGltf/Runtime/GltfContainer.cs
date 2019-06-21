@@ -28,9 +28,20 @@ namespace VGltf
             return new GltfContainer(gltf, buffer);
         }
 
+        public static void FromGltf(Stream s, GltfContainer container)
+        {
+            // TODO: Raise an error if container.Buffer is not empty
+            GltfWriter.Write(s, container.Gltf);
+        }
+
         public static GltfContainer FromGlb(Stream s)
         {
             return Glb.Reader.ReadAsContainer(s);
+        }
+
+        public static void ToGlb(Stream s, GltfContainer container)
+        {
+            Glb.Writer.WriteFromContainer(s, container);
         }
     }
 }
