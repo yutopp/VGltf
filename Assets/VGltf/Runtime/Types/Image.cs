@@ -25,7 +25,7 @@ namespace VGltf.Types
 
         [JsonField(Name = "bufferView"), JsonFieldIgnorable]
         [JsonSchemaDependencies("mimeType"), JsonSchemaRef(typeof(GltfID))]
-        public int? bufferView;
+        public int? BufferView;
 
         //
 

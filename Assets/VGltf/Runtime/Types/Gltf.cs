@@ -150,5 +150,15 @@ namespace VGltf.Types
             int? dummy;
             return GetSamplerByTextureIndex(gltf, index, out dummy);
         }
+
+        public static int AddImage(this Gltf gltf, Image item) {
+            if (gltf.Images == null) {
+                gltf.Images = new List<Image>();
+            }
+
+            var n = gltf.Images.Count;
+            gltf.Images.Add(item);
+            return n;
+        }
     }
 }

@@ -108,7 +108,7 @@ namespace VGltf
             }
             else
             {
-                r = GetOrLoadBufferViewResourceAt(image.bufferView.Value);
+                r = GetOrLoadBufferViewResourceAt(image.BufferView.Value);
             }
 
             _imageResources.Add(index, r);
