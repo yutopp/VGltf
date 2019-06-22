@@ -6,7 +6,7 @@
 (WIP)
 
 `VGltf` is a `glTF 2.0` and `GLB` serializer/deserializer library written in pure C#. Supported versions are `.NET Framework 3.5` and `.NET Standard 1.6` or higher.  
-This library is developed as a purely C# project, however it also supports that be build with `Unity 5.6.3f1` or higher.
+This library is developed as a purely C# project, however it also supports that be build with `2018.3.12f1` or higher.
 
 ## Installation
 
