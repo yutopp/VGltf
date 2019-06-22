@@ -7,7 +7,6 @@
 
 using System;
 using System.IO;
-using VJson;
 
 namespace VGltf.Glb
 {
@@ -64,6 +63,9 @@ namespace VGltf.Glb
                 }
                 chunksTotalSize += ChunkHeaderSize + (uint)gltf.Length;
 
+                var padding = chunksTotalSize % 4; // Must be 4Bytes aligned
+                chunksTotalSize += padding;
+
                 byte[] buffer = null;
                 if (container.Buffer != null)
                 {
@@ -86,10 +88,11 @@ namespace VGltf.Glb
 
                 w.WriteChunk(new Chunk
                 {
-                    ChunkLength = (uint)gltf.Length,
+                    ChunkLength = (uint)gltf.Length + padding,
                     ChunkType = 0x4E4F534A, // JSON
                     ChunkData = gltf,
                 });
+                w._w.Write(new byte[]{ 0x20, 0x20, 0x20, 0x20 }, 0, (int)padding); // Add space padding if needed. 0x20 == ' '.
 
                 if (buffer != null)
                 {

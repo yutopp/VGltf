@@ -9,12 +9,25 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using VJson;
+using VJson.Schema;
 
 namespace VGltf
 {
     public class GltfWriter
     {
         public static void Write(Stream s, Types.Gltf gltf)
+        {
+            var schema = JsonSchemaAttribute.CreateFromClass<Types.Gltf>();
+            var ex = schema.Validate(gltf);
+            if (ex != null)
+            {
+                throw ex;
+            }
+
+            WriteWithoutValidation(s, gltf);
+        }
+
+        public static void WriteWithoutValidation(Stream s, Types.Gltf gltf)
         {
             var js = new JsonSerializer(typeof(Types.Gltf));
             js.Serialize(s, gltf);

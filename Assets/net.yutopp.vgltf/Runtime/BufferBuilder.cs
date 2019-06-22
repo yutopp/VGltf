@@ -23,6 +23,7 @@ namespace VGltf
 
         private List<AsView> _asViews = new List<AsView>();
 
+        // TODO: Support alignments
         public int AddView(ArraySegment<byte> payload, int? byteStride = null, BufferView.TargetEnum? target = null)
         {
             var n = _asViews.Count;

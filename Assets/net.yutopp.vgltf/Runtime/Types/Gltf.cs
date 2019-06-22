@@ -160,5 +160,41 @@ namespace VGltf.Types
             gltf.Images.Add(item);
             return n;
         }
+
+        public static int AddAccessor(this Gltf gltf, Accessor item)
+        {
+            if (gltf.Accessors == null)
+            {
+                gltf.Accessors = new List<Accessor>();
+            }
+
+            var n = gltf.Accessors.Count;
+            gltf.Accessors.Add(item);
+            return n;
+        }
+
+        public static int AddMesh(this Gltf gltf, Mesh item)
+        {
+            if (gltf.Meshes == null)
+            {
+                gltf.Meshes = new List<Mesh>();
+            }
+
+            var n = gltf.Meshes.Count;
+            gltf.Meshes.Add(item);
+            return n;
+        }
+
+        public static int AddNode(this Gltf gltf, Node item)
+        {
+            if (gltf.Nodes == null)
+            {
+                gltf.Nodes = new List<Node>();
+            }
+
+            var n = gltf.Nodes.Count;
+            gltf.Nodes.Add(item);
+            return n;
+        }
     }
 }
