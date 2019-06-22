@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VGltf", "VGltf\VGltf.csproj", "{A4BE8BB3-40A5-417C-B222-157D5267E222}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VGltf.Editor.Tests", "VGltf.Editor.Tests\VGltf.Editor.Tests.csproj", "{A7BB686A-9CF1-4683-AFEE-BAF4BF502378}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{A7BB686A-9CF1-4683-AFEE-BAF4BF502378}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

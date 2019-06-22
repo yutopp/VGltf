@@ -1,8 +1,11 @@
 PROJECT_NAME:=VGltf
 PROJECT_VERSION:=0.1.1
 
-PROJECT_DIR:=${PROJECT_NAME}.standalone
-PROJECT_TEST_DIR:=${PROJECT_DIR}/${PROJECT_NAME}.Editor.Tests
+PACKAGE_NAME:=net.yutopp.vgltf
+PACKAGE_JSON_PATH:=Assets/${PACKAGE_NAME}/package.json
+
+PROJECT_DIR:=StandaloneProject
+PROJECT_TEST_DIR:=${PROJECT_DIR}/Tests
 
 NUNIT_CONSOLE:=.nuget/NUnit.ConsoleRunner/tools/nunit3-console.exe
 
@@ -34,7 +37,7 @@ build-debug-net35: restore-net35
 
 .PHONY: test-net35
 test-net35: build-debug-net35 test-results
-	mono ${NUNIT_CONSOLE} ${PROJECT_TEST_DIR}/bin/Debug/net35/${PROJECT_NAME}.Editor.Tests.dll --result=test-results/results.xml;transform=nunit-transforms/nunit3-junit.xslt
+	mono ${NUNIT_CONSOLE} ${PROJECT_TEST_DIR}/bin/Debug/net35/Tests.dll --result=test-results/results.xml;transform=nunit-transforms/nunit3-junit.xslt
 
 # .NET Framework 4.5
 .PHONY: restore-net45
@@ -47,7 +50,7 @@ build-debug-net45: restore-net45
 
 .PHONY: test-net45
 test-net45: build-debug-net45 test-results
-	mono ${NUNIT_CONSOLE} ${PROJECT_TEST_DIR}/bin/Debug/net45/${PROJECT_NAME}.Editor.Tests.dll --result=test-results/results.xml;transform=nunit-transforms/nunit3-junit.xslt
+	mono ${NUNIT_CONSOLE} ${PROJECT_TEST_DIR}/bin/Debug/net45/Tests.dll --result=test-results/results.xml;transform=nunit-transforms/nunit3-junit.xslt
 
 # .NET Standard 1.6, Core 1.0, Core 2.0
 .PHONY: restore-dotnet

@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="../../Assets/VGltf/Editor/Tests/**/*.cs" />
+    <Compile Include="../../Assets/net.yutopp.vgltf/Editor/Tests/**/*.cs" />
   </ItemGroup>
 
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">

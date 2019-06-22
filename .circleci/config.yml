@@ -46,7 +46,7 @@ jobs:
       - run: chmod +x codecov
       - run: mkdir coverage
       - run: apt-get update -yy && apt-get install -yy make git python3
-      - run: dotnet add VGltf.standalone/VGltf.Editor.Tests/VGltf.Editor.Tests.csproj package coverlet.msbuild
+      - run: dotnet add StandaloneProject/Tests/Tests.csproj package coverlet.msbuild
       - run: make setup
       - run: make coverage-netcore20
       - run: ./codecov -f coverage/lcov.info

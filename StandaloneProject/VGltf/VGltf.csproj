@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="../../Assets/VGltf/Runtime/**/*.cs" />
+    <Compile Include="../../Assets/net.yutopp.vgltf/Runtime/**/*.cs" />
   </ItemGroup>
 
   <!--ItemGroup>
