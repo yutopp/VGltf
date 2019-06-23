@@ -40,12 +40,20 @@ namespace VGltf
         {
             views = new List<BufferView>();
             using (var ms = new MemoryStream())
+            using (var w = new BinaryWriter(ms))
             {
                 foreach (var asView in _asViews)
                 {
                     var offset = ms.Length;
 
-                    ms.Write(asView.Payload.Array, asView.Payload.Offset, asView.Payload.Count);
+                    var padding = offset % 12; // TODO: temporary routine
+                    offset += padding;
+
+                    w.Write(asView.Payload.Array, asView.Payload.Offset, asView.Payload.Count);
+                    for(int i=0; i< padding; ++i)
+                    {
+                        w.Write((byte)0);
+                    }
 
                     views.Add(new BufferView
                     {
