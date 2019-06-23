@@ -208,5 +208,41 @@ namespace VGltf.Types
             gltf.Scenes.Add(item);
             return n;
         }
+
+        public static int AddMaterial(this Gltf gltf, Material item)
+        {
+            if (gltf.Materials == null)
+            {
+                gltf.Materials = new List<Material>();
+            }
+
+            var n = gltf.Materials.Count;
+            gltf.Materials.Add(item);
+            return n;
+        }
+
+        public static int AddSampler(this Gltf gltf, Sampler item)
+        {
+            if (gltf.Samplers == null)
+            {
+                gltf.Samplers = new List<Sampler>();
+            }
+
+            var n = gltf.Samplers.Count;
+            gltf.Samplers.Add(item);
+            return n;
+        }
+
+        public static int AddTexture(this Gltf gltf, Texture item)
+        {
+            if (gltf.Textures == null)
+            {
+                gltf.Textures = new List<Texture>();
+            }
+
+            var n = gltf.Textures.Count;
+            gltf.Textures.Add(item);
+            return n;
+        }
     }
 }
