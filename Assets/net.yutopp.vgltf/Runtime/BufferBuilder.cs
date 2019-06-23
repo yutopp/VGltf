@@ -23,7 +23,6 @@ namespace VGltf
 
         private List<AsView> _asViews = new List<AsView>();
 
-        // TODO: Support alignments
         public int AddView(ArraySegment<byte> payload, int? byteStride = null, BufferView.TargetEnum? target = null)
         {
             var n = _asViews.Count;
@@ -38,27 +37,29 @@ namespace VGltf
 
         public byte[] BuildBytes(out List<BufferView> views)
         {
+            const uint alignment = 4;
+
             views = new List<BufferView>();
             using (var ms = new MemoryStream())
-            using (var w = new BinaryWriter(ms))
             {
+                uint offset = 0;
                 foreach (var asView in _asViews)
                 {
-                    var offset = ms.Length;
+                    var paddingPre = Glb.Align.WritePadding(ms, offset, alignment);
+                    offset += paddingPre;
 
-                    var padding = offset % 12; // TODO: temporary routine
-                    offset += padding;
+                    var currentOffset = offset;
 
-                    w.Write(asView.Payload.Array, asView.Payload.Offset, asView.Payload.Count);
-                    for(int i=0; i< padding; ++i)
-                    {
-                        w.Write((byte)0);
-                    }
+                    ms.Write(asView.Payload.Array, asView.Payload.Offset, asView.Payload.Count);
+                    offset += (uint)asView.Payload.Count;
+
+                    var paddingPost = Glb.Align.WritePadding(ms, offset, alignment);
+                    offset += paddingPost;
 
                     views.Add(new BufferView
                     {
                         Buffer = 0, // NOTE: Hardcoded
-                        ByteOffset = (int)offset,
+                        ByteOffset = (int)currentOffset,
                         ByteLength = asView.Payload.Count,
                         ByteStride = asView.ByteStride,
                         Target = asView.Target,

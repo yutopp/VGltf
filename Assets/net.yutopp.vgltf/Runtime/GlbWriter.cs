@@ -63,7 +63,7 @@ namespace VGltf.Glb
                 }
                 chunksTotalSize += ChunkHeaderSize + (uint)gltf.Length;
 
-                var padding = chunksTotalSize % 4; // Must be 4Bytes aligned
+                var padding = Align.CalcPadding(chunksTotalSize, 4); // Must be 4Bytes aligned
                 chunksTotalSize += padding;
 
                 byte[] buffer = null;

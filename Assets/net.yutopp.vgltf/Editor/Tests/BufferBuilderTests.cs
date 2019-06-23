@@ -24,15 +24,20 @@ namespace VGltf.UnitTests
             var view1 = new ArraySegment<byte>(new byte[] { 0x10, 0x11 });
             var view1Index = bufferBuilder.AddView(view1);
 
+            var view2 = new ArraySegment<byte>(new byte[] { 0x20, 0x21, 0x22, 0x23 });
+            var view2Index = bufferBuilder.AddView(view2);
+
             List<Types.BufferView> views;
             var bufferBytes = bufferBuilder.BuildBytes(out views);
 
-            Assert.AreEqual(5, bufferBytes.Length);
+            Assert.AreEqual(12, bufferBytes.Length); // Actual size is 5Bytes, but aligned to 4Bytes.
             Assert.That(bufferBytes, Is.EquivalentTo(new byte[] {
-                        0x00, 0x01, 0x02, 0x10, 0x11
+                        0x00, 0x01, 0x02, /* Align */ 0x00,
+                        0x10, 0x11, /* Align */ 0x00, 0x00,
+                        0x20, 0x21, 0x22, 0x23
                     }));
 
-            Assert.AreEqual(2, views.Count);
+            Assert.AreEqual(3, views.Count);
 
             Assert.AreEqual(0, views[0].Buffer);
             Assert.AreEqual(0, views[0].ByteOffset);
@@ -41,10 +46,16 @@ namespace VGltf.UnitTests
             Assert.AreEqual(Types.BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER, views[0].Target);
 
             Assert.AreEqual(0, views[1].Buffer);
-            Assert.AreEqual(3, views[1].ByteOffset);
+            Assert.AreEqual(4, views[1].ByteOffset);
             Assert.AreEqual(2, views[1].ByteLength);
             Assert.AreEqual(null, views[1].ByteStride);
             Assert.AreEqual(null, views[1].Target);
+
+            Assert.AreEqual(0, views[2].Buffer);
+            Assert.AreEqual(8, views[2].ByteOffset);
+            Assert.AreEqual(4, views[2].ByteLength);
+            Assert.AreEqual(null, views[2].ByteStride);
+            Assert.AreEqual(null, views[2].Target);
         }
     }
 }
