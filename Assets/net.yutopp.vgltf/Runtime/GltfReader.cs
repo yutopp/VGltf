@@ -9,22 +9,43 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using VJson;
+using VJson.Schema;
 
 namespace VGltf
 {
     public class GltfReader
     {
-        public static Types.Gltf Read(Stream s)
+        public static Types.Gltf Read(Stream s, bool withRepairment = true, bool withValidation = true)
         {
             using (var r = new JsonReader(s))
             {
                 var node = r.Read();
 
-                RepairKnownInvalidFormat(node);
+                if (withRepairment)
+                {
+                    RepairKnownInvalidFormat(node);
+                }
 
                 var jd = new JsonDeserializer(typeof(Types.Gltf));
-                return (Types.Gltf)jd.Deserialize(node);
+                var gltf = (Types.Gltf)jd.Deserialize(node);
+
+                if (withValidation)
+                {
+                    var schema = JsonSchemaAttribute.CreateFromClass<Types.Gltf>();
+                    var ex = schema.Validate(gltf);
+                    if (ex != null)
+                    {
+                        throw ex;
+                    }
+                }
+
+                return gltf;
             }
+        }
+
+        public static Types.Gltf ReadWithoutValidation(Stream s, bool withRepairment = true)
+        {
+            return Read(s, withRepairment, false);
         }
 
         public static void RepairKnownInvalidFormat(INode node)
