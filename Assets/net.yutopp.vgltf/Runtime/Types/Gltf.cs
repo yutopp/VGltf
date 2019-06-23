@@ -196,5 +196,17 @@ namespace VGltf.Types
             gltf.Nodes.Add(item);
             return n;
         }
+
+        public static int AddScene(this Gltf gltf, Scene item)
+        {
+            if (gltf.Scenes == null)
+            {
+                gltf.Scenes = new List<Scene>();
+            }
+
+            var n = gltf.Scenes.Count;
+            gltf.Scenes.Add(item);
+            return n;
+        }
     }
 }
