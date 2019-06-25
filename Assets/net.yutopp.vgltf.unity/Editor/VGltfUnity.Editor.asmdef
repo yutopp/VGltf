@@ -1,0 +1,19 @@
+{
+    "name": "VGltfUnity.Editor",
+    "references": [
+        "GUID:98bdfb5a5a41d46b595c2686dcf3014c",
+        "GUID:70de5b47339d348e88730ab8d42efe53",
+        "GUID:59c855db4b7425348b7cae06c5972372"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

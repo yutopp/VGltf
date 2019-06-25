@@ -1,0 +1,16 @@
+{
+    "name": "VGltfUnity",
+    "references": [
+        "GUID:98bdfb5a5a41d46b595c2686dcf3014c",
+        "GUID:70de5b47339d348e88730ab8d42efe53"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
