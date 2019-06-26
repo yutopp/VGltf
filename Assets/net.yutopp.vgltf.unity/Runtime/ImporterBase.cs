@@ -11,15 +11,22 @@ namespace VGltf.Unity
     {
         public GltfContainer Container { get; }
         public ResourcesCache Cache { get; }
+        public ResourcesStore BufferView { get; }
 
-        public ImporterBase(GltfContainer container, ResourcesCache resCache)
+        public ImporterBase(GltfContainer container, ResourcesCache resCache, ResourcesStore bufView)
         {
             Container = container;
             Cache = resCache;
+            BufferView = bufView;
+        }
+
+        public ImporterBase(GltfContainer container, ResourcesCache resCache, IResourceLoader loader)
+            : this(container, resCache, new ResourcesStore(container.Gltf, container.Buffer, loader))
+        {
         }
 
         public ImporterBase(ImporterBase b)
-            : this(b.Container, b.Cache)
+            : this(b.Container, b.Cache, b.BufferView)
         {
         }
     }

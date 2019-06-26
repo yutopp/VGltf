@@ -25,6 +25,7 @@ namespace VGltf.Unity
         {
             var textureExporter = new TextureExporter(this);
 
+            //var shader = m.shader;
             // TODO: Support various shaders
             {
                 var tex = m.GetTexture("_MainTex") as Texture2D;

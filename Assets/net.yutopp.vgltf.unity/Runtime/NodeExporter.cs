@@ -41,6 +41,8 @@ namespace VGltf.Unity
             var s = go.transform.localScale;
             var gltfNode = new Types.Node
             {
+                Name = go.name,
+
                 Mesh = meshResource != null ? (int?)meshResource.Index : null,
                 Matrix = null,
                 Translation = new float[] { t.x, t.y, t.z },

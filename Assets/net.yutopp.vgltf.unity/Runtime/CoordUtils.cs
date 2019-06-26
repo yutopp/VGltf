@@ -34,23 +34,23 @@ namespace VGltf.Unity
 
         public static Vector3 ConvertSpace(Vector3 v)
         {
-            // ???
-            // TODO: fix
-            return new Vector3(v.x, v.y, -v.z);
+            // (x, y, z)
+            // (-x, y, z)
+            return new Vector3(-v.x, v.y, v.z);
         }
 
         public static Vector4 ConvertSpace(Vector4 v)
         {
             // ???
             // TODO: fix
-            return new Vector4(v.x, v.y, -v.z, -v.w);
+            return new Vector4(-v.x, v.y, v.z, -v.w);
         }
 
         public static Quaternion ConvertSpace(Quaternion v)
         {
             // ???
             // TODO: fix
-            return new Quaternion(-v.x, -v.y, v.z, v.w);
+            return new Quaternion(-v.x, v.y, v.z, -v.w);
         }
     }
 }

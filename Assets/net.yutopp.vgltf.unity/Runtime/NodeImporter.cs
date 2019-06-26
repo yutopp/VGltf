@@ -5,6 +5,7 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,6 +23,27 @@ namespace VGltf.Unity
             var gltfNode = gltf.Nodes[nodeIndex];
 
             var go = new GameObject();
+            go.name = gltfNode.Name;
+
+            var matrix = PrimitiveImporter.AsMatrix4x4(gltfNode.Matrix);
+            if (!matrix.isIdentity)
+            {
+                throw new NotImplementedException("matrix is not implemented");
+            } else
+            {
+                var t = gltfNode.Translation;
+                var r = gltfNode.Rotation;
+                var s = gltfNode.Scale;
+                go.transform.localPosition = CoordUtils.ConvertSpace(PrimitiveImporter.AsVector3(t));
+                go.transform.localRotation = CoordUtils.ConvertSpace(PrimitiveImporter.AsQuaternion(r));
+                go.transform.localScale = PrimitiveImporter.AsVector3(s);
+            }
+
+            if (gltfNode.Mesh != null)
+            {
+                var meshImporter = new MeshImporter(this);
+                meshImporter.Import(gltfNode.Mesh.Value, go);
+            }
 
             if (gltfNode.Children != null)
             {

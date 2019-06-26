@@ -56,10 +56,10 @@ namespace VGltf.Unity
                 normalAccIndex = primitiveExporter.Export(mesh.normals.Select(CoordUtils.ConvertSpace).ToArray());
             }
 
-            int? tantentAccIndex = null;
+            int? tangentAccIndex = null;
             if (mesh.tangents.Length > 0)
             {
-                tantentAccIndex = primitiveExporter.Export(mesh.tangents.Select(CoordUtils.ConvertSpace).ToArray());
+                tangentAccIndex = primitiveExporter.Export(mesh.tangents.Select(CoordUtils.ConvertSpace).ToArray());
             }
 
             int? texcoord0AccIndex = null;
@@ -72,6 +72,12 @@ namespace VGltf.Unity
             if (mesh.uv2.Length > 0)
             {
                 texcoord1AccIndex = primitiveExporter.Export(mesh.uv.Select(CoordUtils.ConvertUV).ToArray());
+            }
+
+            int? color0AccIndex = null;
+            if (mesh.colors.Length > 0)
+            {
+                //color0AccIndex = primitiveExporter.Export(mesh.colors.ToArray());
             }
             // TODO: COLOR_0, JOINTS_0, WEIGHTS_0
 
@@ -87,9 +93,9 @@ namespace VGltf.Unity
                 {
                     attrs[Types.Mesh.PrimitiveType.AttributeName.NORMAL] = normalAccIndex.Value;
                 }
-                if (tantentAccIndex != null)
+                if (tangentAccIndex != null)
                 {
-                    attrs[Types.Mesh.PrimitiveType.AttributeName.TANGENT] = tantentAccIndex.Value;
+                    attrs[Types.Mesh.PrimitiveType.AttributeName.TANGENT] = tangentAccIndex.Value;
                 }
                 if (texcoord0AccIndex != null)
                 {
@@ -112,6 +118,8 @@ namespace VGltf.Unity
 
             var gltfMesh = new Types.Mesh
             {
+                Name = mesh.name,
+
                 Primitives = primitives,
                 // Weights = TODO: Support morph targets
             };

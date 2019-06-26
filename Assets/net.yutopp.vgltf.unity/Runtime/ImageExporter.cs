@@ -29,7 +29,7 @@ namespace VGltf.Unity
             Graphics.Blit(tex, renderTex);
             RenderTexture previous = RenderTexture.active;
             RenderTexture.active = renderTex;
-            Texture2D readableText = new Texture2D(tex.width, tex.height);
+            Texture2D readableText = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, true, true);
             readableText.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
             readableText.Apply();
             RenderTexture.active = previous;

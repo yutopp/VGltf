@@ -15,8 +15,12 @@ namespace VGltf.Unity
 {
     public class Importer : ImporterBase, IDisposable
     {
+        public Importer(GltfContainer container, IResourceLoader loader)
+            : base(container, new ResourcesCache(), loader)
+        {
+        }
         public Importer(GltfContainer container)
-            : base(container, new ResourcesCache())
+            : this(container, new ResourceLoaderFromEmbedOnly())
         {
         }
 

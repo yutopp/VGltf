@@ -28,13 +28,16 @@ namespace VGltf.Unity
         public IndexedResource<T> CacheObjectIfNotExists<T, U>(string name, U obj, Dictionary<string, IndexedResource<T>> dic, Gerenator<T, U> generator) where T : UnityEngine.Object
         {
             IndexedResource<T> res;
-            if (dic.TryGetValue(name, out res))
+            if (!string.IsNullOrEmpty(name) && dic.TryGetValue(name, out res))
             {
                 return res;
             }
 
             res = generator(obj);
-            dic.Add(name, res);
+            if (!string.IsNullOrEmpty(name))
+            {
+                dic.Add(name, res);
+            }
 
             return res;
         }
