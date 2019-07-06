@@ -5,24 +5,55 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System.Collections.Generic;
+
 namespace VGltf.Unity
 {
-    public partial class ExporterBase
+    public interface IExporter
     {
-        public Types.Gltf Gltf { get; }
-        public ResourcesCache Cache { get; }
-        public BufferBuilder BufferBuilder { get; }
+        Types.Gltf Gltf { get; }
+        ResourcesCache<string> Cache { get; }
+        BufferBuilder BufferBuilder { get; }
 
-        public ExporterBase(Types.Gltf gltf, ResourcesCache resCache, BufferBuilder bufBuilder)
+        NodeExporter Nodes { get; }
+        MeshExporter Meshes { get; }
+        MaterialExporter Materials { get; }
+        TextureExporter Textures { get; }
+        ImageExporter Images { get; }
+    }
+
+    public abstract class ExporterRef : IExporter
+    {
+        private IExporter _exporter;
+
+        public Types.Gltf Gltf { get => _exporter.Gltf; }
+        public ResourcesCache<string> Cache { get => _exporter.Cache; }
+        public BufferBuilder BufferBuilder { get => _exporter.BufferBuilder; }
+
+        public NodeExporter Nodes { get => _exporter.Nodes; }
+        public MeshExporter Meshes { get => _exporter.Meshes; }
+        public MaterialExporter Materials { get => _exporter.Materials; }
+        public TextureExporter Textures { get => _exporter.Textures; }
+        public ImageExporter Images { get => _exporter.Images; }
+
+        public ExporterRef(IExporter p)
         {
-            Gltf = gltf;
-            Cache = resCache;
-            BufferBuilder = bufBuilder;
+            _exporter = p;
+        }
+    }
+
+    public abstract class ExporterRefHookable<T> : ExporterRef
+    {
+        protected List<T> Hooks = new List<T>();
+
+        public ExporterRefHookable(IExporter parent)
+            : base(parent)
+        {
         }
 
-        public ExporterBase(ExporterBase b)
-            : this(b.Gltf, b.Cache, b.BufferBuilder)
+        public void AddHook(T hook)
         {
+            Hooks.Add(hook);
         }
     }
 }

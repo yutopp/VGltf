@@ -5,29 +5,55 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System.Collections.Generic;
+
 namespace VGltf.Unity
 {
-    public partial class ImporterBase
+    public interface IImporter
     {
-        public GltfContainer Container { get; }
-        public ResourcesCache Cache { get; }
-        public ResourcesStore BufferView { get; }
+        GltfContainer Container { get; }
+        ResourcesCache<int> Cache { get; }
+        ResourcesStore BufferView { get; }
 
-        public ImporterBase(GltfContainer container, ResourcesCache resCache, ResourcesStore bufView)
+        NodeImporter Nodes { get; }
+        MeshImporter Meshes { get; }
+        MaterialImporter Materials { get; }
+        TextureImporter Textures { get; }
+        ImageImporter Images { get; }
+    }
+
+    public abstract class ImporterRef : IImporter
+    {
+        private IImporter _importer;
+
+        public GltfContainer Container { get => _importer.Container; }
+        public ResourcesCache<int> Cache { get => _importer.Cache; }
+        public ResourcesStore BufferView { get => _importer.BufferView; }
+
+        public NodeImporter Nodes { get => _importer.Nodes; }
+        public MeshImporter Meshes { get => _importer.Meshes; }
+        public MaterialImporter Materials { get => _importer.Materials; }
+        public TextureImporter Textures { get => _importer.Textures; }
+        public ImageImporter Images { get => _importer.Images; }
+
+        public ImporterRef(IImporter p)
         {
-            Container = container;
-            Cache = resCache;
-            BufferView = bufView;
+            _importer = p;
+        }
+    }
+
+    public abstract class ImporterRefHookable<T> : ImporterRef
+    {
+        protected List<T> Hooks = new List<T>();
+
+        public ImporterRefHookable(IImporter parent)
+            : base(parent)
+        {
         }
 
-        public ImporterBase(GltfContainer container, ResourcesCache resCache, IResourceLoader loader)
-            : this(container, resCache, new ResourcesStore(container.Gltf, container.Buffer, loader))
+        public void AddHook(T hook)
         {
-        }
-
-        public ImporterBase(ImporterBase b)
-            : this(b.Container, b.Cache, b.BufferView)
-        {
+            Hooks.Add(hook);
         }
     }
 }
