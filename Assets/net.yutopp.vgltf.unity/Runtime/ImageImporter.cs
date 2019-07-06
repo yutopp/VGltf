@@ -10,9 +10,9 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class ImageImporter : ImporterBase
+    public class ImageImporter : ImporterRef
     {
-        public ImageImporter(ImporterBase parent)
+        public ImageImporter(Importer parent)
             : base(parent)
         {
         }

@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class TextureExporter : ExporterBase
+    public class TextureExporter : ExporterRef
     {
-        public TextureExporter(ExporterBase parent)
+        public TextureExporter(Exporter parent)
             : base(parent)
         {
         }
@@ -23,9 +23,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Texture2D> ForceExport(Texture2D tex)
         {
-            var imageExporter = new ImageExporter(this);
-
-            var imageIndex = imageExporter.Export(tex);
+            var imageIndex = Images.Export(tex);
 
             var gltfImage = new Types.Texture
             {

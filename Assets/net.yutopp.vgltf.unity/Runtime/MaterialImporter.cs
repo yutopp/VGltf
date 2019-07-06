@@ -13,9 +13,14 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    class MaterialImporter : ImporterBase
+    public abstract class MaterialImporterHook
     {
-        public MaterialImporter(ImporterBase parent)
+        public abstract IndexedResource<Material> Import(MaterialImporter importer, int matIndex);
+    }
+
+    public class MaterialImporter : ImporterRefHookable<MaterialImporterHook>
+    {
+        public MaterialImporter(Importer parent)
             : base(parent)
         {
         }
@@ -25,11 +30,21 @@ namespace VGltf.Unity
             var gltf = Container.Gltf;
             var gltfMat = gltf.Materials[matIndex];
 
-            return Cache.CacheObjectIfNotExists(gltfMat.Name, matIndex, Cache.Materials, ForceImport);
+            return Cache.CacheObjectIfNotExists(matIndex, matIndex, Cache.Materials, ForceImport);
         }
 
         public IndexedResource<Material> ForceImport(int matIndex)
         {
+            foreach(var h in Hooks)
+            {
+                var r = h.Import(this, matIndex);
+                if (r != null)
+                {
+                    return r;
+                }
+            }
+
+            // Default import
             var gltf = Container.Gltf;
             var gltfMat = gltf.Materials[matIndex];
 
@@ -38,8 +53,6 @@ namespace VGltf.Unity
             {
                 throw new NotImplementedException();
             }
-
-            var textureImporter = new TextureImporter(this);
 
             var mat = new Material(shader);
             mat.name = gltfMat.Name;
@@ -50,7 +63,7 @@ namespace VGltf.Unity
                 if (pbrMR.BaseColorTexture != null)
                 {
                     var bct = pbrMR.BaseColorTexture;
-                    var textureResource = textureImporter.Import(bct.Index);
+                    var textureResource = Textures.Import(bct.Index);
                     mat.SetTexture("_MainTex", textureResource.Value);
                 }
             }

@@ -10,9 +10,9 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class ImageExporter : ExporterBase
+    public class ImageExporter : ExporterRef
     {
-        public ImageExporter(ExporterBase parent)
+        public ImageExporter(Exporter parent)
             : base(parent)
         {
         }
@@ -40,7 +40,8 @@ namespace VGltf.Unity
 
             return Types.GltfExtensions.AddImage(Gltf, new Types.Image
             {
-                //Name = TODO
+                Name = tex.name,
+
                 MimeType = Types.Image.MimeTypeEnum.ImagePng,
                 BufferView = viewIndex,
             });

@@ -5,13 +5,19 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class MaterialExporter : ExporterBase
+    public abstract class MaterialExporterHook
     {
-        public MaterialExporter(ExporterBase parent)
+        public abstract IndexedResource<Material> Export(MaterialExporter exporter, Material mat);
+    }
+
+    public class MaterialExporter : ExporterRefHookable<MaterialExporterHook>
+    {
+        public MaterialExporter(Exporter parent)
             : base(parent)
         {
         }
@@ -21,41 +27,46 @@ namespace VGltf.Unity
             return Cache.CacheObjectIfNotExists(m.name, m, Cache.Materials, ForceExport);
         }
 
-        public IndexedResource<Material> ForceExport(Material m)
+        public IndexedResource<Material> ForceExport(Material mat)
         {
-            var textureExporter = new TextureExporter(this);
-
-            //var shader = m.shader;
-            // TODO: Support various shaders
+            foreach (var h in Hooks)
             {
-                var tex = m.GetTexture("_MainTex") as Texture2D;
-                IndexedResource<Texture2D> textureResource = null;
-                if (tex != null)
+                var r = h.Export(this, mat);
+                if (r != null)
                 {
-                    textureResource = textureExporter.Export(tex);
+                    return r;
                 }
-
-                var gltfMaterial = new Types.Material
-                {
-                    Name = m.name,
-
-                    PbrMetallicRoughness = new Types.Material.PbrMetallicRoughnessType
-                    {
-                        BaseColorTexture = textureResource != null ? new Types.Material.BaseColorTextureInfoType
-                        {
-                            Index = textureResource.Index,
-                            TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>. 
-                        } : null, // TODO: fix
-                        MetallicFactor = 0.0f,  // TODO: fix
-                        RoughnessFactor = 1.0f, // TODO: fix
-                    },
-                };
-                return new IndexedResource<Material>
-                {
-                    Index = Types.GltfExtensions.AddMaterial(Gltf, gltfMaterial),
-                    Value = m,
-                };
             }
+
+            // Maybe, Standard shader...
+            // TODO: Support various shaders
+            var tex = mat.GetTexture("_MainTex") as Texture2D;
+            IndexedResource<Texture2D> textureResource = null;
+            if (tex != null)
+            {
+                textureResource = Textures.Export(tex);
+            }
+
+            var gltfMaterial = new Types.Material
+            {
+                Name = mat.name,
+
+                PbrMetallicRoughness = new Types.Material.PbrMetallicRoughnessType
+                {
+                    BaseColorTexture = textureResource != null ? new Types.Material.BaseColorTextureInfoType
+                    {
+                        Index = textureResource.Index,
+                        TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
+                    } : null, // TODO: fix
+                    MetallicFactor = 0.0f,  // TODO: fix
+                    RoughnessFactor = 1.0f, // TODO: fix
+                },
+            };
+            return new IndexedResource<Material>
+            {
+                Index = Types.GltfExtensions.AddMaterial(Gltf, gltfMaterial),
+                Value = mat,
+            };
         }
     }
 }

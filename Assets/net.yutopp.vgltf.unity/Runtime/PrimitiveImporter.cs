@@ -13,9 +13,9 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    class PrimitiveImporter : ImporterBase
+    public class PrimitiveImporter : ImporterRef
     {
-        public PrimitiveImporter(ImporterBase parent)
+        public PrimitiveImporter(IImporter parent)
             : base(parent)
         {
         }
@@ -24,6 +24,12 @@ namespace VGltf.Unity
         {
             return new Vector3(fx[0], fx[1], fx[2]);
         }
+
+        public static Color AsColor(float[] fx)
+        {
+            return new Color(fx[0], fx[1], fx[2], fx[3]);
+        }
+
         public static Vector4 AsVector4(float[] fx)
         {
             return new Vector4(fx[0], fx[1], fx[2], fx[3]);

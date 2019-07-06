@@ -6,33 +6,51 @@
 //
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class NodeExporter : ExporterBase
+    public class NodeExporter : ExporterRef
     {
-        public NodeExporter(ExporterBase parent)
+        public NodeExporter(Exporter parent)
             : base(parent)
         {
         }
 
-        public int? Export(GameObject go)
+        public IndexedResource<Transform> Export(GameObject go)
         {
-            var meshExporter = new MeshExporter(this);
+            return Export(go.transform);
+        }
+
+        public IndexedResource<Transform> Export(Transform go)
+        {
+            return Cache.CacheObjectIfNotExists(go, Cache.Nodes, ForceExport);
+        }
+
+        public IndexedResource<Transform> ForceExport(Transform trans)
+        {
+            var go = trans.gameObject;
 
             IndexedResource<Mesh> meshResource = null;
+            int? skinIndex = null;
             var mr = go.GetComponent<MeshRenderer>();
+            var smr = go.GetComponent<SkinnedMeshRenderer>();
             if (mr != null)
             {
-                meshResource = meshExporter.Export(mr);
+                var meshFilter = mr.gameObject.GetComponent<MeshFilter>();
+                var sharedMesh = meshFilter.sharedMesh;
+
+                meshResource = Meshes.Export(mr, sharedMesh);
             }
-            else
+            else if (smr != null)
             {
-                var smr = go.GetComponent<SkinnedMeshRenderer>();
-                if (smr != null)
+                var sharedMesh = smr.sharedMesh;
+                meshResource = Meshes.Export(smr, sharedMesh);
+
+                if (smr.bones.Length > 0)
                 {
-                    meshResource = meshExporter.Export(smr);
+                    skinIndex = ExportSkin(smr, sharedMesh).Index;
                 }
             }
 
@@ -44,6 +62,8 @@ namespace VGltf.Unity
                 Name = go.name,
 
                 Mesh = meshResource != null ? (int?)meshResource.Index : null,
+                Skin = skinIndex,
+
                 Matrix = null,
                 Translation = new float[] { t.x, t.y, t.z },
                 Rotation = new float[] { r.x, r.y, r.z, r.w },
@@ -54,23 +74,50 @@ namespace VGltf.Unity
             for (int i = 0; i < go.transform.childCount; ++i)
             {
                 var c = go.transform.GetChild(i);
-                var nodeIndex = Export(c.gameObject);
-                if (nodeIndex != null)
-                {
-                    nodesIndices.Add(nodeIndex.Value);
-                }
+                var nodeResource = Export(c.gameObject);
+                nodesIndices.Add(nodeResource.Index);
             }
             if (nodesIndices.Count > 0)
             {
                 gltfNode.Children = nodesIndices.ToArray();
             }
 
-            if (gltfNode.Mesh == null && gltfNode.Children == null)
+            return new IndexedResource<Transform>
             {
-                return null; // This is an empty node. Do not add.
+                Index = Types.GltfExtensions.AddNode(Gltf, gltfNode),
+                Value = trans,
+            };
+        }
+
+        public IndexedResource<Skin> ExportSkin(SkinnedMeshRenderer r, Mesh mesh)
+        {
+            return Cache.CacheObjectIfNotExists(mesh.name, mesh, Cache.Skins, (m) => ForceExportSkin(r, m));
+        }
+
+        IndexedResource<Skin> ForceExportSkin(SkinnedMeshRenderer smr, Mesh mesh)
+        {
+            var rootBone = smr.rootBone != null ? (int?)Export(smr.rootBone).Index : null;
+            var boneIndices = smr.bones.Select(bt => Export(bt).Index).ToArray();
+
+            var primitiveExporter = new PrimitiveExporter(this);
+
+            int? matricesAccIndex = null;
+            if (mesh.bindposes.Length > 0)
+            { 
+                var matrices = mesh.bindposes.Select(CoordUtils.ConvertSpace).ToArray();
+                matricesAccIndex = primitiveExporter.Export(matrices);
             }
 
-            return Types.GltfExtensions.AddNode(Gltf, gltfNode);
+            var gltfSkin = new Types.Skin
+            {
+                InverseBindMatrices = matricesAccIndex,
+                Skeleton = rootBone,
+                Joints = boneIndices,
+            };
+            return new IndexedResource<Skin>{
+                Index = Types.GltfExtensions.AddSkin(Gltf, gltfSkin),
+                Value = new Skin(),
+            };
         }
     }
 }

@@ -10,9 +10,9 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class TextureImporter : ImporterBase
+    public class TextureImporter : ImporterRef
     {
-        public TextureImporter(ImporterBase parent)
+        public TextureImporter(Importer parent)
             : base(parent)
         {
         }
@@ -22,7 +22,7 @@ namespace VGltf.Unity
             var gltf = Container.Gltf;
             var gltfTex = gltf.Textures[texIndex];
 
-            return Cache.CacheObjectIfNotExists(gltfTex.Name, texIndex, Cache.Textures, ForceImport);
+            return Cache.CacheObjectIfNotExists(texIndex, texIndex, Cache.Textures, ForceImport);
         }
 
         public IndexedResource<Texture2D> ForceImport(int texIndex)
@@ -35,8 +35,7 @@ namespace VGltf.Unity
 
             if (gltfTex.Source != null)
             {
-                var imageImporter = new ImageImporter(this);
-                var imageResource = imageImporter.Import(gltfTex.Source.Value);
+                var imageResource = Images.Import(gltfTex.Source.Value);
 
                 var imageBuffer = new byte[imageResource.Data.Count];
                 Array.Copy(imageResource.Data.Array, imageResource.Data.Offset, imageBuffer, 0, imageResource.Data.Count);

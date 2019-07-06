@@ -13,32 +13,51 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class Exporter : ExporterBase, IDisposable
+    public class Exporter : IExporter, IDisposable
     {
-        public Exporter(GameObject go)
-            : base(new Types.Gltf(), new ResourcesCache(), new BufferBuilder())
+        public Types.Gltf Gltf { get; }
+        public ResourcesCache<string> Cache { get; }
+        public BufferBuilder BufferBuilder { get; }
+
+        public NodeExporter Nodes { get; }
+        public MeshExporter Meshes { get; }
+        public MaterialExporter Materials { get; }
+        public TextureExporter Textures { get; }
+        public ImageExporter Images { get; }
+
+        public Exporter()
         {
-            var nodeExporter = new NodeExporter(this);
-            var rootNodeIndex = nodeExporter.Export(go);
+            Gltf = new Types.Gltf();
+            Cache = new ResourcesCache<string>();
+            BufferBuilder = new BufferBuilder();
+
+            Nodes = new NodeExporter(this);
+            Meshes = new MeshExporter(this);
+            Materials = new MaterialExporter(this);
+            Textures = new TextureExporter(this);
+            Images = new ImageExporter(this);
 
             // Asset
             Gltf.Asset = new Types.Asset
             {
                 Version = "2.0", // glTF 2.0
             };
-
-            // Scene
-            if (rootNodeIndex != null)
-            {
-                var rootSceneIndex = Types.GltfExtensions.AddScene(Gltf, new Types.Scene
-                {
-                    Nodes = new int[] { rootNodeIndex.Value },
-                });
-                Gltf.Scene = rootSceneIndex;
-            }
         }
 
-        public GltfContainer Export()
+        public void ExportGameObjectAsScene(GameObject go)
+        {
+            var nodeExporter = new NodeExporter(this);
+            var rootNodeResource = nodeExporter.Export(go);
+
+            // Scene
+            var rootSceneIndex = Types.GltfExtensions.AddScene(Gltf, new Types.Scene
+            {
+                Nodes = new int[] { rootNodeResource.Index },
+            });
+            Gltf.Scene = rootSceneIndex;
+        }
+
+        public GltfContainer IntoGlbContainer()
         {
             // Buffer
             List<Types.BufferView> views;
