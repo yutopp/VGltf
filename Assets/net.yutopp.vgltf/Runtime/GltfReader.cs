@@ -23,7 +23,7 @@ namespace VGltf
                 RepairKnownInvalidFormat(node);
 
                 var jd = new JsonDeserializer(typeof(Types.Gltf));
-                return (Types.Gltf)jd.Deserialize(node);
+                return (Types.Gltf)jd.DeserializeFromNode(node);
             }
         }
 
