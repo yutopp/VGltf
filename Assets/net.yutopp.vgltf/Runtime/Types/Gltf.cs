@@ -18,11 +18,11 @@ namespace VGltf.Types
     {
         [JsonField(Name = "extensionsUsed"), JsonFieldIgnorable]
         [JsonSchema(UniqueItems = true, MinItems = 1)]
-        public string[] ExtensionsUsed;
+        public List<string> ExtensionsUsed;
 
         [JsonField(Name = "extensionsRequired"), JsonFieldIgnorable]
         [JsonSchema(UniqueItems = true, MinItems = 1)]
-        public string[] ExtensionsRequired;
+        public List<string> ExtensionsRequired;
 
         [JsonField(Name = "accessors"), JsonFieldIgnorable]
         [JsonSchema(MinItems = 1)]
@@ -243,6 +243,66 @@ namespace VGltf.Types
             var n = gltf.Textures.Count;
             gltf.Textures.Add(item);
             return n;
+        }
+
+        public static int AddSkin(this Gltf gltf, Skin item)
+        {
+            if (gltf.Skins == null)
+            {
+                gltf.Skins = new List<Skin>();
+            }
+
+            var n = gltf.Skins.Count;
+            gltf.Skins.Add(item);
+            return n;
+        }
+
+        public static void AddExtensionUsed(this Gltf gltf, string name)
+        {
+            if (gltf.ExtensionsUsed == null)
+            {
+                gltf.ExtensionsUsed = new List<string>();
+            }
+
+            if (gltf.ContainsExtensionUsed(name))
+            {
+                return;
+            }
+            gltf.ExtensionsUsed.Add(name);
+        }
+
+        public static bool ContainsExtensionUsed(this Gltf gltf, string name)
+        {
+            if (gltf.ExtensionsUsed == null)
+            {
+                return false;
+            }
+
+            return gltf.ExtensionsUsed.Contains(name);
+        }
+
+        public static void AddExtensionRequired(this Gltf gltf, string name)
+        {
+            if (gltf.ExtensionsRequired == null)
+            {
+                gltf.ExtensionsRequired = new List<string>();
+            }
+
+            if (gltf.ContainsExtensionRequired(name))
+            {
+                return;
+            }
+            gltf.ExtensionsRequired.Add(name);
+        }
+
+        public static bool ContainsExtensionRequired(this Gltf gltf, string name)
+        {
+            if (gltf.ExtensionsRequired == null)
+            {
+                return false;
+            }
+
+            return gltf.ExtensionsRequired.Contains(name);
         }
     }
 }
