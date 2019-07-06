@@ -10,6 +10,7 @@ using System.Collections.Generic;
 
 namespace VGltf
 {
+    // TODO: Rename...
     public class ResourcesStore
     {
         // TODO: Consider concurrent accesses

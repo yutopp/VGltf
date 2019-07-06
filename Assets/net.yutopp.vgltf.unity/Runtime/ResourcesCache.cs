@@ -16,27 +16,59 @@ namespace VGltf.Unity
         public T Value;
     }
 
-    public class ResourcesCache
+    public class Skin
     {
-        public Dictionary<string, IndexedResource<Texture2D>> Textures = new Dictionary<string, IndexedResource<Texture2D>>();
-        public Dictionary<string, IndexedResource<Material>> Materials = new Dictionary<string, IndexedResource<Material>>();
-        public Dictionary<string, IndexedResource<Mesh>> Meshes = new Dictionary<string, IndexedResource<Mesh>>();
-        public Dictionary<string, IndexedResource<Avatar>> Avatars = new Dictionary<string, IndexedResource<Avatar>>();
+    }
+
+    public class ResourcesCache<Key>
+    {
+        public Dictionary<object, IndexedResource<Transform>> Nodes = new Dictionary<object, IndexedResource<Transform>>();
+
+        public Dictionary<Key, IndexedResource<Texture2D>> Textures = new Dictionary<Key, IndexedResource<Texture2D>>();
+        public Dictionary<Key, IndexedResource<Material>> Materials = new Dictionary<Key, IndexedResource<Material>>();
+        public Dictionary<Key, IndexedResource<Mesh>> Meshes = new Dictionary<Key, IndexedResource<Mesh>>();
+        public Dictionary<Key, IndexedResource<Skin>> Skins = new Dictionary<Key, IndexedResource<Skin>>();
+        public Dictionary<Key, IndexedResource<Avatar>> Avatars = new Dictionary<Key, IndexedResource<Avatar>>();
 
         public delegate IndexedResource<T> Gerenator<T, U>(U obj);
 
-        public IndexedResource<T> CacheObjectIfNotExists<T, U>(string name, U obj, Dictionary<string, IndexedResource<T>> dic, Gerenator<T, U> generator) where T : UnityEngine.Object
+        public IndexedResource<Transform> CacheObjectIfNotExists(Transform obj, Dictionary<object, IndexedResource<Transform>> dic, Gerenator<Transform, Transform> generator)
         {
-            IndexedResource<T> res;
-            if (!string.IsNullOrEmpty(name) && dic.TryGetValue(name, out res))
+            IndexedResource<Transform> res;
+            // Cached by reference
+            if (dic.TryGetValue(obj, out res))
             {
                 return res;
             }
 
             res = generator(obj);
-            if (!string.IsNullOrEmpty(name))
+            dic.Add(obj, res);
+
+            return res;
+        }
+
+        public IndexedResource<T> CacheObjectIfNotExists<T, U>(Key key, U obj, Dictionary<Key, IndexedResource<T>> dic, Gerenator<T, U> generator)
+        {
+            IndexedResource<T> res;
+
+            var preCond = true;
+            if (key is string)
             {
-                dic.Add(name, res);
+                preCond = !string.IsNullOrEmpty(key as string);
+            } else
+            {
+                preCond = key != null;
+            }
+
+            if (preCond && dic.TryGetValue(key, out res))
+            {
+                return res;
+            }
+
+            res = generator(obj);
+            if (preCond)
+            {
+                dic.Add(key, res);
             }
 
             return res;
