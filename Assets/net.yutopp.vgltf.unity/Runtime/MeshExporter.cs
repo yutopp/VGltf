@@ -13,6 +13,8 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
+    using TMPA = Types.Mesh.PrimitiveType.AttributeName;
+
     public class MeshExporter : ExporterRef
     {
         public MeshExporter(Exporter parent)
@@ -23,6 +25,17 @@ namespace VGltf.Unity
         public IndexedResource<Mesh> Export(Renderer r, Mesh mesh)
         {
             return Cache.CacheObjectIfNotExists(mesh.name, mesh, Cache.Meshes, (m) => ForceExport(r, m));
+        }
+
+        class Target
+        {
+            public string Name;
+
+            public int Position;
+            public int? Normal;
+            public int? Tangent;
+
+            public float Weight;
         }
 
         public IndexedResource<Mesh> ForceExport(Renderer r, Mesh mesh)
@@ -92,6 +105,68 @@ namespace VGltf.Unity
                 weights0AccIndex = ExportWeights(weights);
             }
 
+            #region blendSpace
+            List<Target> targets = null;
+            if (mesh.blendShapeCount > 0)
+            {
+                targets = new List<Target>();
+
+                for(int i = 0; i<mesh.blendShapeCount; ++i)
+                {
+                    var name = mesh.GetBlendShapeName(i);
+
+                    var deltaVertices = new Vector3[mesh.vertexCount];
+                    var deltaNormals = new Vector3[mesh.vertexCount];
+                    var deltaTangents = new Vector3[mesh.vertexCount];
+
+                    var frameCount = mesh.GetBlendShapeFrameCount(i);
+                    mesh.GetBlendShapeFrameVertices(
+                        i,
+                        frameCount - 1 /* get last frame */,
+                        deltaVertices,
+                        deltaNormals,
+                        deltaTangents);
+
+                    var mPositionAccIndex = ExportPositions(deltaVertices);
+
+                    var weight = mesh.GetBlendShapeFrameWeight(
+                        i,
+                        frameCount - 1 /* get last frame */);
+
+                    targets.Add(new Target
+                    {
+                        Name = name,
+
+                        Position = mPositionAccIndex,
+
+                        Weight = weight,
+                    });
+                }
+            }
+
+            List<Dictionary<string, int>> primTargets = null;
+            if (targets != null)
+            {
+                primTargets = new List<Dictionary<string, int>>();
+
+                foreach (var t in targets)
+                {
+                    var primTarget = new Dictionary<string, int>();
+                    primTarget[TMPA.POSITION] = t.Position;
+                    if (t.Normal != null)
+                    {
+                        primTarget[TMPA.NORMAL] = t.Normal.Value;
+                    }
+                    if (t.Tangent != null)
+                    {
+                        primTarget[TMPA.TANGENT] = t.Tangent.Value;
+                    }
+
+                    primTargets.Add(primTarget);
+                }
+            }
+            #endregion
+
             var primitives = new List<Types.Mesh.PrimitiveType>();
             for (var i = 0; i < mesh.subMeshCount; ++i)
             {
@@ -99,34 +174,34 @@ namespace VGltf.Unity
                 var positionindicesAccIndex = primitiveExporter.Export(CoordUtils.FlipIndices(indices).ToArray());
 
                 var attrs = new Dictionary<string, int>();
-                attrs[Types.Mesh.PrimitiveType.AttributeName.POSITION] = positionAccIndex;
+                attrs[TMPA.POSITION] = positionAccIndex;
                 if (normalAccIndex != null)
                 {
-                    attrs[Types.Mesh.PrimitiveType.AttributeName.NORMAL] = normalAccIndex.Value;
+                    attrs[TMPA.NORMAL] = normalAccIndex.Value;
                 }
                 if (tangentAccIndex != null)
                 {
-                    attrs[Types.Mesh.PrimitiveType.AttributeName.TANGENT] = tangentAccIndex.Value;
+                    attrs[TMPA.TANGENT] = tangentAccIndex.Value;
                 }
                 if (texcoord0AccIndex != null)
                 {
-                    attrs[Types.Mesh.PrimitiveType.AttributeName.TEXCOORD_0] = texcoord0AccIndex.Value;
+                    attrs[TMPA.TEXCOORD_0] = texcoord0AccIndex.Value;
                 }
                 if (texcoord1AccIndex != null)
                 {
-                    attrs[Types.Mesh.PrimitiveType.AttributeName.TEXCOORD_1] = texcoord1AccIndex.Value;
+                    attrs[TMPA.TEXCOORD_1] = texcoord1AccIndex.Value;
                 }
                 if (color0AccIndex != null)
                 {
-                    attrs[Types.Mesh.PrimitiveType.AttributeName.COLOR_0] = color0AccIndex.Value;
+                    attrs[TMPA.COLOR_0] = color0AccIndex.Value;
                 }
                 if (joints0AccIndex != null)
                 {
-                    attrs[Types.Mesh.PrimitiveType.AttributeName.JOINTS_0] = joints0AccIndex.Value;
+                    attrs[TMPA.JOINTS_0] = joints0AccIndex.Value;
                 }
                 if (weights0AccIndex != null)
                 {
-                    attrs[Types.Mesh.PrimitiveType.AttributeName.WEIGHTS_0] = weights0AccIndex.Value;
+                    attrs[TMPA.WEIGHTS_0] = weights0AccIndex.Value;
                 }
 
                 var primitive = new Types.Mesh.PrimitiveType
@@ -134,7 +209,7 @@ namespace VGltf.Unity
                     Attributes = attrs,
                     Indices = positionindicesAccIndex,
                     Material = materialIndices[i < materialIndices.Count ? i : materialIndices.Count - 1],
-                    // Targets = TODO: Support morph targets
+                    Targets = primTargets,
                 };
                 primitives.Add(primitive);
             }
@@ -144,8 +219,19 @@ namespace VGltf.Unity
                 Name = mesh.name,
 
                 Primitives = primitives,
-                // Weights = TODO: Support morph targets
+                // Weights = Should support default morph target weights?
             };
+            if (targets != null)
+            {
+                var targetNames = targets.Select(t => t.Name).ToArray();
+
+                // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
+                gltfMesh.Extras = new Dictionary<string, object>
+                {
+                    { "targetNames", targetNames },
+                };
+            }
+
             return new IndexedResource<Mesh>
             {
                 Index = Types.GltfExtensions.AddMesh(Gltf, gltfMesh),
@@ -155,13 +241,18 @@ namespace VGltf.Unity
 
         // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#meshes
 
-        int ExportPositions(Vector3[] vec3)
+        int ExportPositions(Vector3[] vec3, int[] indices = null)
         {
-            vec3 = vec3.Select(CoordUtils.ConvertSpace).ToArray();
+            Types.Accessor.ComponentTypeEnum viewComponentType;
+            var viewIndex = ExportPositionsBuffer(ref vec3, out viewComponentType);
 
-            // VEC3! | FLOAT!
-            byte[] buffer = PrimitiveExporter.Marshal(vec3);
-            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+            var sparseIndexType = default(Types.Accessor.SparseType.IndicesType.ComponentTypeEnum);
+            int? sparseViewIndex = null;
+            if (indices != null)
+            {
+                Debug.Assert(indices.Length == vec3.Length);
+                sparseViewIndex = ExportSparseIndexBuffer(ref indices, out sparseIndexType);
+            }
 
             // position MUST have min/max
             var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
@@ -176,13 +267,58 @@ namespace VGltf.Unity
             {
                 BufferView = viewIndex,
                 ByteOffset = 0,
-                ComponentType = Types.Accessor.ComponentTypeEnum.FLOAT,
+                ComponentType = viewComponentType,
                 Count = vec3.Length,
                 Type = Types.Accessor.TypeEnum.Vec3,
                 Min = new float[] { min.x, min.y, min.z },
                 Max = new float[] { max.x, max.y, max.z },
             };
+            if (sparseViewIndex != null)
+            {
+                accessor.Sparse = new Types.Accessor.SparseType
+                {
+                    Count = vec3.Length,
+                    Indices = new Types.Accessor.SparseType.IndicesType
+                    {
+                        BufferView = sparseViewIndex.Value,
+                        ByteOffset = 0,
+                        ComponentType = sparseIndexType,
+                    },
+                    Values = new Types.Accessor.SparseType.ValuesType
+                    {
+                        BufferView = accessor.BufferView.Value,
+                        ByteOffset = accessor.ByteOffset,
+                    },
+                };
+                accessor.BufferView = null;
+            }
             return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+        }
+
+        int ExportPositionsBuffer(ref Vector3[] vec3, out Types.Accessor.ComponentTypeEnum componentType)
+        {
+            vec3 = vec3.Select(CoordUtils.ConvertSpace).ToArray();
+
+            // VEC3! | FLOAT!
+            byte[] buffer = PrimitiveExporter.Marshal(vec3);
+            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+
+            componentType = Types.Accessor.ComponentTypeEnum.FLOAT;
+
+            return viewIndex;
+        }
+
+        int ExportSparseIndexBuffer(ref int[] indices, out Types.Accessor.SparseType.IndicesType.ComponentTypeEnum componentType)
+        {
+            // Scalar | UNSIGNED_BYTE
+            //        | UNSIGNED_SHORT
+            //        | UNSIGNED_INT! (TODO: fix kind...)
+            byte[] buffer = PrimitiveExporter.Marshal(indices);
+            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+
+            componentType = Types.Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_INT;
+
+            return viewIndex;
         }
 
         int ExportNormals(Vector3[] vec3)

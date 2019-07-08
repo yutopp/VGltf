@@ -28,7 +28,32 @@ namespace VGltf.Unity
             return Cache.CacheObjectIfNotExists(meshIndex, meshIndex, Cache.Meshes, (i) => ForceImport(i, go));
         }
 
-        class Primitive
+        class Target : IEquatable<Target>
+        {
+            public int Position;
+            public int? Normal;
+            public int? Tangent;
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as Target);
+            }
+
+            public bool Equals(Target other)
+            {
+                return other != null &&
+                       Position == other.Position &&
+                       EqualityComparer<int?>.Default.Equals(Normal, other.Normal) &&
+                       EqualityComparer<int?>.Default.Equals(Tangent, other.Tangent);
+            }
+
+            public override int GetHashCode()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        class Primitive 
         {
             public int Position;
             public int? Normal;
@@ -38,6 +63,8 @@ namespace VGltf.Unity
             public int? Color;
             public int? Weight;
             public int? Joint;
+
+            public List<Target> Targets;
 
             public int Indices;
             public int Material;
@@ -129,6 +156,43 @@ namespace VGltf.Unity
                     }
                 }
 
+                if (p.Targets != null)
+                {
+                    var targets = new List<Target>();
+                    foreach(var t in p.Targets)
+                    {
+                        var target = new Target();
+                        {
+                            int index;
+                            if (!t.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.POSITION, out index))
+                            {
+                                throw new NotImplementedException(""); // TODO: fix
+                            }
+                            target.Position = index;
+                        }
+
+                        {
+                            int index;
+                            if (t.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.NORMAL, out index))
+                            {
+                                target.Normal = index;
+                            }
+                        }
+
+                        {
+                            int index;
+                            if (t.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.TANGENT, out index))
+                            {
+                                target.Tangent = index;
+                            }
+                        }
+
+                        targets.Add(target);
+                    }
+
+                    res.Targets = targets;
+                }
+
                 if (p.Indices == null)
                 {
                     throw new NotImplementedException(""); // TODO: fix
@@ -149,14 +213,15 @@ namespace VGltf.Unity
             var skinedMesh = b.Weight != null;
             foreach (var p in prims.Skip(1))
             {
-                if ((b.Position != p.Position)
-                    || (b.Normal != p.Normal)
-                    || (b.Tangent != p.Tangent)
-                    || (b.TexCoord0 != p.TexCoord0)
-                    || (b.TexCoord1 != p.TexCoord1)
-                    || (b.Color != p.Color)
-                    || (b.Weight != p.Weight)
-                    || (b.Joint != p.Joint))
+                if (!(b.Position == p.Position &&
+                    EqualityComparer<int?>.Default.Equals(b.Normal, p.Normal) &&
+                    EqualityComparer<int?>.Default.Equals(b.Tangent, p.Tangent) &&
+                    EqualityComparer<int?>.Default.Equals(b.TexCoord0, p.TexCoord0) &&
+                    EqualityComparer<int?>.Default.Equals(b.TexCoord1, p.TexCoord1) &&
+                    EqualityComparer<int?>.Default.Equals(b.Color, p.Color) &&
+                    EqualityComparer<int?>.Default.Equals(b.Weight, p.Weight) &&
+                    EqualityComparer<int?>.Default.Equals(b.Joint, p.Joint) &&
+                    ((b.Targets == null && p.Targets == null) || (b.Targets != null && p.Targets != null && b.Targets.SequenceEqual(p.Targets)))))
                 {
                     fullClonedMode = true;
                     break;
@@ -237,6 +302,50 @@ namespace VGltf.Unity
                     }).ToArray();
                 }
 
+                if (b.Targets != null)
+                {
+                    // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
+                    var extras = gltfMesh.Extras as Dictionary<string, object>;
+                    var targetNamesObj = default(object);
+                    var targetNames = default(string[]);
+                    if (extras != null && extras.TryGetValue("targetNames", out targetNamesObj))
+                    {
+                        var objs = targetNamesObj as object[];
+                        if (objs != null) {
+                            targetNames = objs
+                                .Select(o => o as string)
+                                .Where(s => s != null)
+                                .ToArray();
+                        }
+                    }
+
+                    var i = 0;
+                    foreach(var t in b.Targets)
+                    {
+                        var deltaVertices = ImportPositions(t.Position);
+
+                        var deltaNormals = default(Vector3[]);
+                        if (t.Normal != null)
+                        {
+                            deltaNormals = ImportNormals(t.Normal.Value);
+                        }
+
+                        var deltaTangents = default(Vector3[]);
+                        if (t.Tangent != null)
+                        {
+                            // TODO: read Tangents as Vector3[] (NOT Vector4[])
+                            //mesh.tangents = ImportTangents(t.Tangent.Value);
+                        }
+
+                        var name = (targetNames != null && i < targetNames.Length)
+                            ? targetNames[i]
+                            : string.Format("BlendShape.{0}", i);
+                        mesh.AddBlendShapeFrame(name, 100.0f, deltaVertices, deltaNormals, deltaTangents);
+
+                        ++i;
+                    }
+                }
+
                 int submesh = 0;
                 foreach (var p in prims)
                 {
@@ -258,6 +367,18 @@ namespace VGltf.Unity
             {
                 var smr = go.AddComponent<SkinnedMeshRenderer>();
                 smr.sharedMesh = mesh;
+
+                // Default blend shape weight
+                if (gltfMesh.Weights != null)
+                {
+                    var i = 0;
+                    foreach(var w in gltfMesh.Weights)
+                    {
+                        // gltf[0, 1] -> Unity[0, 100]
+                        smr.SetBlendShapeWeight(i, w * 100.0f);
+                        ++i;
+                    }
+                }
 
                 r = smr;
             } else
