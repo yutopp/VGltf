@@ -127,7 +127,11 @@ namespace VGltf.Unity
                         deltaNormals,
                         deltaTangents);
 
+                    // TODO: Export as sparse accessors
                     var mPositionAccIndex = ExportPositions(deltaVertices);
+                    var mNormalsAccIndex = ExportNormals(deltaNormals);
+                    //var mTangentsAccIndex = ExportPositions(deltaTangents);
+                    var mTangentsAccIndex = (int?)null;
 
                     var weight = mesh.GetBlendShapeFrameWeight(
                         i,
@@ -138,6 +142,8 @@ namespace VGltf.Unity
                         Name = name,
 
                         Position = mPositionAccIndex,
+                        Normal = mNormalsAccIndex,
+                        Tangent = mTangentsAccIndex,
 
                         Weight = weight,
                     });
