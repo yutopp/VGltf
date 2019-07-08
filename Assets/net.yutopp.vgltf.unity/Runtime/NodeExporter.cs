@@ -5,6 +5,7 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -103,9 +104,8 @@ namespace VGltf.Unity
 
             int? matricesAccIndex = null;
             if (mesh.bindposes.Length > 0)
-            { 
-                var matrices = mesh.bindposes.Select(CoordUtils.ConvertSpace).ToArray();
-                matricesAccIndex = primitiveExporter.Export(matrices);
+            {
+                matricesAccIndex = ExportInverseBindMatrices(mesh.bindposes);
             }
 
             var gltfSkin = new Types.Skin
@@ -118,6 +118,27 @@ namespace VGltf.Unity
                 Index = Types.GltfExtensions.AddSkin(Gltf, gltfSkin),
                 Value = new Skin(),
             };
+        }
+
+        // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#skin
+
+        int ExportInverseBindMatrices(Matrix4x4[] matrices)
+        {
+            matrices = matrices.Select(CoordUtils.ConvertSpace).ToArray();
+
+            // MAT4! | FLOAT!
+            byte[] buffer = PrimitiveExporter.Marshal(matrices);
+            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+
+            var accessor = new Types.Accessor
+            {
+                BufferView = viewIndex,
+                ByteOffset = 0,
+                ComponentType = Types.Accessor.ComponentTypeEnum.FLOAT,
+                Count = matrices.Length,
+                Type = Types.Accessor.TypeEnum.Mat4,
+            };
+            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
         }
     }
 }

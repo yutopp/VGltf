@@ -171,7 +171,7 @@ namespace VGltf.Unity
             for (var i = 0; i < mesh.subMeshCount; ++i)
             {
                 var indices = mesh.GetIndices(i);
-                var positionindicesAccIndex = primitiveExporter.Export(CoordUtils.FlipIndices(indices).ToArray());
+                var positionindicesAccIndex = ExportIndices(indices);
 
                 var attrs = new Dictionary<string, int>();
                 attrs[TMPA.POSITION] = positionAccIndex;
@@ -241,6 +241,48 @@ namespace VGltf.Unity
 
         // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#meshes
 
+        int ExportIndices(int[] indices)
+        {
+            // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#primitiveindices
+
+            indices = CoordUtils.FlipIndices(indices).ToArray();
+
+            // Scalar | UNSIGNED_BYTE
+            //        | UNSIGNED_SHORT
+            //        | UNSIGNED_INT! (TODO: optimize kind...)
+
+            byte[] buffer = PrimitiveExporter.Marshal(indices);
+            var viewIndex = BufferBuilder.AddView(
+                new ArraySegment<byte>(buffer),
+                null,
+                Types.BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER);
+
+            var viewComponentType = Types.Accessor.ComponentTypeEnum.UNSIGNED_INT;
+
+            var accessor = new Types.Accessor
+            {
+                BufferView = viewIndex,
+                ByteOffset = 0,
+                ComponentType = viewComponentType,
+                Count = indices.Length,
+                Type = Types.Accessor.TypeEnum.Scalar,
+            };
+            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+        }
+
+        int ExportSparseIndicesBuffer(ref int[] indices, out Types.Accessor.SparseType.IndicesType.ComponentTypeEnum componentType)
+        {
+            // Scalar | UNSIGNED_BYTE
+            //        | UNSIGNED_SHORT
+            //        | UNSIGNED_INT! (TODO: optimize kind...)
+            byte[] buffer = PrimitiveExporter.Marshal(indices);
+            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+
+            componentType = Types.Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_INT;
+
+            return viewIndex;
+        }
+
         int ExportPositions(Vector3[] vec3, int[] indices = null)
         {
             Types.Accessor.ComponentTypeEnum viewComponentType;
@@ -251,7 +293,7 @@ namespace VGltf.Unity
             if (indices != null)
             {
                 Debug.Assert(indices.Length == vec3.Length);
-                sparseViewIndex = ExportSparseIndexBuffer(ref indices, out sparseIndexType);
+                sparseViewIndex = ExportSparseIndicesBuffer(ref indices, out sparseIndexType);
             }
 
             // position MUST have min/max
@@ -304,19 +346,6 @@ namespace VGltf.Unity
             var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));
 
             componentType = Types.Accessor.ComponentTypeEnum.FLOAT;
-
-            return viewIndex;
-        }
-
-        int ExportSparseIndexBuffer(ref int[] indices, out Types.Accessor.SparseType.IndicesType.ComponentTypeEnum componentType)
-        {
-            // Scalar | UNSIGNED_BYTE
-            //        | UNSIGNED_SHORT
-            //        | UNSIGNED_INT! (TODO: fix kind...)
-            byte[] buffer = PrimitiveExporter.Marshal(indices);
-            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));
-
-            componentType = Types.Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_INT;
 
             return viewIndex;
         }

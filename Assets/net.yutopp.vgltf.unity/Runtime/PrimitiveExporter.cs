@@ -52,57 +52,6 @@ namespace VGltf.Unity
             };
         }
 
-        public int Export(int[] arr)
-        {
-            // TODO: Fix(optimize) size (ComponentType)
-            byte[] buffer = Marshal(arr);
-
-            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));//, null, Types.BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER);
-
-            var min = int.MaxValue;
-            var max = int.MinValue;
-            foreach (var v in arr)
-            {
-                min = Mathf.Min(v, min);
-                max = Mathf.Max(v, max);
-            }
-
-            // TODO: Fix(optimize) size (ComponentType)
-            var accessor = new Types.Accessor
-            {
-                BufferView = viewIndex,
-                ByteOffset = 0,
-                ComponentType = Types.Accessor.ComponentTypeEnum.UNSIGNED_INT,
-                Count = arr.Length,
-                Type = Types.Accessor.TypeEnum.Scalar,
-                Min = new float[] { min },
-                Max = new float[] { max },
-            };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
-        }
-
-
-
-
-        public int Export(Matrix4x4[] mat4x4)
-        {
-            byte[] buffer = Marshal(mat4x4);
-
-            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));//, null, Types.BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER);
-
-            var accessor = new Types.Accessor
-            {
-                BufferView = viewIndex,
-                ByteOffset = 0,
-                ComponentType = Types.Accessor.ComponentTypeEnum.FLOAT,
-                Count = mat4x4.Length,
-                Type = Types.Accessor.TypeEnum.Mat4,
-            };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
-        }
-
-
-
         public static byte[] Marshal(int[] arr)
         {
             // TODO: optimize
@@ -235,7 +184,7 @@ namespace VGltf.Unity
             return buffer;
         }
 
-        static byte[] Marshal(Matrix4x4[] mat4x4)
+        public static byte[] Marshal(Matrix4x4[] mat4x4)
         {
             // TODO: optimize
             byte[] buffer;
