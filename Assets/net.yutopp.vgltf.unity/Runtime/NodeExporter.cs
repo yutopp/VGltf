@@ -12,7 +12,14 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class NodeExporter : ExporterRef
+    public abstract class NodeExporterHook
+    {
+        public virtual void PostHook(NodeExporter exporter, Transform trans, Types.Node gltfNode)
+        {
+        }
+    }
+
+    public class NodeExporter : ExporterRefHookable<NodeExporterHook>
     {
         public NodeExporter(Exporter parent)
             : base(parent)
@@ -81,6 +88,11 @@ namespace VGltf.Unity
             if (nodesIndices.Count > 0)
             {
                 gltfNode.Children = nodesIndices.ToArray();
+            }
+
+            foreach (var h in Hooks)
+            {
+                h.PostHook(this, trans, gltfNode);
             }
 
             return new IndexedResource<Transform>

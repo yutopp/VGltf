@@ -12,7 +12,14 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class NodeImporter : ImporterRef
+    public abstract class NodeImporterHook
+    {
+        public virtual void PostHook(NodeImporter impoter, Transform trans, Types.Node gltfNode)
+        {
+        }
+    }
+
+    public class NodeImporter : ImporterRefHookable<NodeImporterHook>
     {
         public NodeImporter(Importer parent)
             : base(parent)
@@ -91,6 +98,12 @@ namespace VGltf.Unity
                 {
                     ImportMeshesAndSkins(childIndex, gameObjects);
                 }
+            }
+
+            // TODO: move to elsewhere...
+            foreach (var h in Hooks)
+            {
+                h.PostHook(this, go.transform, gltfNode);
             }
         }
 

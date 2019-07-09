@@ -46,8 +46,7 @@ namespace VGltf.Unity
 
         public void ExportGameObjectAsScene(GameObject go)
         {
-            var nodeExporter = new NodeExporter(this);
-            var rootNodeResource = nodeExporter.Export(go);
+            var rootNodeResource = Nodes.Export(go);
 
             // Scene
             var rootSceneIndex = Types.GltfExtensions.AddScene(Gltf, new Types.Scene
