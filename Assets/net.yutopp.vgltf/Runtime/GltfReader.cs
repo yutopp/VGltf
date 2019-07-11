@@ -27,7 +27,7 @@ namespace VGltf
                 }
 
                 var jd = new JsonDeserializer(typeof(Types.Gltf));
-                var gltf = (Types.Gltf)jd.Deserialize(node);
+                var gltf = (Types.Gltf)jd.DeserializeFromNode(node);
 
                 if (withValidation)
                 {

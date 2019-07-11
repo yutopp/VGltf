@@ -1,0 +1,15 @@
+{
+    "name": "VGltfUnity",
+    "references": [
+        "VJson",
+        "VGltf"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

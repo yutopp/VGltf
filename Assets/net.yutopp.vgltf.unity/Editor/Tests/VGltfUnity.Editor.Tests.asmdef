@@ -1,0 +1,21 @@
+{
+    "name": "VGltfUnity.Editor.Tests",
+    "references": [
+        "VJson",
+        "VGltf",
+        "VGltfUnity",
+        "VGltfUnity.Editor"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
