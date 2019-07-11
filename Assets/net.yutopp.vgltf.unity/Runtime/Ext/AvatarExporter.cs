@@ -4,6 +4,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
+
 using System.Linq;
 using UnityEngine;
 
@@ -36,6 +37,7 @@ namespace VGltf.Unity.Ext
             extHD.LegStretch = hd.legStretch;
             extHD.FeetSpacing = hd.feetSpacing;
 
+            // Regenerate skeleton by referencing bones to support normalized bones.
             var allNodes = anim.GetComponentsInChildren<Transform>();
             extHD.Skeleton = allNodes.Where(n =>
             {
