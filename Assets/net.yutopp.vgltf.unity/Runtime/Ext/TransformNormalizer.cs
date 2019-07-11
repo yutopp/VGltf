@@ -60,16 +60,74 @@ namespace VGltf.Unity.Ext
                     };
                 }).ToArray();
 
+                // Initialize forms
                 go.transform.localPosition = Vector3.zero;
                 go.transform.localRotation = Quaternion.identity;
                 go.transform.localScale = Vector3.one;
 
+                if (go.GetComponent<Animator>() != null)
+                {
+                    GameObject.Destroy(go.GetComponent<Animator>());
+                }
+
+                for (var i = 0; i < sharedMesh.blendShapeCount; ++i)
+                {
+                    smr.SetBlendShapeWeight(i, 0.0f);
+                }
+
+                // Bake
                 var mesh = new Mesh();
                 smr.BakeMesh(mesh);
 
                 mesh.name = string.Format("{0}(VGltf.Baked)", sharedMesh.name);
                 mesh.boneWeights = weights;
 
+                var vertices = mesh.vertices;
+                var normals = mesh.normals;
+                var tangents = mesh.tangents;
+                for (var i = 0; i < sharedMesh.blendShapeCount; ++i)
+                {
+                    var blendShapeName = sharedMesh.GetBlendShapeName(i);
+                    var blendShapeFrame = sharedMesh.GetBlendShapeFrameCount(i);
+                    var blendShapeWeight = sharedMesh.GetBlendShapeFrameWeight(i, blendShapeFrame - 1);
+
+                    smr.SetBlendShapeWeight(i, blendShapeWeight);
+                    var blendShapeMesh = new Mesh();
+                    try
+                    {
+                        smr.BakeMesh(blendShapeMesh);
+
+                        var blendShapeVertices = blendShapeMesh.vertices;
+                        var blendShapeNormals = blendShapeMesh.normals;
+                        var blendShapeTangents = blendShapeMesh.tangents;
+
+                        var deltaVertices =
+                            blendShapeVertices.Select((v, j) => v - vertices[j]).ToArray();
+                        var deltaNormals =
+                            blendShapeNormals.Length > 0
+                            ? blendShapeNormals.Select((n, j) => n - normals[j]).ToArray()
+                            : null;
+                        var deltaTangents =
+                            blendShapeTangents.Length > 0
+                            ? blendShapeTangents.Select((t, j) => (Vector3)(t - tangents[j])).ToArray()
+                            : null;
+
+                        mesh.AddBlendShapeFrame(
+                            blendShapeName,
+                            blendShapeWeight,
+                            deltaVertices,
+                            deltaNormals,
+                            deltaTangents
+                            );
+                    }
+                    finally
+                    {
+                        GameObject.Destroy(blendShapeMesh);
+                        smr.SetBlendShapeWeight(i, 0.0f);
+                    }
+                }
+
+                // Save
                 bakedMeshes.Add(sharedMesh, mesh);
             }
 
