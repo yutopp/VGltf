@@ -122,7 +122,7 @@ namespace VGltf.Unity.Ext
                     }
                     finally
                     {
-                        GameObject.Destroy(blendShapeMesh);
+                        GameObject.DestroyImmediate(blendShapeMesh);
                         smr.SetBlendShapeWeight(i, 0.0f);
                     }
                 }
@@ -199,7 +199,7 @@ namespace VGltf.Unity.Ext
                     // Destroy baked meshes
                     foreach(var kv in bakedMeshes)
                     {
-                        GameObject.Destroy(kv.Value);
+                        GameObject.DestroyImmediate(kv.Value);
                     }
                 }
 
