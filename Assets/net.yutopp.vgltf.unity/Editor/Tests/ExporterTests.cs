@@ -20,9 +20,10 @@ namespace VGltf.Unity.UnitTests
         {
             GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-            using (var exporter = new Exporter(go))
+            using (var exporter = new Exporter())
             {
-                var gltfContainer = exporter.Export();
+                exporter.ExportGameObjectAsScene(go);
+                var gltfContainer = exporter.IntoGlbContainer();
                 var gltf = gltfContainer.Gltf;
                 var store = new ResourcesStore(gltf, gltfContainer.Buffer, new ResourceLoaderFromEmbedOnly());
 
@@ -43,7 +44,7 @@ namespace VGltf.Unity.UnitTests
                 var prim0 = prims[0];
                 Assert.AreEqual(null, prim0.Targets);
                 Assert.AreEqual(0, prim0.Material); 
-                Assert.AreEqual(5, prim0.Indices);
+                Assert.AreEqual(4, prim0.Indices);
 
                 var prim0Accessor = gltf.Accessors[prim0.Indices.Value];
                 Assert.AreEqual(36, prim0Accessor.Count); // 2(poly per faces) * 3(tri) * 6(faces)
@@ -58,13 +59,6 @@ namespace VGltf.Unity.UnitTests
                 var prim0Attr = prim0.Attributes;
                 var prim0Position = prim0Attr["POSITION"];
                 Assert.NotNull(prim0Position);
-
-                // Debug
-                var p = string.Join(Path.DirectorySeparatorChar.ToString(), new[] { "Assets", "StreamingAssets", "KiraKira", "Assets", "aaa.glb" });
-                using (var fs = File.Create(p))
-                {
-                    Glb.Writer.WriteFromContainer(fs, gltfContainer);
-                }
             }
         }
     }
