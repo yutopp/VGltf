@@ -25,7 +25,7 @@
   </ItemGroup-->
 
   <ItemGroup>
-    <PackageReference Include="VJson" Version="0.7.5" />
+    <PackageReference Include="VJson" Version="0.8.0" />
   </ItemGroup>
 
   <PropertyGroup>

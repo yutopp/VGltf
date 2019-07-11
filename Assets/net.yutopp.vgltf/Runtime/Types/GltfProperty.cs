@@ -8,32 +8,59 @@
 using System;
 using System.Collections.Generic;
 using VJson;
+using VJson.Schema;
 
 // Reference: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/schema/*
 namespace VGltf.Types
 {
     public class GltfProperty
     {
-        [JsonField(Name = "extensions", DynamicResolverTag = typeof(ExtensionsResolverTag)), JsonFieldIgnorable]
-        public Dictionary<string, object> Extensions;
+        [JsonField(Name = "extensions"), JsonFieldIgnorable]
+        public Dictionary<string, INode> Extensions;
 
         [JsonField(Name = "extras"), JsonFieldIgnorable]
         public object Extras;
 
         //
 
-        public T GetExtension<T>(string name) where T : class
+        public void AddExtension<T>(string name, T value)
+        {
+            if (Extensions == null)
+            {
+                Extensions = new Dictionary<string, INode>();
+            }
+
+            var s = new JsonSerializer(typeof(T));
+            var node = s.SerializeToNode(value);
+            Extensions.Add(name, node);
+        }
+
+        public bool GetExtension<T>(string name, out T value)
         {
             if (Extensions == null) {
-                return null;
+                value = default(T);
+                return false;
             }
 
-            object ext;
-            if (!Extensions.TryGetValue(name, out ext)) {
-                return null;
+            INode node;
+            if (!Extensions.TryGetValue(name, out node)) {
+                value = default(T);
+                return false;
             }
 
-            return ext as T;
+            var v = JsonSchemaAttribute.CreateFromClass<T>();
+            var ex = v.Validate(node);
+            if (ex != null)
+            {
+                // TODO: 
+                throw ex;
+            }
+
+            var d = new JsonDeserializer(typeof(T));
+            var dv = d.DeserializeFromNode(node);
+            value = (T)dv;
+
+            return true;
         }
 
         internal class ExtensionsResolverTag { }
