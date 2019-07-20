@@ -35,7 +35,13 @@ namespace VGltf.Types
             Extensions.Add(name, node);
         }
 
+        [Obsolete]
         public bool GetExtension<T>(string name, out T value)
+        {
+            return TryGetExtension<T>(name, out value);
+        }
+
+        public bool TryGetExtension<T>(string name, out T value)
         {
             if (Extensions == null) {
                 value = default(T);
