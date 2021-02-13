@@ -1,0 +1,15 @@
+{
+    "name": "Unity.net.yutopp.vgltf",
+    "references": [
+        "Unity.net.yutopp.vjson"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

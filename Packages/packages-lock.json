@@ -43,6 +43,29 @@
         "com.unity.modules.imgui": "1.0.0"
       }
     },
+    "net.yutopp.vgltf": {
+      "version": "file:net.yutopp.vgltf",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "net.yutopp.vjson": "0.8.0-dev3"
+      }
+    },
+    "net.yutopp.vgltf.unity": {
+      "version": "file:net.yutopp.vgltf.unity",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "net.yutopp.vjson": "0.8.0-dev3"
+      }
+    },
+    "net.yutopp.vjson": {
+      "version": "0.8.0-dev3",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://registry.npmjs.com"
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
