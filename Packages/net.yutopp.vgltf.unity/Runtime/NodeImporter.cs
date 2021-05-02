@@ -14,21 +14,23 @@ namespace VGltf.Unity
 {
     public abstract class NodeImporterHook
     {
-        public virtual void PostHook(NodeImporter impoter, Transform trans, Types.Node gltfNode)
+        public virtual void PostHook(NodeImporter importer, Transform trans, Types.Node gltfNode)
         {
         }
     }
 
     public class NodeImporter : ImporterRefHookable<NodeImporterHook>
     {
-        public NodeImporter(Importer parent)
-            : base(parent)
+        public override IContext Context { get; }
+
+        public NodeImporter(IContext context)
         {
+            Context = context;
         }
 
         public void ImportGameObjects(int nodeIndex, NodesCache gameObjects, GameObject parentGo)
         {
-            var gltf = Container.Gltf;
+            var gltf = Context.Container.Gltf;
             var gltfNode = gltf.Nodes[nodeIndex];
 
             var go = new GameObject();
@@ -70,13 +72,13 @@ namespace VGltf.Unity
 
         public void ImportMeshesAndSkins(int nodeIndex, NodesCache gameObjects)
         {
-            var gltf = Container.Gltf;
+            var gltf = Context.Container.Gltf;
             var gltfNode = gltf.Nodes[nodeIndex];
             var go = gameObjects.Get(nodeIndex);
 
             if (gltfNode.Mesh != null)
             {
-                var meshResource = Meshes.Import(gltfNode.Mesh.Value, go);
+                var meshResource = Context.Meshes.Import(gltfNode.Mesh.Value, go);
 
                 if (gltfNode.Skin != null)
                 {
@@ -101,7 +103,7 @@ namespace VGltf.Unity
 
         void ImportSkin(int skinIndex, NodesCache gameObjects, GameObject go)
         {
-            var gltf = Container.Gltf;
+            var gltf = Context.Container.Gltf;
             var gltfSkin = gltf.Skins[skinIndex];
 
             var smr = go.GetComponent<SkinnedMeshRenderer>();
@@ -119,7 +121,7 @@ namespace VGltf.Unity
 
             if (gltfSkin.InverseBindMatrices != null)
             {
-                var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(gltfSkin.InverseBindMatrices.Value);
+                var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(gltfSkin.InverseBindMatrices.Value);
                 var matrices = buf.GetEntity<Matrix4x4>().GetEnumerable().Select(CoordUtils.ConvertSpace).ToArray();
 
                 var mesh = smr.sharedMesh;

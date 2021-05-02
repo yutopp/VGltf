@@ -10,24 +10,33 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class TextureImporter : ImporterRef
+    public abstract class TextureImporterHook
     {
-        public TextureImporter(Importer parent)
-            : base(parent)
+        public virtual void PostHook(TextureImporter importer)
         {
+        }
+    }
+
+    public class TextureImporter : ImporterRefHookable<TextureImporterHook>
+    {
+        public override IContext Context { get; }
+
+        public TextureImporter(IContext context)
+        {
+            Context = context;
         }
 
         public IndexedResource<Texture2D> Import(int texIndex)
         {
-            var gltf = Container.Gltf;
+            var gltf = Context.Container.Gltf;
             var gltfTex = gltf.Textures[texIndex];
 
-            return Cache.CacheObjectIfNotExists(texIndex, texIndex, Cache.Textures, ForceImport);
+            return Context.Cache.CacheObjectIfNotExists(texIndex, texIndex, Context.Cache.Textures, ForceImport);
         }
 
         public IndexedResource<Texture2D> ForceImport(int texIndex)
         {
-            var gltf = Container.Gltf;
+            var gltf = Context.Container.Gltf;
             var gltfTex = gltf.Textures[texIndex];
 
             var tex = new Texture2D(0, 0, TextureFormat.RGBA32, true, true);
@@ -35,7 +44,7 @@ namespace VGltf.Unity
 
             if (gltfTex.Source != null)
             {
-                var imageResource = Images.Import(gltfTex.Source.Value);
+                var imageResource = Context.Images.Import(gltfTex.Source.Value);
 
                 var imageBuffer = new byte[imageResource.Data.Count];
                 Array.Copy(imageResource.Data.Array, imageResource.Data.Offset, imageBuffer, 0, imageResource.Data.Count);

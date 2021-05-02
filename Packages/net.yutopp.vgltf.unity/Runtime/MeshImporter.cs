@@ -13,19 +13,28 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class MeshImporter : ImporterRef
+    public abstract class MeshImporterHook
     {
-        public MeshImporter(Importer parent)
-            : base(parent)
+        public virtual void PostHook(MeshImporter importer)
         {
+        }
+    }
+
+    public class MeshImporter : ImporterRefHookable<MeshImporterHook>
+    {
+        public override IContext Context { get; }
+
+        public MeshImporter(IContext context)
+        {
+            Context = context;
         }
 
         public IndexedResource<Mesh> Import(int meshIndex, GameObject go)
         {
-            var gltf = Container.Gltf;
+            var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
 
-            return Cache.CacheObjectIfNotExists(meshIndex, meshIndex, Cache.Meshes, (i) => ForceImport(i, go));
+            return Context.Cache.CacheObjectIfNotExists(meshIndex, meshIndex, Context.Cache.Meshes, (i) => ForceImport(i, go));
         }
 
         class Target : IEquatable<Target>
@@ -92,7 +101,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Mesh> ForceImport(int meshIndex, GameObject go)
         {
-            var gltf = Container.Gltf;
+            var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
 
             var primsRaw = gltfMesh.Primitives
@@ -350,7 +359,7 @@ namespace VGltf.Unity
 
             if (prim.Material != null)
             {
-                var materialRes = Materials.Import(prim.Material.Value);
+                var materialRes = Context.Materials.Import(prim.Material.Value);
                 res.Material = materialRes.Value;
             }
 
@@ -468,7 +477,7 @@ namespace VGltf.Unity
         int[] ImportIndices(int index)
         {
             // SCALAR | !FLOAT
-            var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
+            var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
             var acc = buf.Accessor;
             if (acc.Type == Types.Accessor.TypeEnum.Scalar)
             {
@@ -486,7 +495,7 @@ namespace VGltf.Unity
         Vector3[] ImportPositions(int index)
         {
             // VEC3 | FLOAT
-            var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
+            var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
             var acc = buf.Accessor;
             if (acc.Type == Types.Accessor.TypeEnum.Vec3)
             {
@@ -502,7 +511,7 @@ namespace VGltf.Unity
         Vector3[] ImportNormals(int index)
         {
             // VEC3 | FLOAT
-            var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
+            var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
             var acc = buf.Accessor;
             if (acc.Type == Types.Accessor.TypeEnum.Vec3)
             {
@@ -518,7 +527,7 @@ namespace VGltf.Unity
         Vector4[] ImportTangents(int index)
         {
             // VEC4 | FLOAT
-            var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
+            var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
             var acc = buf.Accessor;
             if (acc.Type == Types.Accessor.TypeEnum.Vec4)
             {
@@ -536,7 +545,7 @@ namespace VGltf.Unity
             // VEC2 | FLOAT
             //      | UNSIGNED_BYTE  (normalized)
             //      | UNSIGNED_SHORT (normalized)
-            var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
+            var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
             var acc = buf.Accessor;
             if (acc.Type == Types.Accessor.TypeEnum.Vec2)
             {
@@ -554,7 +563,7 @@ namespace VGltf.Unity
             // VEC3 | FLOAT
             // VEC4 | UNSIGNED_BYTE  (normalized)
             //      | UNSIGNED_SHORT (normalized)
-            var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
+            var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
             var acc = buf.Accessor;
             if (acc.Type == Types.Accessor.TypeEnum.Vec4)
             {
@@ -571,7 +580,7 @@ namespace VGltf.Unity
         {
             // VEC4 | UNSIGNED_BYTE
             //      | UNSIGNED_SHORT
-            var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
+            var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
             var acc = buf.Accessor;
             if (acc.Type == Types.Accessor.TypeEnum.Vec4)
             {
@@ -592,7 +601,7 @@ namespace VGltf.Unity
             // VEC4 | FLOAT
             //      | UNSIGNED_BYTE  (normalized)
             //      | UNSIGNED_SHORT (normalized)
-            var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
+            var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
             var acc = buf.Accessor;
             if (acc.Type == Types.Accessor.TypeEnum.Vec4)
             {

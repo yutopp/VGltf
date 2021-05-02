@@ -10,16 +10,25 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class ImageImporter : ImporterRef
+    public abstract class ImageImporterHook
     {
-        public ImageImporter(Importer parent)
-            : base(parent)
+        public virtual void PostHook(ImageImporter importer)
         {
+        }
+    }
+
+    public class ImageImporter : ImporterRefHookable<ImageImporterHook>
+    {
+        public override IContext Context { get; }
+
+        public ImageImporter(IContext context)
+        {
+            Context = context;
         }
 
         public Resource Import(int imgIndex)
         {
-            var gltfImgResource = BufferView.GetOrLoadImageResourceAt(imgIndex);
+            var gltfImgResource = Context.BufferView.GetOrLoadImageResourceAt(imgIndex);
 
             return gltfImgResource;
         }

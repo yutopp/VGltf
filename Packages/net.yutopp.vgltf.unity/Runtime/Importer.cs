@@ -13,29 +13,39 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class Importer : IImporter, IDisposable
+    public class Importer : ImporterRefHookable<NodeImporterHook>, IDisposable
     {
-        public GltfContainer Container { get; }
-        public ResourcesCache<int> Cache { get; }
-        public ResourcesStore BufferView { get; }
+        class InnerContext : IContext
+        {
+            public GltfContainer Container { get; }
+            public ResourcesCache<int> Cache { get; }
+            public ResourcesStore BufferView { get; }
 
-        public NodeImporter Nodes { get; }
-        public MeshImporter Meshes { get; }
-        public MaterialImporter Materials { get; }
-        public TextureImporter Textures { get; }
-        public ImageImporter Images { get; }
+            public NodeImporter Nodes { get; }
+            public MeshImporter Meshes { get; }
+            public MaterialImporter Materials { get; }
+            public TextureImporter Textures { get; }
+            public ImageImporter Images { get; }
+
+            public InnerContext(GltfContainer container, IResourceLoader loader)
+            {
+                Container = container;
+                Cache = new ResourcesCache<int>();
+                BufferView = new ResourcesStore(container.Gltf, container.Buffer, loader);
+
+                Nodes = new NodeImporter(this);
+                Meshes = new MeshImporter(this);
+                Materials = new MaterialImporter(this);
+                Textures = new TextureImporter(this);
+                Images = new ImageImporter(this);
+            }
+        }
+
+        public override IContext Context { get; }
 
         public Importer(GltfContainer container, IResourceLoader loader)
         {
-            Container = container;
-            Cache = new ResourcesCache<int>();
-            BufferView = new ResourcesStore(container.Gltf, container.Buffer, loader);
-
-            Nodes = new NodeImporter(this);
-            Meshes = new MeshImporter(this);
-            Materials = new MaterialImporter(this);
-            Textures = new TextureImporter(this);
-            Images = new ImageImporter(this);
+            Context = new InnerContext(container, loader);
         }
 
         public Importer(GltfContainer container)
@@ -45,7 +55,7 @@ namespace VGltf.Unity
 
         public void ImportSceneNodes(GameObject parentGo)
         {
-            var gltf = Container.Gltf;
+            var gltf = Context.Container.Gltf;
             if (gltf.Scene == null)
             {
                 throw new Exception("Scene is null");
@@ -56,17 +66,17 @@ namespace VGltf.Unity
             var nodesCache = new NodesCache();
             foreach (var nodeIndex in gltfScene.Nodes)
             {
-                Nodes.ImportGameObjects(nodeIndex, nodesCache, parentGo);
+                Context.Nodes.ImportGameObjects(nodeIndex, nodesCache, parentGo);
             }
             foreach (var nodeIndex in gltfScene.Nodes)
             {
-                Nodes.ImportMeshesAndSkins(nodeIndex, nodesCache);
+                Context.Nodes.ImportMeshesAndSkins(nodeIndex, nodesCache);
             }
 
             return;
         }
 
-        public void Dispose()
+        void IDisposable.Dispose()
         {
             // TODO: Remove resources
         }
