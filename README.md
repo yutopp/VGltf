@@ -5,8 +5,8 @@
 
 (WIP)
 
-`VGltf` is a `glTF 2.0` and `GLB` serializer/deserializer library written in pure C#. Supported versions are `.NET Framework 3.5` and `.NET Standard 1.6` or higher.  
-This library is developed as a purely C# project, however it also supports that be build with `2018.3.12f1` or higher.
+`VGltf` is a `glTF 2.0` and `GLB` serializer/deserializer library written in pure C#. Supported versions are `.NET Standard 2.0` or higher.  
+This library is developed as a purely C# project, however it also supports that be build with `Unity 2019.4.22f1` or higher.
 
 ## Installation
 
@@ -20,7 +20,47 @@ dotnet add package VGltf
 
 ### For Unity projects
 
-(TODO: Provide unity packages)
+#### stable
+
+Add scoped registry information shown below to your `Packages/manifest.json` if not exists.
+
+```json
+{
+  "scopedRegistries": [
+    {
+      "name": "yutopp.net",
+      "url": "https://registry.npmjs.com",
+      "scopes": [
+        "net.yutopp"
+      ]
+    }
+  ]
+}
+```
+
+And add `net.yutopp.vgltf.*` to your `Packages/manifest.json` like below.
+
+```json
+{
+  "dependencies": {
+    "net.yutopp.vgltf": "*",
+    "net.yutopp.vgltf.unity": "*"
+  }
+}
+```
+
+#### nightly
+
+Add a url for VGltf git repository to your `Packages/manifest.json` like below.
+
+```json
+{
+  "dependencies": {
+    "net.yutopp.vgltf": "https://github.com/yutopp/VGltf.git?path=Packages/net.yutopp.vgltf",
+    "net.yutopp.vgltf.unity": "https://github.com/yutopp/VGltf.git?path=Packages/net.yutopp.vgltf.unity"
+  }
+}
+```
 
 #### Dependencies
 

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <LangVersion>7.3</LangVersion>
+
+    <PackageId>VGltf</PackageId>
+    <Version>0.0.0</Version>
+    <Authors>yutopp</Authors>
+
+    <PackageLicense>https://github.com/yutopp/VGltf/blob/master/LICENSE_1_0.txt</PackageLicense>
+    <PackageProjectUrl>https://github.com/yutopp/VGltf/</PackageProjectUrl>
+    <PackageTags>csharp;gltf;glb;serialization;unity</PackageTags>
+
+    <Description>A glTF and GLB serializer/deserializer library written in pure C#.</Description>
+    <Copyright>Copyright 2019</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../Packages/net.yutopp.vgltf/Runtime/**/*.cs" />
+  </ItemGroup>
+
+  <!--ItemGroup>
+    <Compile Include="../../../VJson/Packages/net.yutopp.vjson/Runtime/**/*.cs" />
+  </ItemGroup-->
+
+  <ItemGroup>
+    <PackageReference Include="VJson" Version="0.9.2" />
+  </ItemGroup>
+
+</Project>
