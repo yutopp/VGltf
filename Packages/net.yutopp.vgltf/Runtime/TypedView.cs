@@ -231,7 +231,7 @@ namespace VGltf
             }
         }
 
-        // TODO: fix for performance...
+        // TODO: fix for performance (Remove ToArray)...
         public ArraySegment<T> GetView()
         {
             return new ArraySegment<T>(GetEnumerable().ToArray());

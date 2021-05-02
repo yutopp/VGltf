@@ -53,9 +53,11 @@ namespace VGltf.Unity
             }
         }
 
-        class Primitive 
+        class Primitive
         {
-            public int Position;
+            public int? Indices;
+            public int? Material;
+            public int? Position;
             public int? Normal;
             public int? Tangent;
             public int? TexCoord0;
@@ -63,11 +65,29 @@ namespace VGltf.Unity
             public int? Color;
             public int? Weight;
             public int? Joint;
-
             public List<Target> Targets;
+        }
 
-            public int Indices;
-            public int Material;
+        class PrimitiveResource
+        {
+            public int[] Indices;
+            public Material Material;
+            public Vector3[] Vertices;
+            public Vector3[] Normals;
+            public Vector4[] Tangents;
+            public Vector2[] UV;
+            public Vector2[] UV2;
+            public Color[] Colors;
+            public BoneWeight[] BoneWeights;
+            public BlendShapeResource[] BlendShapes;
+        }
+
+        class BlendShapeResource
+        {
+            public string Name;
+            public Vector3[] Vertices;
+            public Vector3[] Normals;
+            public Vector3[] Tangents;
         }
 
         public IndexedResource<Mesh> ForceImport(int meshIndex, GameObject go)
@@ -75,288 +95,53 @@ namespace VGltf.Unity
             var gltf = Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
 
+            var primsRaw = gltfMesh.Primitives
+                .Select(p => ExtractPrimitive(p))
+                .ToArray();
+
+            ;
+            foreach (var (p, i) in primsRaw.Skip(1).Select((p, i) => (p, i)))
+            {
+                ValidateSubPrimitives(primsRaw[0], p, i);
+            }
+
+            var prims =
+                primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0));
+
+            // TODO: fix resource leaks when exception raised
             var mesh = new Mesh();
             mesh.name = gltfMesh.Name;
             mesh.subMeshCount = gltfMesh.Primitives.Count;
 
-            var prims = gltfMesh.Primitives.Select(p => {
-                var gltfAttr = p.Attributes;
-                var res = new Primitive();
-
-                {
-                    int index;
-                    if (!gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.POSITION, out index))
-                    {
-                        throw new NotImplementedException(""); // TODO: fix
-                    }
-                    res.Position = index;
-                }
-
-                {
-                    int index;
-                    if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.NORMAL, out index))
-                    {
-                        res.Normal = index;
-                    }
-                }
-
-                {
-                    int index;
-                    if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.TANGENT, out index))
-                    {
-                        res.Tangent = index;
-                    }
-                }
-
-                {
-                    int index;
-                    if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.TEXCOORD_0, out index))
-                    {
-                        res.TexCoord0 = index;
-                    }
-                }
-
-                {
-                    int index;
-                    if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.TEXCOORD_1, out index))
-                    {
-                        res.TexCoord1 = index;
-                    }
-                }
-
-                {
-                    int index;
-                    if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.COLOR_0, out index))
-                    {
-                        res.Color = index;
-                    }
-                }
-
-                {
-                    int index;
-                    if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.WEIGHTS_0, out index))
-                    {
-                        res.Weight = index;
-                    }
-                }
-
-                {
-                    int index;
-                    if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.JOINTS_0, out index))
-                    {
-                        res.Joint = index;
-                    }
-                }
-
-                if (res.Weight != null || res.Joint != null)
-                {
-                    if (res.Weight == null || res.Joint == null)
-                    {
-                        throw new NotImplementedException(""); // TODO: fix
-                    }
-                }
-
-                if (p.Targets != null)
-                {
-                    var targets = new List<Target>();
-                    foreach(var t in p.Targets)
-                    {
-                        var target = new Target();
-                        {
-                            int index;
-                            if (!t.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.POSITION, out index))
-                            {
-                                throw new NotImplementedException(""); // TODO: fix
-                            }
-                            target.Position = index;
-                        }
-
-                        {
-                            int index;
-                            if (t.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.NORMAL, out index))
-                            {
-                                target.Normal = index;
-                            }
-                        }
-
-                        {
-                            int index;
-                            if (t.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.TANGENT, out index))
-                            {
-                                target.Tangent = index;
-                            }
-                        }
-
-                        targets.Add(target);
-                    }
-
-                    res.Targets = targets;
-                }
-
-                if (p.Indices == null)
-                {
-                    throw new NotImplementedException(""); // TODO: fix
-                }
-                res.Indices = p.Indices.Value;
-
-                if (p.Material == null)
-                {
-                    throw new NotImplementedException(""); // TODO: fix
-                }
-                res.Material = p.Material.Value;
-
-                return res;
-            }).ToArray();
-
-            var b = prims[0];
-            var fullClonedMode = false;
-            var skinedMesh = b.Weight != null;
-            foreach (var p in prims.Skip(1))
-            {
-                if (!(b.Position == p.Position &&
-                    EqualityComparer<int?>.Default.Equals(b.Normal, p.Normal) &&
-                    EqualityComparer<int?>.Default.Equals(b.Tangent, p.Tangent) &&
-                    EqualityComparer<int?>.Default.Equals(b.TexCoord0, p.TexCoord0) &&
-                    EqualityComparer<int?>.Default.Equals(b.TexCoord1, p.TexCoord1) &&
-                    EqualityComparer<int?>.Default.Equals(b.Color, p.Color) &&
-                    EqualityComparer<int?>.Default.Equals(b.Weight, p.Weight) &&
-                    EqualityComparer<int?>.Default.Equals(b.Joint, p.Joint) &&
-                    ((b.Targets == null && p.Targets == null) || (b.Targets != null && p.Targets != null && b.Targets.SequenceEqual(p.Targets)))))
-                {
-                    fullClonedMode = true;
-                    break;
-                }
-
-                if (skinedMesh != (p.Weight != null))
-                {
-                    throw new NotImplementedException(); // Renderer is mixed
-                }
-            }
-
             var materials = new List<Material>();
-
-            if (fullClonedMode)
+            var skinedMesh = false;
+            var submeshIndex = 0;
+            foreach (var prim in prims)
             {
-                throw new NotImplementedException("Not supported");
-
-                IEnumerable<Vector3> vertices = new Vector3[] { };
-                IEnumerable<Vector3> normals = new Vector3[] { };
-
-                var currentOffset = 0;
-                foreach (var p in prims)
+                if (submeshIndex == 0)
                 {
-                    var positionBuf = BufferView.GetOrLoadTypedBufferByAccessorIndex(p.Position);
-                    var pVertices = positionBuf.GetEntity<Vector3>().GetEnumerable().Select(CoordUtils.ConvertSpace).ToArray();
-                }
-            } else
-            {
-                {
-                    mesh.vertices = ImportPositions(b.Position);
-                }
+                    skinedMesh = prim.BoneWeights != null;
 
-                if (b.Normal != null)
-                {
-                    mesh.normals = ImportNormals(b.Normal.Value);
-                }
-
-                if (b.Tangent != null)
-                {
-                    mesh.tangents = ImportTangents(b.Tangent.Value);
-                }
-
-                if (b.TexCoord0 != null)
-                {
-                    mesh.uv = ImportUV(b.TexCoord0.Value);
-                }
-
-                if (b.TexCoord1 != null)
-                {
-                    mesh.uv2 = ImportUV(b.TexCoord1.Value);
-                }
-
-                if (b.Color != null)
-                {
-                    mesh.colors = ImportColors(b.Color.Value);
-                }
-
-                if (b.Joint != null && b.Weight != null)
-                {
-                    var joints = ImportJoints(b.Joint.Value);
-                    var weights = ImportWeights(b.Weight.Value);
-                    if (joints.Length != weights.Length)
+                    mesh.vertices = prim.Vertices;
+                    mesh.normals = prim.Normals;
+                    mesh.tangents = prim.Tangents;
+                    mesh.uv = prim.UV;
+                    mesh.uv2 = prim.UV2;
+                    mesh.colors = prim.Colors;
+                    mesh.boneWeights = prim.BoneWeights;
+                    if (prim.BlendShapes != null)
                     {
-                        throw new NotImplementedException(); // TODO
-                    }
-
-                    mesh.boneWeights = joints.Zip(weights, (j, w) => {
-                        var bw = new BoneWeight();
-                        bw.boneIndex0 = j.x;
-                        bw.boneIndex1 = j.y;
-                        bw.boneIndex2 = j.z;
-                        bw.boneIndex3 = j.w;
-                        bw.weight0 = w.x;
-                        bw.weight1 = w.y;
-                        bw.weight2 = w.z;
-                        bw.weight3 = w.w;
-                        return bw;
-                    }).ToArray();
-                }
-
-                if (b.Targets != null)
-                {
-                    // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
-                    var extras = gltfMesh.Extras as Dictionary<string, object>;
-                    var targetNamesObj = default(object);
-                    var targetNames = default(string[]);
-                    if (extras != null && extras.TryGetValue("targetNames", out targetNamesObj))
-                    {
-                        var objs = targetNamesObj as object[];
-                        if (objs != null) {
-                            targetNames = objs
-                                .Select(o => o as string)
-                                .Where(s => s != null)
-                                .ToArray();
-                        }
-                    }
-
-                    var i = 0;
-                    foreach(var t in b.Targets)
-                    {
-                        var deltaVertices = ImportPositions(t.Position);
-
-                        var deltaNormals = default(Vector3[]);
-                        if (t.Normal != null)
+                        foreach (var b in prim.BlendShapes)
                         {
-                            deltaNormals = ImportNormals(t.Normal.Value);
+                            mesh.AddBlendShapeFrame(b.Name, 100.0f, b.Vertices, b.Normals, b.Tangents);
                         }
-
-                        var deltaTangents = default(Vector3[]);
-                        if (t.Tangent != null)
-                        {
-                            // TODO: read Tangents as Vector3[] (NOT Vector4[])
-                            //mesh.tangents = ImportTangents(t.Tangent.Value);
-                        }
-
-                        var name = (targetNames != null && i < targetNames.Length)
-                            ? targetNames[i]
-                            : string.Format("BlendShape.{0}", i);
-                        mesh.AddBlendShapeFrame(name, 100.0f, deltaVertices, deltaNormals, deltaTangents);
-
-                        ++i;
                     }
                 }
 
-                int submesh = 0;
-                foreach (var p in prims)
-                {
-                    var indicesBuf = BufferView.GetOrLoadTypedBufferByAccessorIndex(p.Indices);
-                    var indices = CoordUtils.FlipIndices(indicesBuf.GetPrimitivesAsCasted<int>().ToArray()).ToArray();
-                    mesh.SetIndices(indices, MeshTopology.Triangles, submesh);
-                    ++submesh;
+                mesh.SetIndices(prim.Indices, MeshTopology.Triangles, submeshIndex);
+                submeshIndex++;
 
-                    var matResource = Materials.Import(p.Material);
-                    materials.Add(matResource.Value);
-                }
+                materials.Add(prim.Material);
             }
 
             mesh.RecalculateBounds();
@@ -371,17 +156,16 @@ namespace VGltf.Unity
                 // Default blend shape weight
                 if (gltfMesh.Weights != null)
                 {
-                    var i = 0;
-                    foreach(var w in gltfMesh.Weights)
+                    foreach (var (w, i) in gltfMesh.Weights.Select((w, i) => (w, i)))
                     {
                         // gltf[0, 1] -> Unity[0, 100]
                         smr.SetBlendShapeWeight(i, w * 100.0f);
-                        ++i;
                     }
                 }
 
                 r = smr;
-            } else
+            }
+            else
             {
                 var mf = go.AddComponent<MeshFilter>();
                 mf.sharedMesh = mesh;
@@ -397,6 +181,304 @@ namespace VGltf.Unity
                 Index = meshIndex,
                 Value = mesh,
             };
+        }
+
+        Primitive ExtractPrimitive(Types.Mesh.PrimitiveType gltfPrim)
+        {
+            var gltfAttr = gltfPrim.Attributes;
+
+            var res = new Primitive();
+
+            res.Indices = gltfPrim.Indices;
+            res.Material = gltfPrim.Material;
+
+            {
+                if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.POSITION, out var index))
+                {
+                    res.Position = index;
+                }
+            }
+
+            {
+                int index;
+                if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.NORMAL, out index))
+                {
+                    res.Normal = index;
+                }
+            }
+
+            {
+                int index;
+                if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.TANGENT, out index))
+                {
+                    res.Tangent = index;
+                }
+            }
+
+            {
+                int index;
+                if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.TEXCOORD_0, out index))
+                {
+                    res.TexCoord0 = index;
+                }
+            }
+
+            {
+                int index;
+                if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.TEXCOORD_1, out index))
+                {
+                    res.TexCoord1 = index;
+                }
+            }
+
+            {
+                int index;
+                if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.COLOR_0, out index))
+                {
+                    res.Color = index;
+                }
+            }
+
+            {
+                int index;
+                if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.WEIGHTS_0, out index))
+                {
+                    res.Weight = index;
+                }
+            }
+
+            {
+                int index;
+                if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.JOINTS_0, out index))
+                {
+                    res.Joint = index;
+                }
+            }
+
+            if (res.Weight != null || res.Joint != null)
+            {
+                if (res.Weight == null || res.Joint == null)
+                {
+                    throw new NotImplementedException(""); // TODO: fix
+                }
+            }
+
+            if (gltfPrim.Targets != null)
+            {
+                var targets = new List<Target>();
+                foreach (var t in gltfPrim.Targets)
+                {
+                    var target = new Target();
+                    {
+                        int index;
+                        if (!t.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.POSITION, out index))
+                        {
+                            throw new NotImplementedException(""); // TODO: fix
+                        }
+                        target.Position = index;
+                    }
+
+                    {
+                        int index;
+                        if (t.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.NORMAL, out index))
+                        {
+                            target.Normal = index;
+                        }
+                    }
+
+                    {
+                        int index;
+                        if (t.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.TANGENT, out index))
+                        {
+                            target.Tangent = index;
+                        }
+                    }
+
+                    targets.Add(target);
+                }
+
+                res.Targets = targets;
+            }
+
+            return res;
+        }
+
+        void ValidateSubPrimitives(Primitive b, Primitive p, int i)
+        {
+            if (!EqualityComparer<int?>.Default.Equals(b.Position, p.Position))
+            {
+                throw new Exception($"Position is not same index at: {i}");
+            }
+            if (!EqualityComparer<int?>.Default.Equals(b.Normal, p.Normal))
+            {
+                throw new Exception($"Normal is not same index at: {i}");
+            }
+            if (!EqualityComparer<int?>.Default.Equals(b.Tangent, p.Tangent))
+            {
+                throw new Exception($"Tangent is not same index at: {i}");
+            }
+            if (!EqualityComparer<int?>.Default.Equals(b.TexCoord0, p.TexCoord0))
+            {
+                throw new Exception($"TexCoord0 is not same index at: {i}");
+            }
+            if (!EqualityComparer<int?>.Default.Equals(b.TexCoord1, p.TexCoord1))
+            {
+                throw new Exception($"TexCoord1 is not same index at: {i}");
+            }
+            if (!EqualityComparer<int?>.Default.Equals(b.Color, p.Color))
+            {
+                throw new Exception($"Color is not same index at: {i}");
+            }
+            if (!EqualityComparer<int?>.Default.Equals(b.Weight, p.Weight))
+            {
+                throw new Exception($"Weight is not same index at: {i}");
+            }
+            if (!EqualityComparer<int?>.Default.Equals(b.Joint, p.Joint))
+            {
+                throw new Exception($"Joint is not same index at: {i}");
+            }
+        }
+
+        PrimitiveResource ImportPrimitive(Types.Mesh gltfMesh, Primitive prim, bool isPrimary)
+        {
+            var res = new PrimitiveResource();
+
+            if (prim.Indices != null)
+            {
+                res.Indices = ImportIndices(prim.Indices.Value);
+            }
+
+            if (prim.Material != null)
+            {
+                var materialRes = Materials.Import(prim.Material.Value);
+                res.Material = materialRes.Value;
+            }
+
+            if (isPrimary && prim.Position != null)
+            {
+                res.Vertices = ImportPositions(prim.Position.Value);
+            }
+
+            if (isPrimary && prim.Normal != null)
+            {
+                res.Normals = ImportNormals(prim.Normal.Value);
+            }
+
+            if (isPrimary && prim.Tangent != null)
+            {
+                res.Tangents = ImportTangents(prim.Tangent.Value);
+            }
+
+            if (isPrimary && prim.TexCoord0 != null)
+            {
+                res.UV = ImportUV(prim.TexCoord0.Value);
+            }
+
+            if (isPrimary && prim.TexCoord1 != null)
+            {
+                res.UV2 = ImportUV(prim.TexCoord1.Value);
+            }
+
+            if (isPrimary && prim.Color != null)
+            {
+                res.Colors = ImportColors(prim.Color.Value);
+            }
+
+            if (isPrimary && (prim.Joint != null && prim.Weight != null))
+            {
+                var joints = ImportJoints(prim.Joint.Value);
+                var weights = ImportWeights(prim.Weight.Value);
+                if (joints.Length != weights.Length)
+                {
+                    throw new NotImplementedException(); // TODO
+                }
+
+                res.BoneWeights = joints.Zip(weights, (j, w) =>
+                {
+                    var bw = new BoneWeight();
+                    bw.boneIndex0 = j.x;
+                    bw.boneIndex1 = j.y;
+                    bw.boneIndex2 = j.z;
+                    bw.boneIndex3 = j.w;
+                    bw.weight0 = w.x;
+                    bw.weight1 = w.y;
+                    bw.weight2 = w.z;
+                    bw.weight3 = w.w;
+                    return bw;
+                }).ToArray();
+            }
+
+            if (prim.Targets != null)
+            {
+                // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
+                var extras = gltfMesh.Extras as Dictionary<string, object>;
+                var targetNamesObj = default(object);
+                var targetNames = default(string[]);
+                if (extras != null && extras.TryGetValue("targetNames", out targetNamesObj))
+                {
+                    var objs = targetNamesObj as object[];
+                    if (objs != null)
+                    {
+                        targetNames = objs
+                            .Select(o => o as string)
+                            .Where(s => s != null)
+                            .ToArray();
+                    }
+                }
+
+                var blendSpapes = new List<BlendShapeResource>();
+                var i = 0;
+                foreach (var t in prim.Targets)
+                {
+                    var deltaVertices = ImportPositions(t.Position);
+
+                    var deltaNormals = default(Vector3[]);
+                    if (t.Normal != null)
+                    {
+                        deltaNormals = ImportNormals(t.Normal.Value);
+                    }
+
+                    var deltaTangents = default(Vector3[]);
+                    if (t.Tangent != null)
+                    {
+                        // TODO: read Tangents as Vector3[] (NOT Vector4[])
+                        //mesh.tangents = ImportTangents(t.Tangent.Value);
+                    }
+
+                    var name = (targetNames != null && i < targetNames.Length)
+                        ? targetNames[i]
+                        : string.Format("BlendShape.{0}", i);
+                    blendSpapes.Add(new BlendShapeResource
+                    {
+                        Name = name,
+                        Vertices = deltaVertices,
+                        Normals = deltaNormals,
+                        Tangents = deltaTangents,
+                    });
+
+                    ++i;
+                }
+
+                res.BlendShapes = blendSpapes.ToArray();
+            }
+
+            return res;
+        }
+
+        int[] ImportIndices(int index)
+        {
+            // SCALAR | !FLOAT
+            var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
+            var acc = buf.Accessor;
+            if (acc.Type == Types.Accessor.TypeEnum.Scalar)
+            {
+                if (acc.ComponentType != Types.Accessor.ComponentTypeEnum.FLOAT)
+                {
+                    return CoordUtils.FlipIndices(buf.GetPrimitivesAsCasted<int>().ToArray()).ToArray();
+                }
+            }
+
+            throw new NotImplementedException(); // TODO
         }
 
         // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#meshes
@@ -452,7 +534,7 @@ namespace VGltf.Unity
         Vector2[] ImportUV(int index)
         {
             // VEC2 | FLOAT
-            //      | UNSIGNED_BYTE  (normalized) 
+            //      | UNSIGNED_BYTE  (normalized)
             //      | UNSIGNED_SHORT (normalized)
             var buf = BufferView.GetOrLoadTypedBufferByAccessorIndex(index);
             var acc = buf.Accessor;
