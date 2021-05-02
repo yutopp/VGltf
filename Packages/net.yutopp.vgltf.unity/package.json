@@ -1,0 +1,17 @@
+{
+  "name": "net.yutopp.vgltf.unity",
+  "version": "0.0.0",
+  "displayName": "VGltfUnity",
+  "description": "`VGltf` is a `glTF 2.0` and `GLB` serializer/deserializer library for Unity written in pure C#.",
+  "unity": "2019.4",
+  "dependencies": {},
+  "keywords": [
+    "unity",
+    "unity3d",
+    "gltf"
+  ],
+  "category": "",
+  "author": {
+    "name": "yutopp"
+  }
+}

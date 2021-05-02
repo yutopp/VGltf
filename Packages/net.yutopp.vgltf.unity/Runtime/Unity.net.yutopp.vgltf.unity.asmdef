@@ -1,15 +1,16 @@
 {
-    "name": "VGltfUnity",
+    "name": "Unity.net.yutopp.vgltf.unity",
     "references": [
-        "VJson",
-        "VGltf"
+        "Unity.net.yutopp.vgltf",
+        "Unity.net.yutopp.vjson"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

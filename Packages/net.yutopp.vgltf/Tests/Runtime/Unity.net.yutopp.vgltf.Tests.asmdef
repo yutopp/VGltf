@@ -1,0 +1,22 @@
+{
+    "name": "Unity.net.yutopp.vgltf.Tests",
+    "references": [
+        "GUID:70de5b47339d348e88730ab8d42efe53",
+        "GUID:2fe7776f9beaa911d822d28414d9d672",
+        "GUID:27619889b8ba8c24980f49ee34dbb44a",
+        "GUID:0acc523941302664db1f4e527237feb3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
