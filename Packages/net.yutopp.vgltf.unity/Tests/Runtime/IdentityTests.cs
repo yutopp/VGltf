@@ -43,7 +43,12 @@ namespace VGltf.Unity.UnitTests
                 gltfConteiner = Glb.Reader.ReadAsContainer(s);
             }
             var importer = new Importer(gltfConteiner);
-            var dstGo = importer.ImportSceneAsGameObject();
+
+            var rootGo = new GameObject();
+            importer.ImportSceneNodes(rootGo);
+
+            Assert.That(rootGo.transform.childCount, Is.EqualTo(1));
+            var dstGo = rootGo.transform.GetChild(0);
 
             // Tests
             var srcMf = srcGo.GetComponent<MeshFilter>();

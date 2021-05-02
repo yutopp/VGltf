@@ -43,25 +43,27 @@ namespace VGltf.Unity
         {
         }
 
-        public GameObject ImportSceneAsGameObject()
+        public void ImportSceneNodes(GameObject parentGo)
         {
             var gltf = Container.Gltf;
             if (gltf.Scene == null)
             {
-                return null;
+                throw new Exception("Scene is null");
             }
 
             var gltfScene = gltf.Scenes[gltf.Scene.Value];
-            if (gltfScene.Nodes.Length != 1)
+
+            var nodesCache = new NodesCache();
+            foreach (var nodeIndex in gltfScene.Nodes)
             {
-                // TODO: raise an exception
-                return null;
+                Nodes.ImportGameObjects(nodeIndex, nodesCache, parentGo);
+            }
+            foreach (var nodeIndex in gltfScene.Nodes)
+            {
+                Nodes.ImportMeshesAndSkins(nodeIndex, nodesCache);
             }
 
-            var nodeIndex = gltfScene.Nodes[0];
-            var go = Nodes.Import(nodeIndex);
-
-            return go;
+            return;
         }
 
         public void Dispose()
