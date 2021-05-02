@@ -1,0 +1,61 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish_to_npm:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+
+      - name: publish to npm (core)
+        if: startsWith( github.ref, 'refs/tags/v' )
+        working-directory: ./Packages/net.yutopp.vgltf
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          REF: ${{ github.ref }}
+        run: |
+          cp ../../README.md README.md
+          cp ../../LICENSE_1_0.txt LICENSE.txt
+          npm version "${REF#refs/tags/v}"
+          npm publish --access public
+
+      - name: publish to npm (unity)
+        if: startsWith( github.ref, 'refs/tags/v' )
+        working-directory: ./Packages/net.yutopp.vgltf.unity
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          REF: ${{ github.ref }}
+        run: |
+          cp ../../README.md README.md
+          cp ../../LICENSE_1_0.txt LICENSE.txt
+          npm version "${REF#refs/tags/v}"
+          npm publish --access public
+
+  publish_to_nuget:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: setup env
+        run: sudo apt-get update -yy && sudo apt-get install -yy make git
+
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+
+      - name: publish to nuget (core)
+        if: startsWith( github.ref, 'refs/tags/v' )
+        env:
+          NUGET_KEY: ${{ secrets.NUGET_KEY }}
+          REF: ${{ github.ref }}
+        run: |
+          export PROJECT_VERSION="${REF#refs/tags/v}"
+          make publish-to-nuget
