@@ -87,7 +87,7 @@ namespace VGltfExamples.Dynamic
 
             return res;
         }
-        
+
         // UI
 
         public void UIOnLoadButtonClick()
@@ -128,7 +128,7 @@ namespace VGltfExamples.Dynamic
 
             if (prev != null)
             {
-                Debug.Log($"delta ({prev.TotalReservedMB - now.TotalReservedMB}MB, {prev.TotalAllocatedMB - now.TotalAllocatedMB}MB, {prev.TotalUnusedReservedMB - now.TotalUnusedReservedMB}MB)");
+                Debug.Log($"delta ({now.TotalReservedMB - prev.TotalReservedMB}MB, {now.TotalAllocatedMB - prev.TotalAllocatedMB}MB, {now.TotalUnusedReservedMB - prev.TotalUnusedReservedMB}MB)");
             }
         }
     }
