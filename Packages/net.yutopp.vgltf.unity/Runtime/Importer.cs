@@ -43,6 +43,8 @@ namespace VGltf.Unity
 
         public override IContext Context { get; }
 
+        bool _disposed = false;
+
         public Importer(GltfContainer container, IResourceLoader loader)
         {
             Context = new InnerContext(container, loader);
@@ -76,9 +78,21 @@ namespace VGltf.Unity
             return;
         }
 
-        void IDisposable.Dispose()
+        public void Dispose() => Dispose(true);
+
+        protected virtual void Dispose(bool disposing)
         {
-            // TODO: Remove resources
+            if (_disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                // TODO: remove resources;
+            }
+
+            _disposed = true;
         }
     }
 }
