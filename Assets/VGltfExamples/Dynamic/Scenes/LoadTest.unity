@@ -922,7 +922,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab203e647370f03099ed07761d2138d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FilePath: SampleModels/Alicia/VRM/AliciaSolid.vrm
+  FilePath: SampleModels/Alicia/VRM/AliciaSolid-0.51.vrm
+  RuntimeAnimatorController: {fileID: 9100000, guid: 0477eb8d140de5e5892e04e32fe5e217,
+    type: 2}
 --- !u!1 &2003198534
 GameObject:
   m_ObjectHideFlags: 0

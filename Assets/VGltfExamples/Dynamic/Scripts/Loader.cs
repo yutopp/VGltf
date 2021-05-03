@@ -13,6 +13,8 @@ namespace VGltfExamples.Dynamic
     {
         [SerializeField] public string FilePath = "SampleModels/Alicia/VRM/AliciaSolid.vrm";
 
+        [SerializeField] public RuntimeAnimatorController RuntimeAnimatorController;
+
         class VRMResource : IDisposable
         {
             public Importer GltfImporter;
@@ -57,7 +59,7 @@ namespace VGltfExamples.Dynamic
             // このImporterの内部のContextにリソースがキャッシュされる。
             // Importer(または内部のContext)をDisposeすることでリソースが解放される。
             var gltfImporter = new Importer(gltfContainer);
-            // gltfImporter.AddHook();
+            gltfImporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ImporterHook());
 
             // GLTFのsceneを指すGameObjectを作る。
             // 子のNodeのGameObjectがこの下に作成される。
@@ -102,6 +104,10 @@ namespace VGltfExamples.Dynamic
 
             var res = await LoadVRM();
             _vrmResources.Insert(0, res);
+
+            // 動かす
+            var anim = res.Go.GetComponentInChildren<Animator>();
+            anim.runtimeAnimatorController = RuntimeAnimatorController;
 
             var p1 = Ext.MemoryProfile.Now;
             DebugLogProfile(p1, p0);

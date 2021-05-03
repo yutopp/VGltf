@@ -3,6 +3,8 @@
     "references": [
         "Unity.net.yutopp.vgltf",
         "Unity.net.yutopp.vgltf.unity",
+        "Unity.net.yutopp.vgltf.ext.vrm0",
+        "Unity.net.yutopp.vgltf.ext.vrm0.unity",
         "UniTask"
     ],
     "includePlatforms": [],
