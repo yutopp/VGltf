@@ -2,8 +2,8 @@
     "name": "Unity.net.yutopp.vgltf.unity.Tests",
     "references": [
         "Unity.net.yutopp.vgltf",
-        "Unity.net.yutopp.vgltf.unity",
         "Unity.net.yutopp.vgltf.Tests",
+        "Unity.net.yutopp.vgltf.unity",
         "Unity.net.yutopp.vjson",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
