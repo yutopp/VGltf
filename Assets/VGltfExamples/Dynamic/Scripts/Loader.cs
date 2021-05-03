@@ -114,10 +114,16 @@ namespace VGltfExamples.Dynamic
                 return;
             }
 
+            var p0 = Ext.MemoryProfile.Now;
+            DebugLogProfile(p0);
+
             var head = _vrmResources[0];
             _vrmResources.RemoveAt(0);
 
             head.Dispose();
+
+            var p1 = Ext.MemoryProfile.Now;
+            DebugLogProfile(p1, p0);
         }
 
         void DebugLogProfile(Ext.MemoryProfile now, Ext.MemoryProfile prev = null)
