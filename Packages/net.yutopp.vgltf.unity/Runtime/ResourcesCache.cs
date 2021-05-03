@@ -20,10 +20,54 @@ namespace VGltf.Unity
     {
     }
 
+    public class IndexedResourceDict<K, V>
+    {
+        public delegate IndexedResource<V> Gerenator();
+
+        Dictionary<K, IndexedResource<V>> _dict = new Dictionary<K, IndexedResource<V>>();
+
+        public IndexedResource<V> Add(K k, int index, V v)
+        {
+            var resource = new IndexedResource<V>
+            {
+                Index = index,
+                Value = v,
+            };
+            _dict.Add(k, resource);
+
+            return resource;
+        }
+
+        public IndexedResource<V> this[K k]
+        {
+            get => _dict[k];
+        }
+
+        public IndexedResource<V> GetOrCall(K k, Gerenator generator)
+        {
+            // Cached by reference
+            if (_dict.TryGetValue(k, out var res))
+            {
+                return res;
+            }
+
+            return generator();
+        }
+    }
+
+    public class ImporterRuntimeResources
+    {
+        public IndexedResourceDict<object, Transform> Nodes = new IndexedResourceDict<object, Transform>();
+        public IndexedResourceDict<int, Texture2D> Textures = new IndexedResourceDict<int, Texture2D>();
+        public IndexedResourceDict<int, Material> Materials = new IndexedResourceDict<int, Material>();
+        public IndexedResourceDict<int, Mesh> Meshes = new IndexedResourceDict<int, Mesh>();
+        public IndexedResourceDict<int, Skin> Skins = new IndexedResourceDict<int, Skin>();
+        public IndexedResourceDict<int, Avatar> Avatars = new IndexedResourceDict<int, Avatar>();
+    }
+
     public class ResourcesCache<Key>
     {
         public Dictionary<object, IndexedResource<Transform>> Nodes = new Dictionary<object, IndexedResource<Transform>>();
-
         public Dictionary<Key, IndexedResource<Texture2D>> Textures = new Dictionary<Key, IndexedResource<Texture2D>>();
         public Dictionary<Key, IndexedResource<Material>> Materials = new Dictionary<Key, IndexedResource<Material>>();
         public Dictionary<Key, IndexedResource<Mesh>> Meshes = new Dictionary<Key, IndexedResource<Mesh>>();
@@ -55,7 +99,8 @@ namespace VGltf.Unity
             if (key is string)
             {
                 preCond = !string.IsNullOrEmpty(key as string);
-            } else
+            }
+            else
             {
                 preCond = key != null;
             }

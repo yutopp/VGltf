@@ -6,6 +6,7 @@
 //
 
 using UnityEngine;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
@@ -34,7 +35,7 @@ namespace VGltf.Unity
             };
             return new IndexedResource<Texture2D>
             {
-                Index = Types.GltfExtensions.AddTexture(Gltf, gltfImage),
+                Index = Gltf.AddTexture(gltfImage),
                 Value = tex,
             };
         }

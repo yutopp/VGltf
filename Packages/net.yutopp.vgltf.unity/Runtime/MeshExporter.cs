@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
@@ -240,7 +241,7 @@ namespace VGltf.Unity
 
             return new IndexedResource<Mesh>
             {
-                Index = Types.GltfExtensions.AddMesh(Gltf, gltfMesh),
+                Index = Gltf.AddMesh(gltfMesh),
                 Value = mesh,
             };
         }
@@ -273,7 +274,7 @@ namespace VGltf.Unity
                 Count = indices.Length,
                 Type = Types.Accessor.TypeEnum.Scalar,
             };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+            return Gltf.AddAccessor(accessor);
         }
 
         int ExportSparseIndicesBuffer(ref int[] indices, out Types.Accessor.SparseType.IndicesType.ComponentTypeEnum componentType)
@@ -340,7 +341,7 @@ namespace VGltf.Unity
                 };
                 accessor.BufferView = null;
             }
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+            return Gltf.AddAccessor(accessor);
         }
 
         int ExportPositionsBuffer(ref Vector3[] vec3, out Types.Accessor.ComponentTypeEnum componentType)
@@ -372,7 +373,7 @@ namespace VGltf.Unity
                 Count = vec3.Length,
                 Type = Types.Accessor.TypeEnum.Vec3,
             };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+            return Gltf.AddAccessor(accessor);
         }
 
         int ExportTangents(Vector4[] vec4)
@@ -391,7 +392,7 @@ namespace VGltf.Unity
                 Count = vec4.Length,
                 Type = Types.Accessor.TypeEnum.Vec4,
             };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+            return Gltf.AddAccessor(accessor);
         }
 
         int ExportUV(Vector2[] uv)
@@ -412,7 +413,7 @@ namespace VGltf.Unity
                 Count = uv.Length,
                 Type = Types.Accessor.TypeEnum.Vec2,
             };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+            return Gltf.AddAccessor(accessor);
         }
 
         int ExportColors(Color[] colors)
@@ -431,7 +432,7 @@ namespace VGltf.Unity
                 Count = colors.Length,
                 Type = Types.Accessor.TypeEnum.Vec4,
             };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+            return Gltf.AddAccessor(accessor);
         }
 
         int ExportJoints(Vec4<int>[] joints)
@@ -453,7 +454,7 @@ namespace VGltf.Unity
                 Count = joints.Length,
                 Type = Types.Accessor.TypeEnum.Vec4,
             };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+            return Gltf.AddAccessor(accessor);
         }
 
         int ExportWeights(Vector4[] weights)
@@ -472,7 +473,7 @@ namespace VGltf.Unity
                 Count = weights.Length,
                 Type = Types.Accessor.TypeEnum.Vec4,
             };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+            return Gltf.AddAccessor(accessor);
         }
     }
 }

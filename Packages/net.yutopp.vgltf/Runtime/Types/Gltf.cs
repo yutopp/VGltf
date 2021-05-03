@@ -117,7 +117,10 @@ namespace VGltf.Types
             }
         }
     }
+}
 
+namespace VGltf.Types.Extensions
+{
     public static class GltfExtensions
     {
         /// <summary>

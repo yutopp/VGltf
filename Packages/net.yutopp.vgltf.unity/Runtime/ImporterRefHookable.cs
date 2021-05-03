@@ -22,6 +22,6 @@ namespace VGltf.Unity
             Hooks.Add(hook);
         }
 
-        public abstract IContext Context { get; }
+        public abstract IImporterContext Context { get; }
     }
 }

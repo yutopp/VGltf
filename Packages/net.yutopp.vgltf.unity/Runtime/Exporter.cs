@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
@@ -49,7 +50,7 @@ namespace VGltf.Unity
             var rootNodeResource = Nodes.Export(go);
 
             // Scene
-            var rootSceneIndex = Types.GltfExtensions.AddScene(Gltf, new Types.Scene
+            var rootSceneIndex = Gltf.AddScene(new Types.Scene
             {
                 Nodes = new int[] { rootNodeResource.Index },
             });

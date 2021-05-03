@@ -20,9 +20,9 @@ namespace VGltf.Unity
 
     public class MaterialImporter : ImporterRefHookable<MaterialImporterHook>
     {
-        public override IContext Context { get; }
+        public override IImporterContext Context { get; }
 
-        public MaterialImporter(IContext context)
+        public MaterialImporter(IImporterContext context)
         {
             Context = context;
         }
@@ -32,7 +32,9 @@ namespace VGltf.Unity
             var gltf = Context.Container.Gltf;
             var gltfMat = gltf.Materials[matIndex];
 
-            return Context.Cache.CacheObjectIfNotExists(matIndex, matIndex, Context.Cache.Materials, ForceImport);
+            return Context.RuntimeResources.Materials.GetOrCall(matIndex, () => {
+                return ForceImport(matIndex);
+            });
         }
 
         public IndexedResource<Material> ForceImport(int matIndex)
@@ -59,6 +61,8 @@ namespace VGltf.Unity
             var mat = new Material(shader);
             mat.name = gltfMat.Name;
 
+            var resource = Context.RuntimeResources.Materials.Add(matIndex, matIndex, mat);
+
             if (gltfMat.PbrMetallicRoughness != null)
             {
                 var pbrMR = gltfMat.PbrMetallicRoughness;
@@ -70,11 +74,7 @@ namespace VGltf.Unity
                 }
             }
 
-            return new IndexedResource<Material>
-            {
-                Index = matIndex,
-                Value = mat,
-            };
+            return resource;
         }
     }
 }

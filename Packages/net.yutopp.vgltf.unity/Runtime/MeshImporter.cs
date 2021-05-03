@@ -22,9 +22,9 @@ namespace VGltf.Unity
 
     public class MeshImporter : ImporterRefHookable<MeshImporterHook>
     {
-        public override IContext Context { get; }
+        public override IImporterContext Context { get; }
 
-        public MeshImporter(IContext context)
+        public MeshImporter(IImporterContext context)
         {
             Context = context;
         }
@@ -34,7 +34,9 @@ namespace VGltf.Unity
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
 
-            return Context.Cache.CacheObjectIfNotExists(meshIndex, meshIndex, Context.Cache.Meshes, (i) => ForceImport(i, go));
+            return Context.RuntimeResources.Meshes.GetOrCall(meshIndex, () => {
+                return ForceImport(meshIndex, go);
+            });
         }
 
         class Target : IEquatable<Target>
@@ -117,9 +119,11 @@ namespace VGltf.Unity
             var prims =
                 primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0));
 
-            // TODO: fix resource leaks when exception raised
             var mesh = new Mesh();
             mesh.name = gltfMesh.Name;
+
+            var resource = Context.RuntimeResources.Meshes.Add(meshIndex, meshIndex, mesh);
+
             mesh.subMeshCount = gltfMesh.Primitives.Count;
 
             var materials = new List<Material>();
@@ -185,11 +189,7 @@ namespace VGltf.Unity
 
             r.sharedMaterials = materials.ToArray();
 
-            return new IndexedResource<Mesh>
-            {
-                Index = meshIndex,
-                Value = mesh,
-            };
+            return resource;
         }
 
         Primitive ExtractPrimitive(Types.Mesh.PrimitiveType gltfPrim)

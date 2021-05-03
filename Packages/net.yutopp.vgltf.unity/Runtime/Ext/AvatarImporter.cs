@@ -7,20 +7,21 @@
 
 using System.Linq;
 using UnityEngine;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity.Ext
 {
-    using GE = VGltf.Types.GltfExtensions;
-
     public class AvatarImporter : NodeImporterHook
     {
-        public override void PostHook(NodeImporter importer, Transform trans, VGltf.Types.Node gltfNode)
+        public override void PostHook(NodeImporter importer, int nodeIndex, Transform trans)
         {
             var container = importer.Context.Container;
-            if (!GE.ContainsExtensionUsed(container.Gltf, AvatarType.ExtensionName))
+            if (!container.Gltf.ContainsExtensionUsed(AvatarType.ExtensionName))
             {
                 return;
             }
+
+            var gltfNode = container.Gltf.Nodes[nodeIndex];
 
             AvatarType extAvatar;
             if (!gltfNode.TryGetExtension(AvatarType.ExtensionName, out extAvatar))

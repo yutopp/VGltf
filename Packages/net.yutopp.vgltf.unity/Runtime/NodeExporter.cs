@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
@@ -97,7 +98,7 @@ namespace VGltf.Unity
 
             return new IndexedResource<Transform>
             {
-                Index = Types.GltfExtensions.AddNode(Gltf, gltfNode),
+                Index = Gltf.AddNode(gltfNode),
                 Value = trans,
             };
         }
@@ -127,7 +128,7 @@ namespace VGltf.Unity
                 Joints = boneIndices,
             };
             return new IndexedResource<Skin>{
-                Index = Types.GltfExtensions.AddSkin(Gltf, gltfSkin),
+                Index = Gltf.AddSkin(gltfSkin),
                 Value = new Skin(),
             };
         }
@@ -150,7 +151,7 @@ namespace VGltf.Unity
                 Count = matrices.Length,
                 Type = Types.Accessor.TypeEnum.Mat4,
             };
-            return Types.GltfExtensions.AddAccessor(Gltf, accessor);
+            return Gltf.AddAccessor(accessor);
         }
     }
 }

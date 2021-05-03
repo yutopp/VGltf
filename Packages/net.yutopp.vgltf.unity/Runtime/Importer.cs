@@ -13,12 +13,19 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class Importer : ImporterRefHookable<NodeImporterHook>, IDisposable
+    public abstract class ImporterHookBase
     {
-        class InnerContext : IContext
+        public virtual void PostHook(Importer importer, Transform parentTrans)
+        {
+        }
+    }
+
+    public class Importer : ImporterRefHookable<ImporterHookBase>, IDisposable
+    {
+        class InnerContext : IImporterContext
         {
             public GltfContainer Container { get; }
-            public ResourcesCache<int> Cache { get; }
+            public ImporterRuntimeResources RuntimeResources { get; }
             public ResourcesStore BufferView { get; }
 
             public NodeImporter Nodes { get; }
@@ -30,7 +37,7 @@ namespace VGltf.Unity
             public InnerContext(GltfContainer container, IResourceLoader loader)
             {
                 Container = container;
-                Cache = new ResourcesCache<int>();
+                RuntimeResources = new ImporterRuntimeResources();
                 BufferView = new ResourcesStore(container.Gltf, container.Buffer, loader);
 
                 Nodes = new NodeImporter(this);
@@ -41,7 +48,7 @@ namespace VGltf.Unity
             }
         }
 
-        public override IContext Context { get; }
+        public override IImporterContext Context { get; }
 
         bool _disposed = false;
 
@@ -73,6 +80,11 @@ namespace VGltf.Unity
             foreach (var nodeIndex in gltfScene.Nodes)
             {
                 Context.Nodes.ImportMeshesAndSkins(nodeIndex, nodesCache);
+            }
+
+            foreach(var hook in Hooks)
+            {
+                hook.PostHook(this, parentGo.transform);
             }
 
             return;

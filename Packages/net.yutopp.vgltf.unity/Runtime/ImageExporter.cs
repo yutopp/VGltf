@@ -7,6 +7,7 @@
 
 using System;
 using UnityEngine;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
@@ -38,7 +39,7 @@ namespace VGltf.Unity
             var pngBytes = readableText.EncodeToPNG();
             var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(pngBytes));
 
-            return Types.GltfExtensions.AddImage(Gltf, new Types.Image
+            return Gltf.AddImage(new Types.Image
             {
                 Name = tex.name,
 

@@ -19,9 +19,9 @@ namespace VGltf.Unity
 
     public class TextureImporter : ImporterRefHookable<TextureImporterHook>
     {
-        public override IContext Context { get; }
+        public override IImporterContext Context { get; }
 
-        public TextureImporter(IContext context)
+        public TextureImporter(IImporterContext context)
         {
             Context = context;
         }
@@ -29,9 +29,11 @@ namespace VGltf.Unity
         public IndexedResource<Texture2D> Import(int texIndex)
         {
             var gltf = Context.Container.Gltf;
-            var gltfTex = gltf.Textures[texIndex];
 
-            return Context.Cache.CacheObjectIfNotExists(texIndex, texIndex, Context.Cache.Textures, ForceImport);
+            return Context.RuntimeResources.Textures.GetOrCall(texIndex, () =>
+            {
+                return ForceImport(texIndex);
+            });
         }
 
         public IndexedResource<Texture2D> ForceImport(int texIndex)
@@ -41,6 +43,8 @@ namespace VGltf.Unity
 
             var tex = new Texture2D(0, 0, TextureFormat.RGBA32, true, true);
             tex.name = gltfTex.Name;
+
+            var resource = Context.RuntimeResources.Textures.Add(texIndex, texIndex, tex);
 
             if (gltfTex.Source != null)
             {
@@ -52,11 +56,7 @@ namespace VGltf.Unity
                 tex.LoadImage(imageBuffer);
             }
 
-            return new IndexedResource<Texture2D>
-            {
-                Index = texIndex,
-                Value = tex,
-            };
+            return resource;
         }
     }
 }

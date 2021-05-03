@@ -14,31 +14,41 @@ namespace VGltf.Unity
 {
     public abstract class NodeImporterHook
     {
-        public virtual void PostHook(NodeImporter importer, Transform trans, Types.Node gltfNode)
+        public virtual void PostHook(NodeImporter importer, int nodeIndex, Transform trans)
         {
         }
     }
 
     public class NodeImporter : ImporterRefHookable<NodeImporterHook>
     {
-        public override IContext Context { get; }
+        public override IImporterContext Context { get; }
 
-        public NodeImporter(IContext context)
+        public NodeImporter(IImporterContext context)
         {
             Context = context;
         }
-
         public void ImportGameObjects(int nodeIndex, NodesCache gameObjects, GameObject parentGo)
+        {
+            Context.RuntimeResources.Nodes.GetOrCall(nodeIndex, () => {
+                return ForceImportGameObjects(nodeIndex, gameObjects, parentGo);
+            });
+        }
+
+        public IndexedResource<Transform> ForceImportGameObjects(int nodeIndex, NodesCache gameObjects, GameObject parentGo)
         {
             var gltf = Context.Container.Gltf;
             var gltfNode = gltf.Nodes[nodeIndex];
 
             var go = new GameObject();
+            go.name = gltfNode.Name;
+
+            var resource = Context.RuntimeResources.Nodes.Add(nodeIndex, nodeIndex, go.transform);
+
             if (parentGo != null)
             {
+                // TODO: go.transform have parent already, it will error
                 go.transform.SetParent(parentGo.transform, false);
             }
-            go.name = gltfNode.Name;
 
             var matrix = PrimitiveImporter.AsMatrix4x4(gltfNode.Matrix);
             if (!matrix.isIdentity)
@@ -68,6 +78,8 @@ namespace VGltf.Unity
                     ImportGameObjects(childIndex, gameObjects, go);
                 }
             }
+
+            return resource;
         }
 
         public void ImportMeshesAndSkins(int nodeIndex, NodesCache gameObjects)
@@ -97,7 +109,7 @@ namespace VGltf.Unity
             // TODO: move to elsewhere...
             foreach (var h in Hooks)
             {
-                h.PostHook(this, go.transform, gltfNode);
+                h.PostHook(this, nodeIndex, go.transform);
             }
         }
 

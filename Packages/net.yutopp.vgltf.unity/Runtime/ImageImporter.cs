@@ -19,9 +19,9 @@ namespace VGltf.Unity
 
     public class ImageImporter : ImporterRefHookable<ImageImporterHook>
     {
-        public override IContext Context { get; }
+        public override IImporterContext Context { get; }
 
-        public ImageImporter(IContext context)
+        public ImageImporter(IImporterContext context)
         {
             Context = context;
         }

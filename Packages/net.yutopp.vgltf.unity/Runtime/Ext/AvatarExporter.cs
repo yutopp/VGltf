@@ -7,11 +7,10 @@
 
 using System.Linq;
 using UnityEngine;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity.Ext
 {
-    using GE = VGltf.Types.GltfExtensions;
-
     public class AvatarExporter : NodeExporterHook
     {
         public override void PostHook(NodeExporter exporter, Transform trans, VGltf.Types.Node gltfNode)
@@ -82,7 +81,7 @@ namespace VGltf.Unity.Ext
             //
             gltfNode.AddExtension(AvatarType.ExtensionName, extAvatar);
 
-            GE.AddExtensionUsed(exporter.Gltf, AvatarType.ExtensionName);
+            exporter.Gltf.AddExtensionUsed(AvatarType.ExtensionName);
         }
     }
 }

@@ -9,10 +9,10 @@ using System.Collections.Generic;
 
 namespace VGltf.Unity
 {
-    public interface IContext
+    public interface IImporterContext
     {
         GltfContainer Container { get; }
-        ResourcesCache<int> Cache { get; }
+        ImporterRuntimeResources RuntimeResources { get; }
         ResourcesStore BufferView { get; }
 
         NodeImporter Nodes { get; }

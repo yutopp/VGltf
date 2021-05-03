@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
@@ -64,7 +65,7 @@ namespace VGltf.Unity
             };
             return new IndexedResource<Material>
             {
-                Index = Types.GltfExtensions.AddMaterial(Gltf, gltfMaterial),
+                Index = Gltf.AddMaterial(gltfMaterial),
                 Value = mat,
             };
         }
