@@ -1,0 +1,23 @@
+{
+    "name": "Unity.net.yutopp.vgltf.ext.vrm0.Tests",
+    "references": [
+        "Unity.net.yutopp.vgltf",
+        "Unity.net.yutopp.vgltf.ext.vrm0",
+        "Unity.net.yutopp.vjson",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

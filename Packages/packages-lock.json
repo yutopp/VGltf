@@ -47,6 +47,18 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "net.yutopp.vgltf.ext.vrm0": {
+      "version": "file:net.yutopp.vgltf.ext.vrm0",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "net.yutopp.vgltf.ext.vrm0.unity": {
+      "version": "file:net.yutopp.vgltf.ext.vrm0.unity",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "net.yutopp.vgltf.unity": {
       "version": "file:net.yutopp.vgltf.unity",
       "depth": 0,
