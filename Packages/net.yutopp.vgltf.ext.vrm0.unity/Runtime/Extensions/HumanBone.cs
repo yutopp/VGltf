@@ -16,4 +16,17 @@ namespace VGltf.Ext.Vrm0.Unity.Extensions
             return new Vector3(v.x, v.y, v.z);
         }
     }
+
+    public static class UnityVector3Extensions
+    {
+        public static VGltf.Ext.Vrm0.Types.Vector3 ToVrm(this Vector3 v)
+        {
+            return new VGltf.Ext.Vrm0.Types.Vector3()
+            {
+                x = v.x,
+                y = v.y,
+                z = v.z
+            };
+        }
+    }
 }
