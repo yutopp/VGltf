@@ -52,7 +52,7 @@ jobs:
         include:
           - unity_version: 2019.4.22f1
             docker_container: unityci/editor:ubuntu-2019.4.22f1-base-0.11.0
-            ulf_secrets_key: UNITY_2019_4_ULF
+            ulf_secrets_key: UNITY_2019_4_22_f1_ULF
 
     runs-on: ubuntu-20.04
     container: ${{ matrix.docker_container }}
@@ -66,25 +66,6 @@ jobs:
           apt update -yy && apt install -yy --no-install-recommends make git python3 xsltproc
         env:
           DEBIAN_FRONTEND: noninteractive
-
-      - run: /usr/bin/unity-editor -quit -batchmode -createManualActivationFile || true
-        if: env.UNITY_ULF == ''
-        env:
-          UNITY_ULF: ${{ secrets[matrix.ulf_secrets_key] }}
-
-      - uses: actions/upload-artifact@v1
-        with:
-          name: Unity_v${{ matrix.unity_version }}.alf
-          path: ./Unity_v${{ matrix.unity_version }}.alf
-        if: env.UNITY_ULF == ''
-        env:
-          UNITY_ULF: ${{ secrets[matrix.ulf_secrets_key] }}
-
-      - run: echo "Secret key '$SECRETS_KEY' is empty" && exit 1
-        if: env.UNITY_ULF == ''
-        env:
-          SECRETS_KEY: ${{ matrix.ulf_secrets_key }}
-          UNITY_ULF: ${{ secrets[matrix.ulf_secrets_key] }}
 
       - name: setup unity license
         run: |
