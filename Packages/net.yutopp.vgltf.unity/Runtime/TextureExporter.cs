@@ -10,21 +10,25 @@ using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
-    public class TextureExporter : ExporterRef
+    public class TextureExporter : ExporterRefHookable<NodeExporterHook>
     {
-        public TextureExporter(Exporter parent)
-            : base(parent)
+        public override IExporterContext Context { get; }
+
+        public TextureExporter(IExporterContext context)
         {
+            Context = context;
         }
 
         public IndexedResource<Texture2D> Export(Texture2D tex)
         {
-            return Cache.CacheObjectIfNotExists(tex.name, tex, Cache.Textures, ForceExport);
+            return Context.RuntimeResources.Textures.GetOrCall(tex.name, () => {
+                return ForceExport(tex);
+            });
         }
 
         public IndexedResource<Texture2D> ForceExport(Texture2D tex)
         {
-            var imageIndex = Images.Export(tex);
+            var imageIndex = Context.Images.Export(tex);
 
             var gltfImage = new Types.Texture
             {
@@ -33,11 +37,10 @@ namespace VGltf.Unity
                 //Sampler = primitives,
                 Source = imageIndex,
             };
-            return new IndexedResource<Texture2D>
-            {
-                Index = Gltf.AddTexture(gltfImage),
-                Value = tex,
-            };
+            var texIndex = Context.Gltf.AddTexture(gltfImage);
+            var resource = Context.RuntimeResources.Textures.Add(tex.name, texIndex, tex);
+
+            return resource;
         }
     }
 }

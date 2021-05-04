@@ -81,7 +81,7 @@ namespace VGltf.Unity.Ext
             //
             gltfNode.AddExtension(AvatarType.ExtensionName, extAvatar);
 
-            exporter.Gltf.AddExtensionUsed(AvatarType.ExtensionName);
+            exporter.Context.Gltf.AddExtensionUsed(AvatarType.ExtensionName);
         }
     }
 }

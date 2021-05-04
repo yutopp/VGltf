@@ -13,13 +13,8 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class PrimitiveExporter : ExporterRef
+    public class PrimitiveExporter
     {
-        public PrimitiveExporter(ExporterRef parent)
-            : base(parent)
-        {
-        }
-
         public static float[] AsArray(Vector3 v)
         {
             return new float[] { v.x, v.y, v.z };

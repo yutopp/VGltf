@@ -11,11 +11,13 @@ using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
-    public class ImageExporter : ExporterRef
+    public class ImageExporter : ExporterRefHookable<uint>
     {
-        public ImageExporter(Exporter parent)
-            : base(parent)
+        public override IExporterContext Context { get; }
+
+        public ImageExporter(IExporterContext context)
         {
+            Context = context;
         }
 
         public int Export(Texture2D tex)
@@ -34,12 +36,12 @@ namespace VGltf.Unity
             readableText.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
             readableText.Apply();
             RenderTexture.active = previous;
-            RenderTexture.ReleaseTemporary(renderTex);
+            RenderTexture.ReleaseTemporary(renderTex); // TODO: fix resource leak when exceptions raised
 
             var pngBytes = readableText.EncodeToPNG();
-            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(pngBytes));
+            var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(pngBytes));
 
-            return Gltf.AddImage(new Types.Image
+            return Context.Gltf.AddImage(new Types.Image
             {
                 Name = tex.name,
 

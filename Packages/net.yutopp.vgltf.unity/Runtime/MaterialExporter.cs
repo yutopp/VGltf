@@ -18,14 +18,19 @@ namespace VGltf.Unity
 
     public class MaterialExporter : ExporterRefHookable<MaterialExporterHook>
     {
-        public MaterialExporter(Exporter parent)
-            : base(parent)
+        public override IExporterContext Context { get; }
+
+        public MaterialExporter(IExporterContext context)
         {
+            Context = context;
         }
 
         public IndexedResource<Material> Export(Material m)
         {
-            return Cache.CacheObjectIfNotExists(m.name, m, Cache.Materials, ForceExport);
+            return Context.RuntimeResources.Materials.GetOrCall(m.name, () =>
+            {
+                return ForceExport(m);
+            });
         }
 
         public IndexedResource<Material> ForceExport(Material mat)
@@ -45,7 +50,7 @@ namespace VGltf.Unity
             IndexedResource<Texture2D> textureResource = null;
             if (tex != null)
             {
-                textureResource = Textures.Export(tex);
+                textureResource = Context.Textures.Export(tex);
             }
 
             var gltfMaterial = new Types.Material
@@ -63,11 +68,10 @@ namespace VGltf.Unity
                     RoughnessFactor = 1.0f, // TODO: fix
                 },
             };
-            return new IndexedResource<Material>
-            {
-                Index = Gltf.AddMaterial(gltfMaterial),
-                Value = mat,
-            };
+            var matIndex = Context.Gltf.AddMaterial(gltfMaterial);
+            var resource = Context.RuntimeResources.Materials.Add(mat.name, matIndex, mat);
+
+            return resource;
         }
     }
 }

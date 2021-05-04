@@ -22,9 +22,11 @@ namespace VGltf.Unity
 
     public class NodeExporter : ExporterRefHookable<NodeExporterHook>
     {
-        public NodeExporter(Exporter parent)
-            : base(parent)
+        public override IExporterContext Context { get; }
+
+        public NodeExporter(IExporterContext context)
         {
+            Context = context;
         }
 
         public IndexedResource<Transform> Export(GameObject go)
@@ -32,9 +34,12 @@ namespace VGltf.Unity
             return Export(go.transform);
         }
 
-        public IndexedResource<Transform> Export(Transform go)
+        public IndexedResource<Transform> Export(Transform trans)
         {
-            return Cache.CacheObjectIfNotExists(go, Cache.Nodes, ForceExport);
+            return Context.RuntimeResources.Nodes.GetOrCall(trans, () =>
+            {
+                return ForceExport(trans);
+            });
         }
 
         public IndexedResource<Transform> ForceExport(Transform trans)
@@ -50,12 +55,12 @@ namespace VGltf.Unity
                 var meshFilter = mr.gameObject.GetComponent<MeshFilter>();
                 var sharedMesh = meshFilter.sharedMesh;
 
-                meshResource = Meshes.Export(mr, sharedMesh);
+                meshResource = Context.Meshes.Export(mr, sharedMesh);
             }
             else if (smr != null)
             {
                 var sharedMesh = smr.sharedMesh;
-                meshResource = Meshes.Export(smr, sharedMesh);
+                meshResource = Context.Meshes.Export(smr, sharedMesh);
 
                 if (smr.bones.Length > 0)
                 {
@@ -66,6 +71,7 @@ namespace VGltf.Unity
             var t = CoordUtils.ConvertSpace(go.transform.localPosition);
             var r = CoordUtils.ConvertSpace(go.transform.localRotation);
             var s = go.transform.localScale;
+
             var gltfNode = new Types.Node
             {
                 Name = go.name,
@@ -78,6 +84,9 @@ namespace VGltf.Unity
                 Rotation = new float[] { r.x, r.y, r.z, r.w },
                 Scale = new float[] { s.x, s.y, s.z },
             };
+
+            var nodeIndex = Context.Gltf.AddNode(gltfNode);
+            var resource = Context.RuntimeResources.Nodes.Add(trans, nodeIndex, trans);
 
             var nodesIndices = new List<int>();
             for (int i = 0; i < go.transform.childCount; ++i)
@@ -96,24 +105,21 @@ namespace VGltf.Unity
                 h.PostHook(this, trans, gltfNode);
             }
 
-            return new IndexedResource<Transform>
-            {
-                Index = Gltf.AddNode(gltfNode),
-                Value = trans,
-            };
+            return resource;
         }
 
         public IndexedResource<Skin> ExportSkin(SkinnedMeshRenderer r, Mesh mesh)
         {
-            return Cache.CacheObjectIfNotExists(mesh.name, mesh, Cache.Skins, (m) => ForceExportSkin(r, m));
+            return Context.RuntimeResources.Skins.GetOrCall(mesh.name, () =>
+            {
+                return ForceExportSkin(r, mesh);
+            });
         }
 
         IndexedResource<Skin> ForceExportSkin(SkinnedMeshRenderer smr, Mesh mesh)
         {
             var rootBone = smr.rootBone != null ? (int?)Export(smr.rootBone).Index : null;
             var boneIndices = smr.bones.Select(bt => Export(bt).Index).ToArray();
-
-            var primitiveExporter = new PrimitiveExporter(this);
 
             int? matricesAccIndex = null;
             if (mesh.bindposes.Length > 0)
@@ -127,10 +133,10 @@ namespace VGltf.Unity
                 Skeleton = rootBone,
                 Joints = boneIndices,
             };
-            return new IndexedResource<Skin>{
-                Index = Gltf.AddSkin(gltfSkin),
-                Value = new Skin(),
-            };
+            var skinIndex = Context.Gltf.AddSkin(gltfSkin);
+            var resource = Context.RuntimeResources.Skins.Add(mesh.name, skinIndex, new Skin());
+
+            return resource;
         }
 
         // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#skin
@@ -141,7 +147,7 @@ namespace VGltf.Unity
 
             // MAT4! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(matrices);
-            var viewIndex = BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+            var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
 
             var accessor = new Types.Accessor
             {
@@ -151,7 +157,7 @@ namespace VGltf.Unity
                 Count = matrices.Length,
                 Type = Types.Accessor.TypeEnum.Mat4,
             };
-            return Gltf.AddAccessor(accessor);
+            return Context.Gltf.AddAccessor(accessor);
         }
     }
 }

@@ -10,54 +10,9 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class IndexedResource<T>
-    {
-        public int Index;
-        public T Value;
-    }
-
-    public class Skin
-    {
-    }
-
-    public class IndexedResourceDict<K, V>
-    {
-        public delegate IndexedResource<V> Gerenator();
-
-        Dictionary<K, IndexedResource<V>> _dict = new Dictionary<K, IndexedResource<V>>();
-
-        public IndexedResource<V> Add(K k, int index, V v)
-        {
-            var resource = new IndexedResource<V>
-            {
-                Index = index,
-                Value = v,
-            };
-            _dict.Add(k, resource);
-
-            return resource;
-        }
-
-        public IndexedResource<V> this[K k]
-        {
-            get => _dict[k];
-        }
-
-        public IndexedResource<V> GetOrCall(K k, Gerenator generator)
-        {
-            // Cached by reference
-            if (_dict.TryGetValue(k, out var res))
-            {
-                return res;
-            }
-
-            return generator();
-        }
-    }
-
     public class ImporterRuntimeResources
     {
-        public IndexedResourceDict<object, Transform> Nodes = new IndexedResourceDict<object, Transform>();
+        public IndexedResourceDict<int, Transform> Nodes = new IndexedResourceDict<int, Transform>();
         public IndexedResourceDict<int, Texture2D> Textures = new IndexedResourceDict<int, Texture2D>();
         public IndexedResourceDict<int, Material> Materials = new IndexedResourceDict<int, Material>();
         public IndexedResourceDict<int, Mesh> Meshes = new IndexedResourceDict<int, Mesh>();
@@ -65,58 +20,13 @@ namespace VGltf.Unity
         public IndexedResourceDict<int, Avatar> Avatars = new IndexedResourceDict<int, Avatar>();
     }
 
-    public class ResourcesCache<Key>
+    public class ExporterRuntimeResources
     {
-        public Dictionary<object, IndexedResource<Transform>> Nodes = new Dictionary<object, IndexedResource<Transform>>();
-        public Dictionary<Key, IndexedResource<Texture2D>> Textures = new Dictionary<Key, IndexedResource<Texture2D>>();
-        public Dictionary<Key, IndexedResource<Material>> Materials = new Dictionary<Key, IndexedResource<Material>>();
-        public Dictionary<Key, IndexedResource<Mesh>> Meshes = new Dictionary<Key, IndexedResource<Mesh>>();
-        public Dictionary<Key, IndexedResource<Skin>> Skins = new Dictionary<Key, IndexedResource<Skin>>();
-        public Dictionary<Key, IndexedResource<Avatar>> Avatars = new Dictionary<Key, IndexedResource<Avatar>>();
-
-        public delegate IndexedResource<T> Gerenator<T, U>(U obj);
-
-        public IndexedResource<Transform> CacheObjectIfNotExists(Transform obj, Dictionary<object, IndexedResource<Transform>> dic, Gerenator<Transform, Transform> generator)
-        {
-            IndexedResource<Transform> res;
-            // Cached by reference
-            if (dic.TryGetValue(obj, out res))
-            {
-                return res;
-            }
-
-            res = generator(obj);
-            dic.Add(obj, res);
-
-            return res;
-        }
-
-        public IndexedResource<T> CacheObjectIfNotExists<T, U>(Key key, U obj, Dictionary<Key, IndexedResource<T>> dic, Gerenator<T, U> generator)
-        {
-            IndexedResource<T> res;
-
-            var preCond = true;
-            if (key is string)
-            {
-                preCond = !string.IsNullOrEmpty(key as string);
-            }
-            else
-            {
-                preCond = key != null;
-            }
-
-            if (preCond && dic.TryGetValue(key, out res))
-            {
-                return res;
-            }
-
-            res = generator(obj);
-            if (preCond)
-            {
-                dic.Add(key, res);
-            }
-
-            return res;
-        }
+        public IndexedResourceDict<object, Transform> Nodes = new IndexedResourceDict<object, Transform>();
+        public IndexedResourceDict<string, Texture2D> Textures = new IndexedResourceDict<string, Texture2D>();
+        public IndexedResourceDict<string, Material> Materials = new IndexedResourceDict<string, Material>();
+        public IndexedResourceDict<string, Mesh> Meshes = new IndexedResourceDict<string, Mesh>();
+        public IndexedResourceDict<string, Skin> Skins = new IndexedResourceDict<string, Skin> ();
+        public IndexedResourceDict<string, Avatar> Avatars = new IndexedResourceDict<string, Avatar>();
     }
 }
