@@ -119,7 +119,9 @@ namespace VGltf.Unity
         IndexedResource<Skin> ForceExportSkin(SkinnedMeshRenderer smr, Mesh mesh)
         {
             var rootBone = smr.rootBone != null ? (int?)Export(smr.rootBone).Index : null;
-            var boneIndices = smr.bones.Select(bt => Export(bt).Index).ToArray();
+
+            var boneTransValues = smr.bones.Select(bt => Export(bt)).ToArray();
+            var boneIndices = boneTransValues.Select(t => t.Index).ToArray();
 
             int? matricesAccIndex = null;
             if (mesh.bindposes.Length > 0)

@@ -23,6 +23,12 @@ namespace VGltf.Unity
 
     public class Exporter : ExporterRefHookable<ExporterHookBase>, IDisposable
     {
+        public class Config
+        {
+            public bool UseChildren = true;
+            public bool UseNormalizedTransforms = true;
+        }
+
         class InnerContext : IExporterContext, IDisposable
         {
             public Types.Gltf Gltf { get; }
@@ -68,14 +74,52 @@ namespace VGltf.Unity
             };
         }
 
-        public void ExportGameObjectAsScene(GameObject go)
+        public void ExportGameObjectAsScene(GameObject go, Config config = null)
         {
-            var rootNodeResource = Context.Nodes.Export(go);
+            if (config == null)
+            {
+                config = new Config();
+            }
+
+            if (config.UseNormalizedTransforms)
+            {
+                using (var normalizer = new VGltf.Unity.Ext.TransformNormalizer())
+                {
+                    normalizer.Normalize(go);
+                    ExportGameObjectAsSceneWithoutNormalize(normalizer.Go, config);
+                }
+
+            }
+            else
+            {
+                ExportGameObjectAsSceneWithoutNormalize(go, config);
+            }
+        }
+
+        void ExportGameObjectAsSceneWithoutNormalize(GameObject go, Config config)
+        {
+            Func<IndexedResource<Transform>[]> generator = () =>
+            {
+                if (config.UseChildren)
+                {
+                    return Enumerable.Range(0, go.transform.childCount).Select(i =>
+                    {
+                        var childGo = go.transform.GetChild(i);
+                        return Context.Nodes.Export(childGo);
+                    }).ToArray();
+                }
+                else
+                {
+                    var node = Context.Nodes.Export(go);
+                    return new IndexedResource<Transform>[] { node };
+                }
+            };
+            var nodes = generator();
 
             // Scene
             var rootSceneIndex = Context.Gltf.AddScene(new Types.Scene
             {
-                Nodes = new int[] { rootNodeResource.Index },
+                Nodes = nodes.Select(n => n.Index).ToArray(),
             });
             Context.Gltf.Scene = rootSceneIndex;
 
