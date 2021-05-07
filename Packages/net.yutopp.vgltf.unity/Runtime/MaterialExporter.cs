@@ -44,6 +44,55 @@ namespace VGltf.Unity
                 }
             }
 
+            // TODO: Support various shaders
+            switch (mat.shader.name)
+            {
+                case "Unlit/Texture":
+                    return ForceExportUnlit(mat);
+                default:
+                    return ForceExportStandard(mat);
+            }
+        }
+
+        public IndexedResource<Material> ForceExportUnlit(Material mat)
+        {
+            var tex = mat.GetTexture("_MainTex") as Texture2D;
+            IndexedResource<Texture2D> textureResource = null;
+            if (tex != null)
+            {
+                textureResource = Context.Textures.Export(tex);
+            }
+
+            var gltfMaterial = new Types.Material
+            {
+                Name = mat.name,
+
+                PbrMetallicRoughness = new Types.Material.PbrMetallicRoughnessType
+                {
+                    BaseColorTexture = textureResource != null ? new Types.Material.BaseColorTextureInfoType
+                    {
+                        Index = textureResource.Index,
+                        TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
+                    } : null, // TODO: fix
+                    BaseColorFactor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f }, // while defaultly
+                },
+            };
+            gltfMaterial.AddExtension(
+                VGltf.Ext.KhrMaterialsUnlit.Types.KhrMaterialsUnlit.ExtensionName,
+                new VGltf.Ext.KhrMaterialsUnlit.Types.KhrMaterialsUnlit { }
+                );
+
+            var matIndex = Context.Gltf.AddMaterial(gltfMaterial);
+            var resource = Context.RuntimeResources.Materials.Add(mat.name, matIndex, mat);
+
+            // Mark an extension as used
+            Context.Gltf.AddExtensionUsed(VGltf.Ext.KhrMaterialsUnlit.Types.KhrMaterialsUnlit.ExtensionName);
+
+            return resource;
+        }
+
+        public IndexedResource<Material> ForceExportStandard(Material mat)
+        {
             // Maybe, Standard shader...
             // TODO: Support various shaders
             var tex = mat.GetTexture("_MainTex") as Texture2D;
@@ -68,6 +117,7 @@ namespace VGltf.Unity
                     RoughnessFactor = 1.0f, // TODO: fix
                 },
             };
+
             var matIndex = Context.Gltf.AddMaterial(gltfMaterial);
             var resource = Context.RuntimeResources.Materials.Add(mat.name, matIndex, mat);
 
