@@ -24,6 +24,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 
             ExportMeta(exporter, extVrm, trans);
             ExportHumanoid(exporter, extVrm, trans);
+            ExportMaterial(exporter, extVrm);
 
             //
             gltf.AddExtension(Types.Vrm.ExtensionName, extVrm);
@@ -120,6 +121,23 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             }).ToList();
 
             extVrm.Humanoid = vrmHum;
+        }
+
+        void ExportMaterial(Exporter exporter, Types.Vrm extVrm)
+        {
+            var vrmMats = exporter.Context.RuntimeResources.Materials.Map(mat =>
+            {
+                var vrmMat = new Types.Material();
+
+                // TODO: if mat.shader is MToon, support that
+
+                vrmMat.Name = mat.Value.name;
+                vrmMat.Shader = Types.Material.VRM_USE_GLTFSHADER;
+
+                return (mat.Index, vrmMat);
+            }).OrderBy(tup => tup.Index).Select(tup => tup.vrmMat).ToList();
+
+            extVrm.MaterialProperties = vrmMats;
         }
     }
 }

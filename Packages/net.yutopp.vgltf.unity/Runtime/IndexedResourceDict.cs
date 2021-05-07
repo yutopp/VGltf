@@ -5,7 +5,9 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VGltf.Unity
 {
@@ -41,6 +43,11 @@ namespace VGltf.Unity
             }
 
             return generator();
+        }
+
+        public IEnumerable<T> Map<T>(Func<IndexedResource<V>, T> f)
+        {
+            return _dict.Select(kv => f(kv.Value));
         }
     }
 }
