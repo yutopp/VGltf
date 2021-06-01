@@ -21,6 +21,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             var gltf = exporter.Context.Gltf;
 
             var extVrm = new Types.Vrm();
+            extVrm.ExporterVersion = "VGltf.Ext.Vrm0";
 
             ExportMeta(exporter, extVrm, trans);
             ExportHumanoid(exporter, extVrm, trans);
