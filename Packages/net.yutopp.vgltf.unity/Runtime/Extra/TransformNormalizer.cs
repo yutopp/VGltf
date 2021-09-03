@@ -12,19 +12,45 @@ using UnityEngine;
 
 namespace VGltf.Unity.Ext
 {
-    public class TransformNormalizer : IDisposable
+    public sealed class TransformNormalizer : IDisposable
     {
         public GameObject Go;
         private Dictionary<Mesh, Mesh> bakedMeshes = new Dictionary<Mesh, Mesh>();
 
-        public void Normalize(GameObject go)
+        void IDisposable.Dispose()
         {
-            Go = Normalized(go);
+            if (Go != null)
+            {
+                Utils.Destroy(Go);
+                Go = null;
+            }
+
+            // Destroy baked meshes
+            foreach (var kv in bakedMeshes)
+            {
+                Utils.Destroy(kv.Value);
+            }
+            bakedMeshes.Clear();
         }
 
-        public GameObject Normalized(GameObject go)
+        public void Normalize(GameObject go)
         {
             var nGo = UnityEngine.Object.Instantiate(go) as GameObject;
+            try
+            {
+                Normalized(go, nGo);
+            }
+            catch (Exception)
+            {
+                Utils.Destroy(nGo);
+                throw;
+            }
+
+            Go = nGo;
+        }
+
+        void Normalized(GameObject go, GameObject nGo)
+        {
             nGo.name = string.Format("{0}(VGltf.Normalized)", go.name);
 
             nGo.transform.localPosition = Vector3.zero;
@@ -34,8 +60,6 @@ namespace VGltf.Unity.Ext
             BakeMeshes(nGo);
             NormalizeTransforms(nGo.transform, Matrix4x4.identity);
             UpdateBonePoses(nGo);
-
-            return nGo;
         }
 
         public void BakeMeshes(GameObject go)
@@ -77,6 +101,8 @@ namespace VGltf.Unity.Ext
 
                 // Bake
                 var mesh = new Mesh();
+                bakedMeshes.Add(sharedMesh, mesh);
+
                 smr.BakeMesh(mesh);
 
                 mesh.name = string.Format("{0}(VGltf.Baked)", sharedMesh.name);
@@ -126,9 +152,6 @@ namespace VGltf.Unity.Ext
                         smr.SetBlendShapeWeight(i, 0.0f);
                     }
                 }
-
-                // Save
-                bakedMeshes.Add(sharedMesh, mesh);
             }
 
             for (var i = 0; i < go.transform.childCount; ++i)
@@ -181,36 +204,5 @@ namespace VGltf.Unity.Ext
                 UpdateBonePoses(ct.gameObject);
             }
         }
-
-        #region IDisposable Support
-        private bool disposedValue = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    if (Go != null)
-                    {
-                        GameObject.DestroyImmediate(Go);
-                    }
-
-                    // Destroy baked meshes
-                    foreach(var kv in bakedMeshes)
-                    {
-                        GameObject.DestroyImmediate(kv.Value);
-                    }
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        void IDisposable.Dispose()
-        {
-            Dispose(true);
-        }
-        #endregion
     }
 }

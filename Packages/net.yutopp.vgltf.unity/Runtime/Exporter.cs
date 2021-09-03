@@ -88,7 +88,6 @@ namespace VGltf.Unity
                     normalizer.Normalize(go);
                     ExportGameObjectAsSceneWithoutNormalize(normalizer.Go, config);
                 }
-
             }
             else
             {
