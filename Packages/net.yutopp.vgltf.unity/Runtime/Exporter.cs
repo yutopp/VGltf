@@ -21,7 +21,7 @@ namespace VGltf.Unity
         }
     }
 
-    public class Exporter : ExporterRefHookable<ExporterHookBase>, IDisposable
+    public sealed class Exporter : ExporterRefHookable<ExporterHookBase>, IDisposable
     {
         public class Config
         {
@@ -29,7 +29,7 @@ namespace VGltf.Unity
             public bool UseNormalizedTransforms = true;
         }
 
-        class InnerContext : IExporterContext, IDisposable
+        sealed class InnerContext : IExporterContext
         {
             public Types.Gltf Gltf { get; }
             public ExporterRuntimeResources RuntimeResources { get; }
@@ -54,13 +54,13 @@ namespace VGltf.Unity
                 Images = new ImageExporter(this);
             }
 
-            public void Dispose()
+            void IDisposable.Dispose()
             {
                 // TODO: Remove resources
             }
         }
 
-        public override IExporterContext Context { get; }
+        public override IExporterContext Context { get; protected set; }
 
         public Exporter()
         {
@@ -152,9 +152,17 @@ namespace VGltf.Unity
             return container;
         }
 
-        public void Dispose()
+        // Take ownership of Context from exporter.
+        public IExporterContext TakeContext()
         {
-            // Context.Dispose();
+            var ctx = Context;
+            Context = null;
+            return ctx;
+        }
+
+        void IDisposable.Dispose()
+        {
+            Context?.Dispose();
         }
     }
 }

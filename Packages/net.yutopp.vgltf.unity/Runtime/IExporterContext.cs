@@ -5,9 +5,11 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System;
+
 namespace VGltf.Unity
 {
-    public interface IExporterContext
+    public interface IExporterContext : IDisposable
     {
         Types.Gltf Gltf { get; }
         ExporterRuntimeResources RuntimeResources { get; }

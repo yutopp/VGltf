@@ -23,6 +23,7 @@ namespace VGltf.Unity.UnitTests
             using (var exporter = new Exporter())
             {
                 exporter.ExportGameObjectAsScene(go);
+                
                 var gltfContainer = exporter.IntoGlbContainer();
                 var gltf = gltfContainer.Gltf;
                 var store = new ResourcesStore(gltf, gltfContainer.Buffer, new ResourceLoaderFromEmbedOnly());

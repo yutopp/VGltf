@@ -12,7 +12,7 @@ namespace VGltf.Unity
     public abstract class ExporterRefHookable<T>
     {
         protected List<T> Hooks = new List<T>();
-        public abstract IExporterContext Context { get; }
+        public abstract IExporterContext Context { get; protected set; }
 
         public void AddHook(T hook)
         {
