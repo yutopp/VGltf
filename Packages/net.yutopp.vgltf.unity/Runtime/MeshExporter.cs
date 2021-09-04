@@ -59,7 +59,7 @@ namespace VGltf.Unity
             int? normalAccIndex = null;
             if (mesh.normals.Length > 0)
             {
-                normalAccIndex = ExportNormals(mesh.normals);
+                normalAccIndex = ExportNormals(Normalize(mesh.normals));
             }
 
             int? tangentAccIndex = null;
@@ -476,6 +476,11 @@ namespace VGltf.Unity
                 Type = Types.Accessor.TypeEnum.Vec4,
             };
             return Context.Gltf.AddAccessor(accessor);
+        }
+
+        static Vector3[] Normalize(Vector3[] vec3)
+        {
+            return vec3.Select(v => v.normalized).ToArray();
         }
     }
 }
