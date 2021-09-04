@@ -25,7 +25,7 @@ namespace VGltf.Unity
     {
         public class Config
         {
-            public bool UseChildren = true;
+            public bool IncludeRootObject = true;
             public bool UseNormalizedTransforms = true;
         }
 
@@ -60,14 +60,15 @@ namespace VGltf.Unity
             }
         }
 
-        public override IExporterContext Context { get; protected set; }
+        IExporterContext context_;
+        public override IExporterContext Context { get => context_; }
 
         public Exporter()
         {
-            Context = new InnerContext();
+            context_ = new InnerContext();
 
             // Asset
-            Context.Gltf.Asset = new Types.Asset
+            context_.Gltf.Asset = new Types.Asset
             {
                 Version = "2.0", // glTF 2.0
                 Generator = "VGltf"
@@ -99,18 +100,18 @@ namespace VGltf.Unity
         {
             Func<IndexedResource<Transform>[]> generator = () =>
             {
-                if (config.UseChildren)
+                if (config.IncludeRootObject)
+                {
+                    var node = Context.Nodes.Export(go);
+                    return new IndexedResource<Transform>[] { node };
+                }
+                else
                 {
                     return Enumerable.Range(0, go.transform.childCount).Select(i =>
                     {
                         var childGo = go.transform.GetChild(i);
                         return Context.Nodes.Export(childGo);
                     }).ToArray();
-                }
-                else
-                {
-                    var node = Context.Nodes.Export(go);
-                    return new IndexedResource<Transform>[] { node };
                 }
             };
             var nodes = generator();
@@ -155,8 +156,9 @@ namespace VGltf.Unity
         // Take ownership of Context from exporter.
         public IExporterContext TakeContext()
         {
-            var ctx = Context;
-            Context = null;
+            var ctx = context_;
+            context_ = null;
+
             return ctx;
         }
 
