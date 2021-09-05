@@ -49,5 +49,9 @@ namespace VGltf.Unity
         {
             return _dict.Select(kv => f(kv.Value));
         }
+
+        public bool Contains(K k) {
+            return _dict.ContainsKey(k);
+        }
     }
 }

@@ -28,15 +28,15 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public void ImportGameObjects(int nodeIndex, NodesCache gameObjects, GameObject parentGo = null)
+        public void ImportGameObjects(int nodeIndex, GameObject parentGo = null)
         {
             Context.Resources.Nodes.GetOrCall(nodeIndex, () =>
             {
-                return ForceImportGameObjects(nodeIndex, gameObjects, parentGo);
+                return ForceImportGameObjects(nodeIndex, parentGo);
             });
         }
 
-        public IndexedResource<Transform> ForceImportGameObjects(int nodeIndex, NodesCache gameObjects, GameObject parentGo)
+        public IndexedResource<Transform> ForceImportGameObjects(int nodeIndex, GameObject parentGo)
         {
             var gltf = Context.Container.Gltf;
             var gltfNode = gltf.Nodes[nodeIndex];
@@ -67,28 +67,27 @@ namespace VGltf.Unity
                 go.transform.localScale = s;
             }
 
-            gameObjects.Add(nodeIndex, go);
-
             if (gltfNode.Children != null)
             {
                 foreach (var childIndex in gltfNode.Children)
                 {
-                    if (gameObjects.Contains(childIndex))
+                    if (Context.Resources.Nodes.Contains(childIndex))
                     {
                         throw new NotImplementedException("Node duplication"); // TODO:
                     }
-                    ImportGameObjects(childIndex, gameObjects, go);
+                    ImportGameObjects(childIndex, go);
                 }
             }
 
             return resource;
         }
 
-        public void ImportMeshesAndSkins(int nodeIndex, NodesCache gameObjects)
+        public void ImportMeshesAndSkins(int nodeIndex)
         {
             var gltf = Context.Container.Gltf;
             var gltfNode = gltf.Nodes[nodeIndex];
-            var go = gameObjects.Get(nodeIndex);
+
+            var go = Context.Resources.Nodes[nodeIndex].Value.gameObject;
 
             if (gltfNode.Mesh != null)
             {
@@ -96,7 +95,7 @@ namespace VGltf.Unity
 
                 if (gltfNode.Skin != null)
                 {
-                    ImportSkin(gltfNode.Skin.Value, gameObjects, go);
+                    ImportSkin(gltfNode.Skin.Value, go);
                 }
             }
 
@@ -104,7 +103,7 @@ namespace VGltf.Unity
             {
                 foreach (var childIndex in gltfNode.Children)
                 {
-                    ImportMeshesAndSkins(childIndex, gameObjects);
+                    ImportMeshesAndSkins(childIndex);
                 }
             }
 
@@ -115,7 +114,7 @@ namespace VGltf.Unity
             }
         }
 
-        void ImportSkin(int skinIndex, NodesCache gameObjects, GameObject go)
+        void ImportSkin(int skinIndex, GameObject go)
         {
             var gltf = Context.Container.Gltf;
             var gltfSkin = gltf.Skins[skinIndex];
@@ -141,26 +140,6 @@ namespace VGltf.Unity
                 var mesh = smr.sharedMesh;
                 mesh.bindposes = matrices;
             }
-        }
-    }
-
-    public class NodesCache
-    {
-        readonly Dictionary<int, GameObject> _objects = new Dictionary<int, GameObject>();
-
-        public void Add(int nodeIndex, GameObject go)
-        {
-            _objects.Add(nodeIndex, go);
-        }
-
-        public bool Contains(int nodeIndex)
-        {
-            return _objects.ContainsKey(nodeIndex);
-        }
-
-        public GameObject Get(int nodeIndex)
-        {
-            return _objects[nodeIndex];
         }
     }
 }

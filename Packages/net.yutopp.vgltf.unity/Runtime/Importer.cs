@@ -79,14 +79,13 @@ namespace VGltf.Unity
             var gltf = Context.Container.Gltf;
             var gltfScene = VGltf.Types.Extensions.GltfExtensions.GetSceneObject(gltf);
 
-            var nodesCache = new NodesCache();
             foreach (var nodeIndex in gltfScene.Nodes)
             {
-                Context.Importers.Nodes.ImportGameObjects(nodeIndex, nodesCache);
+                Context.Importers.Nodes.ImportGameObjects(nodeIndex);
             }
             foreach (var nodeIndex in gltfScene.Nodes)
             {
-                Context.Importers.Nodes.ImportMeshesAndSkins(nodeIndex, nodesCache);
+                Context.Importers.Nodes.ImportMeshesAndSkins(nodeIndex);
             }
 
             foreach (var hook in Hooks)
