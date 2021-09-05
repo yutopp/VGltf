@@ -31,12 +31,6 @@ namespace VGltf.Unity
 
             public ResourceImporters Importers { get; }
 
-            public NodeImporter Nodes { get; }
-            public MeshImporter Meshes { get; }
-            public MaterialImporter Materials { get; }
-            public TextureImporter Textures { get; }
-            public ImageImporter Images { get; }
-
             public InnerContext(GltfContainer container, IResourceLoader loader)
             {
                 Container = container;
