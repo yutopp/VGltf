@@ -12,11 +12,21 @@ using UnityEngine;
 namespace VGltf.Unity
 {
     /// <summary>
-    /// Convert coordinates. +Z -> -Z (and vice versa)
+    /// Convert coordinates.
+    ///   Unity : Left hand  / +Y up / +Z front
+    ///   glTF  : Right hand / +Y up / +Z front
+    /// Conversion
+    ///   Axis       : +X <-> -X
+    ///   Indices    : Flip order
+    ///   Rotation   : Flip sign
+    ///   UV         : U’=U, V’=1-V
+    ///   Handedness : Flip sign
     /// </summary>
-    public class CoordUtils
+    public sealed class CoordUtils
     {
-        public static IEnumerable<int> FlipIndices(int[] xs)
+        readonly Vector3 CoordinateSpaceAxisFlip = new Vector3(-1, 1, 1); // +X -> -X
+
+        public IEnumerable<int> FlipIndices(int[] xs)
         {
             if (xs.Length % 3 != 0)
             {
@@ -33,34 +43,30 @@ namespace VGltf.Unity
             }
         }
 
-        public static Vector2 ConvertUV(Vector2 v)
+        public Vector2 ConvertUV(Vector2 v)
         {
             // From : (u, v)
             // To   : (u, 1 - v)
             return new Vector2(v.x, 1 - v.y);
         }
 
-        public static Vector3 ConvertSpace(Vector3 v)
+        public Vector3 ConvertSpace(Vector3 v)
         {
-            // From : (x, y, z)
-            // To   : (x, y, -z)
-            return new Vector3(v.x, v.y, -v.z);
+            return new Vector3(v.x * CoordinateSpaceAxisFlip.x, v.y * CoordinateSpaceAxisFlip.y, v.z * CoordinateSpaceAxisFlip.z);
         }
 
-        public static Vector4 ConvertSpace(Vector4 v)
+        public Vector4 ConvertSpace(Vector4 v)
         {
-            // ???
-            // TODO: fix
-            return new Vector4(-v.x, v.y, v.z, -v.w);
+            return new Vector4(v.x * CoordinateSpaceAxisFlip.x, v.y * CoordinateSpaceAxisFlip.y, v.z * CoordinateSpaceAxisFlip.z, v.w * -1);
         }
 
-        public static Quaternion ConvertSpace(Quaternion q)
+        public Quaternion ConvertSpace(Quaternion q)
         {
             // https://stackoverflow.com/questions/41816497/right-hand-camera-to-left-hand-opencv-to-unity
-            return new Quaternion(-q.x, -q.y, q.z, q.w);
+            return new Quaternion(q.x * -CoordinateSpaceAxisFlip.x, q.y * -CoordinateSpaceAxisFlip.y, q.z * -CoordinateSpaceAxisFlip.z, q.w * -(-1));
         }
 
-        public static Matrix4x4 ConvertSpace(Matrix4x4 m)
+        public Matrix4x4 ConvertSpace(Matrix4x4 m)
         {
             //
             // NOTE: Calcurated matrix will be BROKEN, when scale or rotation is NOT uniformed.

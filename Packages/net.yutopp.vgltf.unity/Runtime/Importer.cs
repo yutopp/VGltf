@@ -44,10 +44,11 @@ namespace VGltf.Unity
 
                 Resources = new ImporterRuntimeResources();
 
+                var coordUtils = new CoordUtils();
                 Importers = new ResourceImporters
                 {
-                    Nodes = new NodeImporter(this),
-                    Meshes = new MeshImporter(this),
+                    Nodes = new NodeImporter(this, coordUtils),
+                    Meshes = new MeshImporter(this, coordUtils),
                     Materials = new MaterialImporter(this),
                     Textures = new TextureImporter(this),
                     Images = new ImageImporter(this),

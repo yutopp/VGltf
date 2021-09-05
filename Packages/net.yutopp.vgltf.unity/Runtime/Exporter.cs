@@ -46,8 +46,9 @@ namespace VGltf.Unity
                 RuntimeResources = new ExporterRuntimeResources();
                 BufferBuilder = new BufferBuilder();
 
-                Nodes = new NodeExporter(this);
-                Meshes = new MeshExporter(this);
+                var coordUtils = new CoordUtils();
+                Nodes = new NodeExporter(this, coordUtils);
+                Meshes = new MeshExporter(this, coordUtils);
                 Materials = new MaterialExporter(this);
                 Textures = new TextureExporter(this);
                 Images = new ImageExporter(this);

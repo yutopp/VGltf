@@ -19,33 +19,39 @@ namespace VGltf.Unity.UnitTests
         [Test]
         public void UVTest()
         {
+            var coordUtils = new CoordUtils();
+
             var srcUV = new Vector2(0.2f, 0.8f);
-            var conv = CoordUtils.ConvertUV(srcUV);
+            var conv = coordUtils.ConvertUV(srcUV);
             Assert.That(Asserts.EqualsWithDelta(srcUV, conv), Is.EqualTo(false));
 
-            var dstUV = CoordUtils.ConvertUV(conv);
+            var dstUV = coordUtils.ConvertUV(conv);
             Assert.That(Asserts.EqualsWithDelta(srcUV, dstUV), Is.EqualTo(true));
         }
 
         [Test]
         public void SpaceVector3Test()
         {
+            var coordUtils = new CoordUtils();
+
             var srcPos = new Vector3(0.2f, 0.8f, -0.1f);
-            var conv = CoordUtils.ConvertSpace(srcPos);
+            var conv = coordUtils.ConvertSpace(srcPos);
             //Assert.False(EqualsWithDelta(srcPos, conv));
 
-            var dstPos = CoordUtils.ConvertSpace(conv);
+            var dstPos = coordUtils.ConvertSpace(conv);
             Assert.IsTrue(Asserts.EqualsWithDelta(srcPos, dstPos));
         }
 
         [Test]
         public void SpaceQuaternionTest()
         {
+            var coordUtils = new CoordUtils();
+
             var srcRot = Quaternion.AngleAxis(30, new Vector3(1, 2, 3));
-            var conv = CoordUtils.ConvertSpace(srcRot);
+            var conv = coordUtils.ConvertSpace(srcRot);
             Assert.That(Asserts.EqualsWithDelta(srcRot, conv), Is.EqualTo(false));
 
-            var dstRot = CoordUtils.ConvertSpace(conv);
+            var dstRot = coordUtils.ConvertSpace(conv);
             Assert.That(Asserts.EqualsWithDelta(srcRot, dstRot), Is.EqualTo(true));
         }
 
@@ -53,22 +59,24 @@ namespace VGltf.Unity.UnitTests
         [TestCaseSource("TRSElems")]
         public void Matrix4x4Test(Vector3 srcT, Quaternion srcR, Vector3 srcS)
         {
+            var coordUtils = new CoordUtils();
+
             var srcM = new Matrix4x4();
             srcM.SetTRS(srcT, srcR, srcS);
             Assert.IsTrue(Asserts.EqualsWithDelta(srcM, srcM));
 
-            var conv = CoordUtils.ConvertSpace(srcM);
+            var conv = coordUtils.ConvertSpace(srcM);
             var convT = CoordUtils.GetTranslate(conv);
             var convR = CoordUtils.GetRotation(conv);
             var convS = CoordUtils.GetScale(conv);
-            Assert.IsTrue(Asserts.EqualsWithDelta(CoordUtils.ConvertSpace(srcT), convT),
-                string.Format("Expect = {0}, Actual = {1}", CoordUtils.ConvertSpace(srcT), convT));
-            Assert.IsTrue(Asserts.EqualsWithDelta(CoordUtils.ConvertSpace(srcR), convR),
-                string.Format("Expect = {0}, Actual = {1}", CoordUtils.ConvertSpace(srcR), convR));
+            Assert.IsTrue(Asserts.EqualsWithDelta(coordUtils.ConvertSpace(srcT), convT),
+                string.Format("Expect = {0}, Actual = {1}", coordUtils.ConvertSpace(srcT), convT));
+            Assert.IsTrue(Asserts.EqualsWithDelta(coordUtils.ConvertSpace(srcR), convR),
+                string.Format("Expect = {0}, Actual = {1}", coordUtils.ConvertSpace(srcR), convR));
             Assert.IsTrue(Asserts.EqualsWithDelta(srcS, convS),
                 string.Format("Expect = {0}, Actual = {1}", srcS, convS));
 
-            var dstM = CoordUtils.ConvertSpace(conv);
+            var dstM = coordUtils.ConvertSpace(conv);
             Assert.IsTrue(Asserts.EqualsWithDelta(dstM, srcM));
 
             var dstT = CoordUtils.GetTranslate(dstM);

@@ -23,9 +23,12 @@ namespace VGltf.Unity
     {
         public override IImporterContext Context { get; }
 
-        public NodeImporter(IImporterContext context)
+        CoordUtils _coordUtils;
+
+        public NodeImporter(IImporterContext context, CoordUtils coordUtils)
         {
             Context = context;
+            _coordUtils = coordUtils;
         }
 
         public void ImportGameObjects(int nodeIndex, GameObject parentGo = null)
@@ -62,8 +65,8 @@ namespace VGltf.Unity
                 var t = PrimitiveImporter.AsVector3(gltfNode.Translation);
                 var r = PrimitiveImporter.AsQuaternion(gltfNode.Rotation);
                 var s = PrimitiveImporter.AsVector3(gltfNode.Scale);
-                go.transform.localPosition = CoordUtils.ConvertSpace(t);
-                go.transform.localRotation = CoordUtils.ConvertSpace(r);
+                go.transform.localPosition = _coordUtils.ConvertSpace(t);
+                go.transform.localRotation = _coordUtils.ConvertSpace(r);
                 go.transform.localScale = s;
             }
 
@@ -135,7 +138,7 @@ namespace VGltf.Unity
             if (gltfSkin.InverseBindMatrices != null)
             {
                 var buf = Context.GltfResources.GetOrLoadTypedBufferByAccessorIndex(gltfSkin.InverseBindMatrices.Value);
-                var matrices = buf.GetEntity<Matrix4x4>().GetEnumerable().Select(CoordUtils.ConvertSpace).ToArray();
+                var matrices = buf.GetEntity<Matrix4x4>().GetEnumerable().Select(_coordUtils.ConvertSpace).ToArray();
 
                 var mesh = smr.sharedMesh;
                 mesh.bindposes = matrices;

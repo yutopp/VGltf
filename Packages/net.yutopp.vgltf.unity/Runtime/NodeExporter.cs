@@ -24,9 +24,12 @@ namespace VGltf.Unity
     {
         public override IExporterContext Context { get; }
 
-        public NodeExporter(IExporterContext context)
+        CoordUtils _coordUtils;
+
+        public NodeExporter(IExporterContext context, CoordUtils coordUtils)
         {
             Context = context;
+            _coordUtils = coordUtils;
         }
 
         public IndexedResource<Transform> Export(GameObject go)
@@ -68,8 +71,8 @@ namespace VGltf.Unity
                 }
             }
 
-            var t = CoordUtils.ConvertSpace(go.transform.localPosition);
-            var r = CoordUtils.ConvertSpace(go.transform.localRotation);
+            var t = _coordUtils.ConvertSpace(go.transform.localPosition);
+            var r = _coordUtils.ConvertSpace(go.transform.localRotation);
             var s = go.transform.localScale;
 
             var gltfNode = new Types.Node
@@ -145,7 +148,7 @@ namespace VGltf.Unity
 
         int ExportInverseBindMatrices(Matrix4x4[] matrices)
         {
-            matrices = matrices.Select(CoordUtils.ConvertSpace).ToArray();
+            matrices = matrices.Select(_coordUtils.ConvertSpace).ToArray();
 
             // MAT4! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(matrices);

@@ -24,9 +24,12 @@ namespace VGltf.Unity
     {
         public override IImporterContext Context { get; }
 
-        public MeshImporter(IImporterContext context)
+        CoordUtils _coordUtils;
+
+        public MeshImporter(IImporterContext context, CoordUtils coordUtils)
         {
             Context = context;
+            _coordUtils = coordUtils;
         }
 
         public IndexedResource<Mesh> Import(int meshIndex, GameObject go)
@@ -483,7 +486,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType != Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return CoordUtils.FlipIndices(buf.GetPrimitivesAsCasted<int>().ToArray()).ToArray();
+                    return _coordUtils.FlipIndices(buf.GetPrimitivesAsCasted<int>().ToArray()).ToArray();
                 }
             }
 
@@ -501,7 +504,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<Vector3>().GetEnumerable().Select(CoordUtils.ConvertSpace).ToArray();
+                    return buf.GetEntity<Vector3>().GetEnumerable().Select(_coordUtils.ConvertSpace).ToArray();
                 }
             }
 
@@ -517,7 +520,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<Vector3>().GetEnumerable().Select(CoordUtils.ConvertSpace).ToArray();
+                    return buf.GetEntity<Vector3>().GetEnumerable().Select(_coordUtils.ConvertSpace).ToArray();
                 }
             }
 
@@ -533,7 +536,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<Vector4>().GetEnumerable().Select(CoordUtils.ConvertSpace).ToArray();
+                    return buf.GetEntity<Vector4>().GetEnumerable().Select(_coordUtils.ConvertSpace).ToArray();
                 }
             }
 
@@ -551,7 +554,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<Vector2>().GetEnumerable().Select(CoordUtils.ConvertUV).ToArray();
+                    return buf.GetEntity<Vector2>().GetEnumerable().Select(_coordUtils.ConvertUV).ToArray();
                 }
             }
 
