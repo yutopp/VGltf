@@ -66,10 +66,16 @@ namespace VGltfExamples.Dynamic
                 var go = new GameObject();
                 res.Go = go;
 
+                // VRM0はなぜかglTFの座標系の反転をZ軸で行うため
+                var config = new Importer.Config
+                {
+                    FlipZAxisInsteadOfXAsix = true,
+                };
+
                 // GLTFのUnity向けImporterを作成
                 // このImporterの内部のContextにリソースがキャッシュされる。
                 // Importer(または内部のContext)をDisposeすることでリソースが解放される。
-                using (var gltfImporter = new Importer(gltfContainer))
+                using (var gltfImporter = new Importer(gltfContainer, config))
                 {
                     // VRM は glTF nodes にGameObjectがフラットに詰め込まれており、RootのGoが存在しないため hook で解消する
                     gltfImporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ImporterHook(go));
