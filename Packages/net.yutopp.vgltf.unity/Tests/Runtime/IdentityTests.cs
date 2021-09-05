@@ -42,27 +42,35 @@ namespace VGltf.Unity.UnitTests
             {
                 gltfConteiner = Glb.Reader.ReadAsContainer(s);
             }
-            var importer = new Importer(gltfConteiner);
+            var scene = VGltf.Types.Extensions.GltfExtensions.GetSceneObject(gltfConteiner.Gltf);
+            Assert.That(scene.Nodes.Count, Is.EqualTo(1));
 
-            var rootGo = new GameObject();
-            importer.ImportSceneNodes(rootGo);
+            var rootNodeIndex = scene.Nodes[0];
 
-            Assert.That(rootGo.transform.childCount, Is.EqualTo(1));
-            var dstGo = rootGo.transform.GetChild(0);
+            IImporterContext ctx = null;
+            using (var importer = new Importer(gltfConteiner))
+            {
+                ctx = importer.ImportSceneNodes();
+            }
+            using (ctx)
+            {
+                var rootGo = ctx.Resources.Nodes[rootNodeIndex].Value.gameObject;
 
-            // Tests
-            var srcMf = srcGo.GetComponent<MeshFilter>();
-            var srcMesh = srcMf.sharedMesh;
+                // Tests
+                var srcMf = srcGo.GetComponent<MeshFilter>();
+                var srcMesh = srcMf.sharedMesh;
 
-            var dstMf = dstGo.GetComponent<MeshFilter>();
-            var dstMesh = dstMf.sharedMesh;
+                var dstGo = rootGo;
+                var dstMf = dstGo.GetComponent<MeshFilter>();
+                var dstMesh = dstMf.sharedMesh;
 
-            Assert.That(srcMesh.vertices, Is.EquivalentTo(dstMesh.vertices).Using<Vector3, Vector3>(EqualsWithDelta));
-            Assert.That(srcMesh.normals, Is.EquivalentTo(dstMesh.normals).Using<Vector3, Vector3>(EqualsWithDelta));
-            Assert.That(srcMesh.uv, Is.EquivalentTo(dstMesh.uv).Using<Vector2, Vector2>(EqualsWithDelta));
-            Assert.That(srcMesh.uv2, Is.EquivalentTo(dstMesh.uv2).Using<Vector2, Vector2>(EqualsWithDelta));
-            Assert.That(srcMesh.colors, Is.EquivalentTo(dstMesh.colors));
-            Assert.That(srcMesh.boneWeights, Is.EquivalentTo(dstMesh.boneWeights));
+                Assert.That(srcMesh.vertices, Is.EquivalentTo(dstMesh.vertices).Using<Vector3, Vector3>(EqualsWithDelta));
+                Assert.That(srcMesh.normals, Is.EquivalentTo(dstMesh.normals).Using<Vector3, Vector3>(EqualsWithDelta));
+                Assert.That(srcMesh.uv, Is.EquivalentTo(dstMesh.uv).Using<Vector2, Vector2>(EqualsWithDelta));
+                Assert.That(srcMesh.uv2, Is.EquivalentTo(dstMesh.uv2).Using<Vector2, Vector2>(EqualsWithDelta));
+                Assert.That(srcMesh.colors, Is.EquivalentTo(dstMesh.colors));
+                Assert.That(srcMesh.boneWeights, Is.EquivalentTo(dstMesh.boneWeights));
+            }
         }
 
         static bool EqualsWithDelta(Vector2 a, Vector2 b)

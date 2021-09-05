@@ -32,7 +32,7 @@ namespace VGltf.Unity
             var gltf = Context.Container.Gltf;
             var gltfMat = gltf.Materials[matIndex];
 
-            return Context.RuntimeResources.Materials.GetOrCall(matIndex, () => {
+            return Context.Resources.Materials.GetOrCall(matIndex, () => {
                 return ForceImport(matIndex);
             });
         }
@@ -61,7 +61,7 @@ namespace VGltf.Unity
             var mat = new Material(shader);
             mat.name = gltfMat.Name;
 
-            var resource = Context.RuntimeResources.Materials.Add(matIndex, matIndex, mat);
+            var resource = Context.Resources.Materials.Add(matIndex, matIndex, mat);
 
             if (gltfMat.PbrMetallicRoughness != null)
             {
@@ -69,7 +69,7 @@ namespace VGltf.Unity
                 if (pbrMR.BaseColorTexture != null)
                 {
                     var bct = pbrMR.BaseColorTexture;
-                    var textureResource = Context.Textures.Import(bct.Index);
+                    var textureResource = Context.Importers.Textures.Import(bct.Index);
                     mat.SetTexture("_MainTex", textureResource.Value);
                 }
             }

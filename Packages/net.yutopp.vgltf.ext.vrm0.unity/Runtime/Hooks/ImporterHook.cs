@@ -18,7 +18,14 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 {
     public class ImporterHook : ImporterHookBase
     {
-        public override void PostHook(Importer importer, Transform parentTrans)
+        GameObject rootGo_;
+
+        public ImporterHook(GameObject rootGo)
+        {
+            rootGo_ = rootGo;
+        }
+
+        public override void PostHook(Importer importer)
         {
             var gltf = importer.Context.Container.Gltf;
 
@@ -33,11 +40,26 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                 throw new Exception("No vrm extension record");
             }
 
-            ImportHumanoid(importer.Context, vrm, parentTrans);
+            ImportHumanoid(importer.Context, vrm);
         }
 
-        void ImportHumanoid(IImporterContext context, Types.Vrm vrm, Transform parentTrans)
+        void ImportHumanoid(IImporterContext context, Types.Vrm vrm)
         {
+            // VRM glTF structures.
+            // - scenes
+            //   - nodes
+            //     - armature
+            //     - gameobjects...
+            // Thus all nodes under scenes should be reconstructed as children of root game object.
+
+            var gltfScene = context.Container.Gltf.GetSceneObject();
+            var childrenNodes = gltfScene.Nodes.Select(nodeIndex => context.Resources.Nodes[nodeIndex].Value);
+
+            foreach (var childrenNode in childrenNodes)
+            {
+                childrenNode.SetParent(rootGo_.transform, false);
+            }
+
             var vrmHum = vrm.Humanoid;
 
             var hd = new HumanDescription();
@@ -52,14 +74,13 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             hd.hasTranslationDoF = vrmHum.HasTranslationDoF;
 
             // NOTE: Maybe VRM humanoid is a broken format.
-            // There is not enough information in HumanBones, so we need to scan all the data.
+            // There is not enough information in HumanBones, so we need to scan all the data (recursively).
             // It's going to get weird when we get duplicate names.
-            var allNodes = parentTrans.GetComponentsInChildren<Transform>().Where(n =>
+            var allNodes = context.Resources.Nodes.Map(t => t.Value).Where(n =>
             {
-                return !(
-                    (n.GetComponent<MeshRenderer>() != null) ||
-                    (n.GetComponent<SkinnedMeshRenderer>() != null)
-                );
+                return
+                    (n.GetComponent<MeshRenderer>() == null) &&
+                    (n.GetComponent<SkinnedMeshRenderer>() == null);
             });
             hd.skeleton = allNodes.Select(n =>
             {
@@ -83,7 +104,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                     axisLength = vrmHumBone.AxisLength,
                 };
 
-                var node = context.RuntimeResources.Nodes[vrmHumBone.Node];
+                var node = context.Resources.Nodes[vrmHumBone.Node];
 
                 return new HumanBone
                 {
@@ -93,7 +114,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                 };
             }).ToArray();
 
-            var go = parentTrans.gameObject;
+            var go = rootGo_;
             Avatar avater = null;
             avater = AvatarBuilder.BuildHumanAvatar(go, hd);
 

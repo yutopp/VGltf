@@ -28,7 +28,7 @@ namespace VGltf.Unity
 
         public Resource Import(int imgIndex)
         {
-            var gltfImgResource = Context.BufferView.GetOrLoadImageResourceAt(imgIndex);
+            var gltfImgResource = Context.GltfResources.GetOrLoadImageResourceAt(imgIndex);
 
             return gltfImgResource;
         }

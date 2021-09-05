@@ -27,9 +27,11 @@ namespace VGltf.Unity
         {
             Context = context;
         }
-        public void ImportGameObjects(int nodeIndex, NodesCache gameObjects, GameObject parentGo)
+
+        public void ImportGameObjects(int nodeIndex, NodesCache gameObjects, GameObject parentGo = null)
         {
-            Context.RuntimeResources.Nodes.GetOrCall(nodeIndex, () => {
+            Context.Resources.Nodes.GetOrCall(nodeIndex, () =>
+            {
                 return ForceImportGameObjects(nodeIndex, gameObjects, parentGo);
             });
         }
@@ -42,7 +44,7 @@ namespace VGltf.Unity
             var go = new GameObject();
             go.name = gltfNode.Name;
 
-            var resource = Context.RuntimeResources.Nodes.Add(nodeIndex, nodeIndex, go.transform);
+            var resource = Context.Resources.Nodes.Add(nodeIndex, nodeIndex, go.transform);
 
             if (parentGo != null)
             {
@@ -90,7 +92,7 @@ namespace VGltf.Unity
 
             if (gltfNode.Mesh != null)
             {
-                var meshResource = Context.Meshes.Import(gltfNode.Mesh.Value, go);
+                var meshResource = Context.Importers.Meshes.Import(gltfNode.Mesh.Value, go);
 
                 if (gltfNode.Skin != null)
                 {
@@ -126,14 +128,14 @@ namespace VGltf.Unity
 
             if (gltfSkin.Skeleton != null)
             {
-                smr.rootBone = gameObjects.Get(gltfSkin.Skeleton.Value).transform;
+                smr.rootBone = Context.Resources.Nodes[gltfSkin.Skeleton.Value].Value;
             }
 
-            smr.bones = gltfSkin.Joints.Select(i => gameObjects.Get(i).transform).ToArray();
+            smr.bones = gltfSkin.Joints.Select(i => Context.Resources.Nodes[i].Value).ToArray();
 
             if (gltfSkin.InverseBindMatrices != null)
             {
-                var buf = Context.BufferView.GetOrLoadTypedBufferByAccessorIndex(gltfSkin.InverseBindMatrices.Value);
+                var buf = Context.GltfResources.GetOrLoadTypedBufferByAccessorIndex(gltfSkin.InverseBindMatrices.Value);
                 var matrices = buf.GetEntity<Matrix4x4>().GetEnumerable().Select(CoordUtils.ConvertSpace).ToArray();
 
                 var mesh = smr.sharedMesh;

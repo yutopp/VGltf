@@ -5,6 +5,7 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VJson;
@@ -123,6 +124,16 @@ namespace VGltf.Types.Extensions
 {
     public static class GltfExtensions
     {
+        public static Scene GetSceneObject(this Gltf gltf)
+        {
+            if (gltf.Scene == null)
+            {
+                throw new Exception("Scene is null");
+            }
+
+            return gltf.Scenes[gltf.Scene.Value];
+        }
+
         /// <summary>
         ///   NOTE: Throw exceptions if elements are not found.
         /// </summary>

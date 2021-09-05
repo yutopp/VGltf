@@ -15,7 +15,7 @@ namespace VGltf.Unity
 {
     public abstract class ImporterHookBase
     {
-        public virtual void PostHook(Importer importer, Transform parentTrans)
+        public virtual void PostHook(Importer importer)
         {
         }
     }
@@ -25,8 +25,11 @@ namespace VGltf.Unity
         sealed class InnerContext : IImporterContext
         {
             public GltfContainer Container { get; }
-            public ImporterRuntimeResources RuntimeResources { get; }
-            public ResourcesStore BufferView { get; }
+            public ResourcesStore GltfResources { get; }
+
+            public ImporterRuntimeResources Resources { get; }
+
+            public ResourceImporters Importers { get; }
 
             public NodeImporter Nodes { get; }
             public MeshImporter Meshes { get; }
@@ -37,14 +40,18 @@ namespace VGltf.Unity
             public InnerContext(GltfContainer container, IResourceLoader loader)
             {
                 Container = container;
-                RuntimeResources = new ImporterRuntimeResources();
-                BufferView = new ResourcesStore(container.Gltf, container.Buffer, loader);
+                GltfResources = new ResourcesStore(container.Gltf, container.Buffer, loader);
 
-                Nodes = new NodeImporter(this);
-                Meshes = new MeshImporter(this);
-                Materials = new MaterialImporter(this);
-                Textures = new TextureImporter(this);
-                Images = new ImageImporter(this);
+                Resources = new ImporterRuntimeResources();
+
+                Importers = new ResourceImporters
+                {
+                    Nodes = new NodeImporter(this),
+                    Meshes = new MeshImporter(this),
+                    Materials = new MaterialImporter(this),
+                    Textures = new TextureImporter(this),
+                    Images = new ImageImporter(this),
+                };
             }
 
             void IDisposable.Dispose()
@@ -67,29 +74,24 @@ namespace VGltf.Unity
         {
         }
 
-        public IImporterContext ImportSceneNodes(GameObject parentGo)
+        public IImporterContext ImportSceneNodes()
         {
             var gltf = Context.Container.Gltf;
-            if (gltf.Scene == null)
-            {
-                throw new Exception("Scene is null");
-            }
-
-            var gltfScene = gltf.Scenes[gltf.Scene.Value];
+            var gltfScene = VGltf.Types.Extensions.GltfExtensions.GetSceneObject(gltf);
 
             var nodesCache = new NodesCache();
             foreach (var nodeIndex in gltfScene.Nodes)
             {
-                Context.Nodes.ImportGameObjects(nodeIndex, nodesCache, parentGo);
+                Context.Importers.Nodes.ImportGameObjects(nodeIndex, nodesCache);
             }
             foreach (var nodeIndex in gltfScene.Nodes)
             {
-                Context.Nodes.ImportMeshesAndSkins(nodeIndex, nodesCache);
+                Context.Importers.Nodes.ImportMeshesAndSkins(nodeIndex, nodesCache);
             }
 
             foreach (var hook in Hooks)
             {
-                hook.PostHook(this, parentGo.transform);
+                hook.PostHook(this);
             }
 
             return TakeContext();

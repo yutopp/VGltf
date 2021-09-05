@@ -12,13 +12,19 @@ namespace VGltf.Unity
     public interface IImporterContext : IDisposable
     {
         GltfContainer Container { get; }
-        ImporterRuntimeResources RuntimeResources { get; }
-        ResourcesStore BufferView { get; }
+        ResourcesStore GltfResources { get; }
 
-        NodeImporter Nodes { get; }
-        MeshImporter Meshes { get; }
-        MaterialImporter Materials { get; }
-        TextureImporter Textures { get; }
-        ImageImporter Images { get; }
+        ImporterRuntimeResources Resources { get; }
+
+        ResourceImporters Importers { get; }
+    }
+
+    public sealed class ResourceImporters
+    {
+        public NodeImporter Nodes;
+        public MeshImporter Meshes;
+        public MaterialImporter Materials;
+        public TextureImporter Textures;
+        public ImageImporter Images;
     }
 }

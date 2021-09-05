@@ -30,7 +30,7 @@ namespace VGltf.Unity
         {
             var gltf = Context.Container.Gltf;
 
-            return Context.RuntimeResources.Textures.GetOrCall(texIndex, () =>
+            return Context.Resources.Textures.GetOrCall(texIndex, () =>
             {
                 return ForceImport(texIndex);
             });
@@ -44,11 +44,11 @@ namespace VGltf.Unity
             var tex = new Texture2D(0, 0, TextureFormat.RGBA32, true, true);
             tex.name = gltfTex.Name;
 
-            var resource = Context.RuntimeResources.Textures.Add(texIndex, texIndex, tex);
+            var resource = Context.Resources.Textures.Add(texIndex, texIndex, tex);
 
             if (gltfTex.Source != null)
             {
-                var imageResource = Context.Images.Import(gltfTex.Source.Value);
+                var imageResource = Context.Importers.Images.Import(gltfTex.Source.Value);
 
                 var imageBuffer = new byte[imageResource.Data.Count];
                 Array.Copy(imageResource.Data.Array, imageResource.Data.Offset, imageBuffer, 0, imageResource.Data.Count);
