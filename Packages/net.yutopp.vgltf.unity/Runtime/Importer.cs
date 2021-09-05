@@ -22,6 +22,11 @@ namespace VGltf.Unity
 
     public sealed class Importer : ImporterRefHookable<ImporterHookBase>, IDisposable
     {
+        public sealed class Config
+        {
+            public bool FlipZAxisInsteadOfXAsix = false;
+        }
+
         sealed class InnerContext : IImporterContext
         {
             public GltfContainer Container { get; }
@@ -31,14 +36,13 @@ namespace VGltf.Unity
 
             public ResourceImporters Importers { get; }
 
-            public InnerContext(GltfContainer container, IResourceLoader loader)
+            public InnerContext(GltfContainer container, IResourceLoader loader, CoordUtils coordUtils)
             {
                 Container = container;
                 GltfResources = new ResourcesStore(container.Gltf, container.Buffer, loader);
 
                 Resources = new ImporterRuntimeResources();
 
-                var coordUtils = new CoordUtils();
                 Importers = new ResourceImporters
                 {
                     Nodes = new NodeImporter(this, coordUtils),
@@ -59,13 +63,19 @@ namespace VGltf.Unity
 
         public override IImporterContext Context { get => context_; }
 
-        public Importer(GltfContainer container, IResourceLoader loader)
+        public Importer(GltfContainer container, IResourceLoader loader, Config config = null)
         {
-            context_ = new InnerContext(container, loader);
+            if (config == null)
+            {
+                config = new Config();
+            }
+
+            var coordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
+            context_ = new InnerContext(container, loader, coordUtils);
         }
 
-        public Importer(GltfContainer container)
-            : this(container, new ResourceLoaderFromEmbedOnly())
+        public Importer(GltfContainer container, Config config = null)
+            : this(container, new ResourceLoaderFromEmbedOnly(), config)
         {
         }
 

@@ -26,6 +26,7 @@ namespace VGltf.Unity
         {
             public bool IncludeRootObject = true;
             public bool UseNormalizedTransforms = true;
+            public bool FlipZAxisInsteadOfXAsix = false;
         }
 
         sealed class InnerContext : IExporterContext
@@ -40,13 +41,12 @@ namespace VGltf.Unity
             public TextureExporter Textures { get; }
             public ImageExporter Images { get; }
 
-            public InnerContext()
+            public InnerContext(CoordUtils coordUtils)
             {
                 Gltf = new Types.Gltf();
                 RuntimeResources = new ExporterRuntimeResources();
                 BufferBuilder = new BufferBuilder();
 
-                var coordUtils = new CoordUtils();
                 Nodes = new NodeExporter(this, coordUtils);
                 Meshes = new MeshExporter(this, coordUtils);
                 Materials = new MaterialExporter(this);
@@ -60,12 +60,22 @@ namespace VGltf.Unity
             }
         }
 
+        readonly Config _config;
+
         IExporterContext context_;
+
         public override IExporterContext Context { get => context_; }
 
-        public Exporter()
+        public Exporter(Config config = null)
         {
-            context_ = new InnerContext();
+            if (config == null)
+            {
+                config = new Config();
+            }
+            _config = config;
+
+            var coordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
+            context_ = new InnerContext(coordUtils);
 
             // Asset
             context_.Gltf.Asset = new Types.Asset
@@ -75,32 +85,27 @@ namespace VGltf.Unity
             };
         }
 
-        public void ExportGameObjectAsScene(GameObject go, Config config = null)
+        public void ExportGameObjectAsScene(GameObject go)
         {
-            if (config == null)
-            {
-                config = new Config();
-            }
-
-            if (config.UseNormalizedTransforms)
+            if (_config.UseNormalizedTransforms)
             {
                 using (var normalizer = new VGltf.Unity.Ext.TransformNormalizer())
                 {
                     normalizer.Normalize(go);
-                    ExportGameObjectAsSceneWithoutNormalize(normalizer.Go, config);
+                    ExportGameObjectAsSceneWithoutNormalize(normalizer.Go);
                 }
             }
             else
             {
-                ExportGameObjectAsSceneWithoutNormalize(go, config);
+                ExportGameObjectAsSceneWithoutNormalize(go);
             }
         }
 
-        void ExportGameObjectAsSceneWithoutNormalize(GameObject go, Config config)
+        void ExportGameObjectAsSceneWithoutNormalize(GameObject go)
         {
             Func<IndexedResource<Transform>[]> generator = () =>
             {
-                if (config.IncludeRootObject)
+                if (_config.IncludeRootObject)
                 {
                     var node = Context.Nodes.Export(go);
                     return new IndexedResource<Transform>[] { node };

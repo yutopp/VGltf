@@ -26,6 +26,13 @@ namespace VGltf.Unity
     {
         readonly Vector3 CoordinateSpaceAxisFlip = new Vector3(-1, 1, 1); // +X -> -X
 
+        public CoordUtils() {}
+
+        public CoordUtils(Vector3 axis)
+        {
+            CoordinateSpaceAxisFlip = axis;
+        }
+
         public IEnumerable<int> FlipIndices(int[] xs)
         {
             if (xs.Length % 3 != 0)
