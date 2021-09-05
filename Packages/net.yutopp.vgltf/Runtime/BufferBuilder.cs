@@ -12,9 +12,9 @@ using VGltf.Types;
 
 namespace VGltf
 {
-    public class BufferBuilder
+    public sealed class BufferBuilder
     {
-        class AsView
+        sealed class AsView
         {
             public ArraySegment<byte> Payload;
             public int? ByteStride;

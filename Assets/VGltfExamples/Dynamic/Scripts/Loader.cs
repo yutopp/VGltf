@@ -17,13 +17,13 @@ namespace VGltfExamples.Dynamic
 
         class VRMResource : IDisposable
         {
-            public Importer GltfImporter;
+            public IImporterContext Context;
             public GameObject Go;
 
             public void Dispose()
             {
                 GameObject.Destroy(Go);
-                GltfImporter.Dispose();
+                Context.Dispose();
             }
         }
 
@@ -58,36 +58,23 @@ namespace VGltfExamples.Dynamic
             // GLTFのUnity向けImporterを作成
             // このImporterの内部のContextにリソースがキャッシュされる。
             // Importer(または内部のContext)をDisposeすることでリソースが解放される。
-            var gltfImporter = new Importer(gltfContainer);
-            gltfImporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ImporterHook());
-
-            // GLTFのsceneを指すGameObjectを作る。
-            // 子のNodeのGameObjectがこの下に作成される。
-            var go = new GameObject();
-
-            var res = new VRMResource
+            using (var gltfImporter = new Importer(gltfContainer))
             {
-                GltfImporter = gltfImporter,
-                Go = go,
-            };
+                gltfImporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ImporterHook());
 
-            bool error = true;
-            try
-            {
+                // GLTFのsceneを指すGameObjectを作る。
+                // 子のNodeのGameObjectがこの下に作成される。
+                var go = new GameObject();
+
                 // Sceneを読み込み
-                gltfImporter.ImportSceneNodes(go);
-                error = false;
-            }
-            finally
-            {
-                // 読み込みに失敗したらリソースは解放
-                if (error)
-                {
-                    res.Dispose();
-                }
-            }
+                var ctx = gltfImporter.ImportSceneNodes(go);
 
-            return res;
+                return new VRMResource
+                {
+                    Context = ctx,
+                    Go = go,
+                };
+            }
         }
 
         // UI

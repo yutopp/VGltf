@@ -7,7 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 using VGltf.Types.Extensions;
@@ -138,10 +137,11 @@ namespace VGltf.Unity
             {
                 Context.Gltf.BufferViews = views;
                 Context.Gltf.Buffers = new List<Types.Buffer> {
+                    // Buffers[0]: references Glb bytes
                     new Types.Buffer {
                         ByteLength = bufferBytes.Length,
                     }
-                }; // Index0: references Glb bytes
+                };
             }
 
             var container = new GltfContainer(
@@ -165,6 +165,7 @@ namespace VGltf.Unity
         void IDisposable.Dispose()
         {
             Context?.Dispose();
+            context_ = null;
         }
     }
 }

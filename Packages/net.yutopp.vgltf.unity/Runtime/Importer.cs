@@ -20,9 +20,9 @@ namespace VGltf.Unity
         }
     }
 
-    public class Importer : ImporterRefHookable<ImporterHookBase>, IDisposable
+    public sealed class Importer : ImporterRefHookable<ImporterHookBase>, IDisposable
     {
-        class InnerContext : IImporterContext
+        sealed class InnerContext : IImporterContext
         {
             public GltfContainer Container { get; }
             public ImporterRuntimeResources RuntimeResources { get; }
@@ -46,15 +46,20 @@ namespace VGltf.Unity
                 Textures = new TextureImporter(this);
                 Images = new ImageImporter(this);
             }
+
+            void IDisposable.Dispose()
+            {
+                // TODO: implement
+            }
         }
 
-        public override IImporterContext Context { get; }
+        IImporterContext context_;
 
-        bool _disposed = false;
+        public override IImporterContext Context { get => context_; }
 
         public Importer(GltfContainer container, IResourceLoader loader)
         {
-            Context = new InnerContext(container, loader);
+            context_ = new InnerContext(container, loader);
         }
 
         public Importer(GltfContainer container)
@@ -62,7 +67,7 @@ namespace VGltf.Unity
         {
         }
 
-        public void ImportSceneNodes(GameObject parentGo)
+        public IImporterContext ImportSceneNodes(GameObject parentGo)
         {
             var gltf = Context.Container.Gltf;
             if (gltf.Scene == null)
@@ -82,29 +87,27 @@ namespace VGltf.Unity
                 Context.Nodes.ImportMeshesAndSkins(nodeIndex, nodesCache);
             }
 
-            foreach(var hook in Hooks)
+            foreach (var hook in Hooks)
             {
                 hook.PostHook(this, parentGo.transform);
             }
 
-            return;
+            return TakeContext();
         }
 
-        public void Dispose() => Dispose(true);
-
-        protected virtual void Dispose(bool disposing)
+        // Take ownership of Context from importer.
+        public IImporterContext TakeContext()
         {
-            if (_disposed)
-            {
-                return;
-            }
+            var ctx = context_;
+            context_ = null;
 
-            if (disposing)
-            {
-                // TODO: remove resources;
-            }
+            return ctx;
+        }
 
-            _disposed = true;
+        void IDisposable.Dispose()
+        {
+            context_?.Dispose();
+            context_ = null;
         }
     }
 }
