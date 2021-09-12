@@ -51,7 +51,7 @@ namespace VGltf.Unity.Ext
 
         void Normalized(GameObject go, GameObject nGo)
         {
-            nGo.name = string.Format("{0}(VGltf.Normalized)", go.name);
+            nGo.name = go.name;
 
             nGo.transform.localPosition = Vector3.zero;
             nGo.transform.localRotation = Quaternion.identity;
