@@ -11,13 +11,14 @@ using System.Linq;
 
 namespace VGltf.Unity
 {
-    public class IndexedResourceDict<K, V>
+    public sealed class IndexedResourceDict<K, V>
     {
         public delegate IndexedResource<V> Gerenator();
 
-        Dictionary<K, IndexedResource<V>> _dict = new Dictionary<K, IndexedResource<V>>();
+        readonly Dictionary<K, IndexedResource<V>> _dict = new Dictionary<K, IndexedResource<V>>();
+        readonly Dictionary<string, IndexedResource<V>> _nameDict = new Dictionary<string, IndexedResource<V>>();
 
-        public IndexedResource<V> Add(K k, int index, V v)
+        public IndexedResource<V> Add(K k, int index, string name, V v)
         {
             var resource = new IndexedResource<V>
             {
@@ -25,6 +26,7 @@ namespace VGltf.Unity
                 Value = v,
             };
             _dict.Add(k, resource);
+            _nameDict.Add(name, resource);
 
             return resource;
         }
@@ -50,12 +52,24 @@ namespace VGltf.Unity
             return _dict.Select(kv => f(kv.Value));
         }
 
-        public bool Contains(K k) {
+        public bool Contains(K k)
+        {
             return _dict.ContainsKey(k);
         }
 
-        public bool TryGetValue(K k, out IndexedResource<V> res) {
+        public bool TryGetValue(K k, out IndexedResource<V> res)
+        {
             return _dict.TryGetValue(k, out res);
         }
+
+        public bool ContainsByName(string k)
+        {
+            return _nameDict.ContainsKey(k);
+        }
+
+        public bool TryGetValueByName(string k, out IndexedResource<V> res)
+        {
+            return _nameDict.TryGetValue(k, out res);
+        }        
     }
 }

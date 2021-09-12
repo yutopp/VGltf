@@ -61,7 +61,7 @@ namespace VGltf.Unity
             var mat = new Material(shader);
             mat.name = gltfMat.Name;
 
-            var resource = Context.Resources.Materials.Add(matIndex, matIndex, mat);
+            var resource = Context.Resources.Materials.Add(matIndex, matIndex, mat.name, mat);
 
             if (gltfMat.PbrMetallicRoughness != null)
             {

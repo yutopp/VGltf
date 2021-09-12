@@ -47,7 +47,7 @@ namespace VGltf.Unity
             var go = new GameObject();
             go.name = gltfNode.Name;
 
-            var resource = Context.Resources.Nodes.Add(nodeIndex, nodeIndex, go.transform);
+            var resource = Context.Resources.Nodes.Add(nodeIndex, nodeIndex, go.name, go.transform);
 
             if (parentGo != null)
             {

@@ -21,7 +21,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Texture2D> Export(Texture2D tex)
         {
-            return Context.RuntimeResources.Textures.GetOrCall(tex.name, () => {
+            return Context.RuntimeResources.Textures.GetOrCall(tex, () => {
                 return ForceExport(tex);
             });
         }
@@ -38,7 +38,7 @@ namespace VGltf.Unity
                 Source = imageIndex,
             };
             var texIndex = Context.Gltf.AddTexture(gltfImage);
-            var resource = Context.RuntimeResources.Textures.Add(tex.name, texIndex, tex);
+            var resource = Context.RuntimeResources.Textures.Add(tex, texIndex, tex.name, tex);
 
             return resource;
         }

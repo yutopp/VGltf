@@ -125,7 +125,7 @@ namespace VGltf.Unity
             var mesh = new Mesh();
             mesh.name = gltfMesh.Name;
 
-            var resource = Context.Resources.Meshes.Add(meshIndex, meshIndex, mesh);
+            var resource = Context.Resources.Meshes.Add(meshIndex, meshIndex, mesh.name, mesh);
 
             mesh.subMeshCount = gltfMesh.Primitives.Count;
 

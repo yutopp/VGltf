@@ -44,7 +44,7 @@ namespace VGltf.Unity
             var tex = new Texture2D(0, 0, TextureFormat.RGBA32, true, true);
             tex.name = gltfTex.Name;
 
-            var resource = Context.Resources.Textures.Add(texIndex, texIndex, tex);
+            var resource = Context.Resources.Textures.Add(texIndex, texIndex, tex.name, tex);
 
             if (gltfTex.Source != null)
             {
