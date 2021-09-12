@@ -423,20 +423,8 @@ namespace VGltf.Unity
             if (prim.Targets != null)
             {
                 // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
-                var extras = gltfMesh.Extras as Dictionary<string, object>;
-                var targetNamesObj = default(object);
-                var targetNames = default(string[]);
-                if (extras != null && extras.TryGetValue("targetNames", out targetNamesObj))
-                {
-                    var objs = targetNamesObj as object[];
-                    if (objs != null)
-                    {
-                        targetNames = objs
-                            .Select(o => o as string)
-                            .Where(s => s != null)
-                            .ToArray();
-                    }
-                }
+                string[] targetNames = null;
+                gltfMesh.TryGetExtra("targetNames", out targetNames);
 
                 var blendSpapes = new List<BlendShapeResource>();
                 var i = 0;

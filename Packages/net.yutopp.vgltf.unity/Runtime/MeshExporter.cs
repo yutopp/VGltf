@@ -118,7 +118,7 @@ namespace VGltf.Unity
             {
                 targets = new List<Target>();
 
-                for(int i = 0; i<mesh.blendShapeCount; ++i)
+                for (int i = 0; i < mesh.blendShapeCount; ++i)
                 {
                     var name = mesh.GetBlendShapeName(i);
 
@@ -237,12 +237,8 @@ namespace VGltf.Unity
             if (targets != null)
             {
                 var targetNames = targets.Select(t => t.Name).ToArray();
-
                 // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
-                gltfMesh.Extras = new Dictionary<string, object>
-                {
-                    { "targetNames", targetNames },
-                };
+                gltfMesh.AddExtra("targetNames", targetNames);
             }
 
             var meshIndex = Context.Gltf.AddMesh(gltfMesh);
