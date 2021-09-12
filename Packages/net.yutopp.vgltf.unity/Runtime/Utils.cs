@@ -9,6 +9,11 @@ namespace VGltf.Unity
     {
         public static void Destroy(Object go)
         {
+            if (go == null)
+            {
+                return;
+            }
+
 #if UNITY_EDITOR
             if (!EditorApplication.isPlaying)
             {
