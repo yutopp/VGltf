@@ -78,10 +78,7 @@ namespace VGltf.Unity.Ext
 
             extAvatar.HumanDescription = extHD;
 
-            //
-            gltfNode.AddExtension(AvatarType.ExtensionName, extAvatar);
-
-            exporter.Context.Gltf.AddExtensionUsed(AvatarType.ExtensionName);
+            gltfNode.AddExtra(AvatarType.ExtraName, extAvatar);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace VGltf.Unity.Ext
     /// </summary>
     public class AvatarType
     {
-        public static readonly string ExtensionName = "YUTOPP_vgltf_unity_avatar";
+        public static readonly string ExtraName = "VGLTF_unity_avatar";
 
         [JsonField(Name = "humanDescription")]
         public HumanDescriptionType HumanDescription;
@@ -49,7 +49,6 @@ namespace VGltf.Unity.Ext
 
             [JsonField(Name = "skeleton"), JsonFieldIgnorable]
             public List<SkeletonBone> Skeleton = new List<SkeletonBone>();
-
 
             public class HumanBone
             {

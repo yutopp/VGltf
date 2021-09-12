@@ -16,16 +16,13 @@ namespace VGltf.Unity.Ext
         public override void PostHook(NodeImporter importer, int nodeIndex, Transform trans)
         {
             var container = importer.Context.Container;
-            if (!container.Gltf.ContainsExtensionUsed(AvatarType.ExtensionName))
-            {
-                return;
-            }
 
             var gltfNode = container.Gltf.Nodes[nodeIndex];
 
             AvatarType extAvatar;
-            if (!gltfNode.TryGetExtension(AvatarType.ExtensionName, out extAvatar))
+            if (!gltfNode.TryGetExtra(AvatarType.ExtraName, out extAvatar))
             {
+                // TODO: raise error?
                 return;
             }
 
