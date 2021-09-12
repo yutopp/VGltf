@@ -37,7 +37,7 @@ namespace VGltf.Unity
         public IndexedResource<V> GetOrCall(K k, Gerenator generator)
         {
             // Cached by reference
-            if (_dict.TryGetValue(k, out var res))
+            if (TryGetValue(k, out var res))
             {
                 return res;
             }
@@ -52,6 +52,10 @@ namespace VGltf.Unity
 
         public bool Contains(K k) {
             return _dict.ContainsKey(k);
+        }
+
+        public bool TryGetValue(K k, out IndexedResource<V> res) {
+            return _dict.TryGetValue(k, out res);
         }
     }
 }
