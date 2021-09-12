@@ -19,7 +19,7 @@ namespace VGltf.Types
         public Dictionary<string, INode> Extensions;
 
         [JsonField(Name = "extras"), JsonFieldIgnorable]
-        public object Extras;
+        public Dictionary<string, INode> Extras;
 
         //
 
@@ -43,13 +43,15 @@ namespace VGltf.Types
 
         public bool TryGetExtension<T>(string name, out T value)
         {
-            if (Extensions == null) {
+            if (Extensions == null)
+            {
                 value = default(T);
                 return false;
             }
 
             INode node;
-            if (!Extensions.TryGetValue(name, out node)) {
+            if (!Extensions.TryGetValue(name, out node))
+            {
                 value = default(T);
                 return false;
             }
@@ -74,6 +76,50 @@ namespace VGltf.Types
         public static void RegisterExtension(string name, Type type)
         {
             DynamicResolver.Register<ExtensionsResolverTag>(name, type);
+        }
+
+        //
+
+        public void AddExtra<T>(string name, T value)
+        {
+            if (Extras == null)
+            {
+                Extras = new Dictionary<string, INode>();
+            }
+
+            var s = new JsonSerializer(typeof(T));
+            var node = s.SerializeToNode(value);
+            Extras.Add(name, node);
+        }
+
+        public bool TryGetExtra<T>(string name, out T value)
+        {
+            if (Extras == null)
+            {
+                value = default(T);
+                return false;
+            }
+
+            INode node;
+            if (!Extras.TryGetValue(name, out node))
+            {
+                value = default(T);
+                return false;
+            }
+
+            var v = JsonSchemaAttribute.CreateFromClass<T>();
+            var ex = v.Validate(node);
+            if (ex != null)
+            {
+                // TODO: 
+                throw ex;
+            }
+
+            var d = new JsonDeserializer(typeof(T));
+            var dv = d.DeserializeFromNode(node);
+            value = (T)dv;
+
+            return true;
         }
     }
 }
