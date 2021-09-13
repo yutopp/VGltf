@@ -19,14 +19,14 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public IndexedResource<Texture2D> Export(Texture2D tex)
+        public IndexedResource<Texture> Export(Texture tex)
         {
             return Context.Resources.Textures.GetOrCall(tex.name, () => {
                 return ForceExport(tex);
             });
         }
 
-        public IndexedResource<Texture2D> ForceExport(Texture2D tex)
+        public IndexedResource<Texture> ForceExport(Texture tex)
         {
             var imageIndex = Context.Exporters.Images.Export(tex);
 

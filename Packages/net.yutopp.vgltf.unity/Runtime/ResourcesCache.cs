@@ -23,7 +23,7 @@ namespace VGltf.Unity
     public class ExporterRuntimeResources
     {
         public IndexedResourceDict<string, Transform> Nodes = new IndexedResourceDict<string, Transform>();
-        public IndexedResourceDict<string, Texture2D> Textures = new IndexedResourceDict<string, Texture2D>();
+        public IndexedResourceDict<string, Texture> Textures = new IndexedResourceDict<string, Texture>();
         public IndexedResourceDict<string, Material> Materials = new IndexedResourceDict<string, Material>();
         public IndexedResourceDict<string, Mesh> Meshes = new IndexedResourceDict<string, Mesh>();
         public IndexedResourceDict<string, Skin> Skins = new IndexedResourceDict<string, Skin> ();

@@ -56,8 +56,8 @@ namespace VGltf.Unity
 
         public IndexedResource<Material> ForceExportUnlit(Material mat)
         {
-            var tex = mat.GetTexture("_MainTex") as Texture2D;
-            IndexedResource<Texture2D> textureResource = null;
+            var tex = mat.GetTexture("_MainTex");
+            IndexedResource<Texture> textureResource = null;
             if (tex != null)
             {
                 textureResource = Context.Exporters.Textures.Export(tex);
@@ -95,8 +95,8 @@ namespace VGltf.Unity
         {
             // Maybe, Standard shader...
             // TODO: Support various shaders
-            var tex = mat.GetTexture("_MainTex") as Texture2D;
-            IndexedResource<Texture2D> textureResource = null;
+            var tex = mat.GetTexture("_MainTex");
+            IndexedResource<Texture> textureResource = null;
             if (tex != null)
             {
                 textureResource = Context.Exporters.Textures.Export(tex);

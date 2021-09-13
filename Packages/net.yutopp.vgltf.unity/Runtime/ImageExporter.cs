@@ -20,7 +20,7 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public int Export(Texture2D tex)
+        public int Export(Texture tex)
         {
             RenderTexture renderTex = RenderTexture.GetTemporary(
                 tex.width,
