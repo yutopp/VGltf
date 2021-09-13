@@ -39,7 +39,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Transform> Export(Transform trans)
         {
-            return Context.Resources.Nodes.GetOrCall(trans, () =>
+            return Context.Resources.Nodes.GetOrCall(trans.name, () =>
             {
                 return ForceExport(trans);
             });
@@ -89,7 +89,7 @@ namespace VGltf.Unity
             };
 
             var nodeIndex = Context.Gltf.AddNode(gltfNode);
-            var resource = Context.Resources.Nodes.Add(trans, nodeIndex, go.name, trans);
+            var resource = Context.Resources.Nodes.Add(trans.name, nodeIndex, go.name, trans);
 
             var nodesIndices = new List<int>();
             for (int i = 0; i < go.transform.childCount; ++i)
@@ -113,7 +113,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Skin> ExportSkin(SkinnedMeshRenderer r, Mesh mesh)
         {
-            return Context.Resources.Skins.GetOrCall(mesh, () =>
+            return Context.Resources.Skins.GetOrCall(mesh.name, () =>
             {
                 return ForceExportSkin(r, mesh);
             });
@@ -139,7 +139,7 @@ namespace VGltf.Unity
                 Joints = boneIndices,
             };
             var skinIndex = Context.Gltf.AddSkin(gltfSkin);
-            var resource = Context.Resources.Skins.Add(mesh, skinIndex, mesh.name, new Skin());
+            var resource = Context.Resources.Skins.Add(mesh.name, skinIndex, mesh.name, new Skin());
 
             return resource;
         }

@@ -70,6 +70,6 @@ namespace VGltf.Unity
         public bool TryGetValueByName(string k, out IndexedResource<V> res)
         {
             return _nameDict.TryGetValue(k, out res);
-        }        
+        }
     }
 }

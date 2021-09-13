@@ -27,7 +27,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Material> Export(Material m)
         {
-            return Context.Resources.Materials.GetOrCall(m, () =>
+            return Context.Resources.Materials.GetOrCall(m.name, () =>
             {
                 return ForceExport(m);
             });
@@ -83,7 +83,7 @@ namespace VGltf.Unity
                 );
 
             var matIndex = Context.Gltf.AddMaterial(gltfMaterial);
-            var resource = Context.Resources.Materials.Add(mat, matIndex, mat.name, mat);
+            var resource = Context.Resources.Materials.Add(mat.name, matIndex, mat.name, mat);
 
             // Mark an extension as used
             Context.Gltf.AddExtensionUsed(VGltf.Ext.KhrMaterialsUnlit.Types.KhrMaterialsUnlit.ExtensionName);
@@ -119,7 +119,7 @@ namespace VGltf.Unity
             };
 
             var matIndex = Context.Gltf.AddMaterial(gltfMaterial);
-            var resource = Context.Resources.Materials.Add(mat, matIndex, mat.name, mat);
+            var resource = Context.Resources.Materials.Add(mat.name, matIndex, mat.name, mat);
 
             return resource;
         }
