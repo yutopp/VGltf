@@ -39,7 +39,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Transform> Export(Transform trans)
         {
-            return Context.RuntimeResources.Nodes.GetOrCall(trans, () =>
+            return Context.Resources.Nodes.GetOrCall(trans, () =>
             {
                 return ForceExport(trans);
             });
@@ -58,12 +58,12 @@ namespace VGltf.Unity
                 var meshFilter = mr.gameObject.GetComponent<MeshFilter>();
                 var sharedMesh = meshFilter.sharedMesh;
 
-                meshResource = Context.Meshes.Export(mr, sharedMesh);
+                meshResource = Context.Exporters.Meshes.Export(mr, sharedMesh);
             }
             else if (smr != null)
             {
                 var sharedMesh = smr.sharedMesh;
-                meshResource = Context.Meshes.Export(smr, sharedMesh);
+                meshResource = Context.Exporters.Meshes.Export(smr, sharedMesh);
 
                 if (smr.bones.Length > 0)
                 {
@@ -89,7 +89,7 @@ namespace VGltf.Unity
             };
 
             var nodeIndex = Context.Gltf.AddNode(gltfNode);
-            var resource = Context.RuntimeResources.Nodes.Add(trans, nodeIndex, go.name, trans);
+            var resource = Context.Resources.Nodes.Add(trans, nodeIndex, go.name, trans);
 
             var nodesIndices = new List<int>();
             for (int i = 0; i < go.transform.childCount; ++i)
@@ -113,7 +113,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Skin> ExportSkin(SkinnedMeshRenderer r, Mesh mesh)
         {
-            return Context.RuntimeResources.Skins.GetOrCall(mesh, () =>
+            return Context.Resources.Skins.GetOrCall(mesh, () =>
             {
                 return ForceExportSkin(r, mesh);
             });
@@ -139,7 +139,7 @@ namespace VGltf.Unity
                 Joints = boneIndices,
             };
             var skinIndex = Context.Gltf.AddSkin(gltfSkin);
-            var resource = Context.RuntimeResources.Skins.Add(mesh, skinIndex, mesh.name, new Skin());
+            var resource = Context.Resources.Skins.Add(mesh, skinIndex, mesh.name, new Skin());
 
             return resource;
         }

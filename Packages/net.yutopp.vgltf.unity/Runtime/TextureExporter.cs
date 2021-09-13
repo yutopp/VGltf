@@ -21,14 +21,14 @@ namespace VGltf.Unity
 
         public IndexedResource<Texture2D> Export(Texture2D tex)
         {
-            return Context.RuntimeResources.Textures.GetOrCall(tex, () => {
+            return Context.Resources.Textures.GetOrCall(tex, () => {
                 return ForceExport(tex);
             });
         }
 
         public IndexedResource<Texture2D> ForceExport(Texture2D tex)
         {
-            var imageIndex = Context.Images.Export(tex);
+            var imageIndex = Context.Exporters.Images.Export(tex);
 
             var gltfImage = new Types.Texture
             {
@@ -38,7 +38,7 @@ namespace VGltf.Unity
                 Source = imageIndex,
             };
             var texIndex = Context.Gltf.AddTexture(gltfImage);
-            var resource = Context.RuntimeResources.Textures.Add(tex, texIndex, tex.name, tex);
+            var resource = Context.Resources.Textures.Add(tex, texIndex, tex.name, tex);
 
             return resource;
         }

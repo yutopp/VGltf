@@ -12,13 +12,19 @@ namespace VGltf.Unity
     public interface IExporterContext : IDisposable
     {
         Types.Gltf Gltf { get; }
-        ExporterRuntimeResources RuntimeResources { get; }
         BufferBuilder BufferBuilder { get; }
 
-        NodeExporter Nodes { get; }
-        MeshExporter Meshes { get; }
-        MaterialExporter Materials { get; }
-        TextureExporter Textures { get; }
-        ImageExporter Images { get; }
+        ExporterRuntimeResources Resources { get; }
+
+        ResourceExporters Exporters { get; }
+    }
+
+    public sealed class ResourceExporters
+    {
+        public NodeExporter Nodes;
+        public MeshExporter Meshes;
+        public MaterialExporter Materials;
+        public TextureExporter Textures;
+        public ImageExporter Images;
     }
 }

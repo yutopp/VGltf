@@ -30,7 +30,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Mesh> Export(Renderer r, Mesh mesh)
         {
-            return Context.RuntimeResources.Meshes.GetOrCall(mesh, () =>
+            return Context.Resources.Meshes.GetOrCall(mesh, () =>
             {
                 return ForceExport(r, mesh);
             });
@@ -52,7 +52,7 @@ namespace VGltf.Unity
             var materialIndices = new List<int>();
             foreach (var m in r.sharedMaterials)
             {
-                var materialResource = Context.Materials.Export(m);
+                var materialResource = Context.Exporters.Materials.Export(m);
                 materialIndices.Add(materialResource.Index);
             }
 
@@ -242,7 +242,7 @@ namespace VGltf.Unity
             }
 
             var meshIndex = Context.Gltf.AddMesh(gltfMesh);
-            var resource = Context.RuntimeResources.Meshes.Add(mesh, meshIndex, mesh.name, mesh);
+            var resource = Context.Resources.Meshes.Add(mesh, meshIndex, mesh.name, mesh);
 
             return resource;
         }

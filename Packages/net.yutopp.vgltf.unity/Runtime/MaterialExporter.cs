@@ -27,7 +27,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Material> Export(Material m)
         {
-            return Context.RuntimeResources.Materials.GetOrCall(m, () =>
+            return Context.Resources.Materials.GetOrCall(m, () =>
             {
                 return ForceExport(m);
             });
@@ -60,7 +60,7 @@ namespace VGltf.Unity
             IndexedResource<Texture2D> textureResource = null;
             if (tex != null)
             {
-                textureResource = Context.Textures.Export(tex);
+                textureResource = Context.Exporters.Textures.Export(tex);
             }
 
             var gltfMaterial = new Types.Material
@@ -83,7 +83,7 @@ namespace VGltf.Unity
                 );
 
             var matIndex = Context.Gltf.AddMaterial(gltfMaterial);
-            var resource = Context.RuntimeResources.Materials.Add(mat, matIndex, mat.name, mat);
+            var resource = Context.Resources.Materials.Add(mat, matIndex, mat.name, mat);
 
             // Mark an extension as used
             Context.Gltf.AddExtensionUsed(VGltf.Ext.KhrMaterialsUnlit.Types.KhrMaterialsUnlit.ExtensionName);
@@ -99,7 +99,7 @@ namespace VGltf.Unity
             IndexedResource<Texture2D> textureResource = null;
             if (tex != null)
             {
-                textureResource = Context.Textures.Export(tex);
+                textureResource = Context.Exporters.Textures.Export(tex);
             }
 
             var gltfMaterial = new Types.Material
@@ -119,7 +119,7 @@ namespace VGltf.Unity
             };
 
             var matIndex = Context.Gltf.AddMaterial(gltfMaterial);
-            var resource = Context.RuntimeResources.Materials.Add(mat, matIndex, mat.name, mat);
+            var resource = Context.Resources.Materials.Add(mat, matIndex, mat.name, mat);
 
             return resource;
         }

@@ -32,26 +32,27 @@ namespace VGltf.Unity
         sealed class InnerContext : IExporterContext
         {
             public Types.Gltf Gltf { get; }
-            public ExporterRuntimeResources RuntimeResources { get; }
             public BufferBuilder BufferBuilder { get; }
 
-            public NodeExporter Nodes { get; }
-            public MeshExporter Meshes { get; }
-            public MaterialExporter Materials { get; }
-            public TextureExporter Textures { get; }
-            public ImageExporter Images { get; }
+            public ExporterRuntimeResources Resources { get; }
+
+            public ResourceExporters Exporters { get; }
 
             public InnerContext(CoordUtils coordUtils)
             {
                 Gltf = new Types.Gltf();
-                RuntimeResources = new ExporterRuntimeResources();
                 BufferBuilder = new BufferBuilder();
 
-                Nodes = new NodeExporter(this, coordUtils);
-                Meshes = new MeshExporter(this, coordUtils);
-                Materials = new MaterialExporter(this);
-                Textures = new TextureExporter(this);
-                Images = new ImageExporter(this);
+                Resources = new ExporterRuntimeResources();
+
+                Exporters = new ResourceExporters
+                {
+                    Nodes = new NodeExporter(this, coordUtils),
+                    Meshes = new MeshExporter(this, coordUtils),
+                    Materials = new MaterialExporter(this),
+                    Textures = new TextureExporter(this),
+                    Images = new ImageExporter(this),
+                };
             }
 
             void IDisposable.Dispose()
@@ -107,7 +108,7 @@ namespace VGltf.Unity
             {
                 if (_config.IncludeRootObject)
                 {
-                    var node = Context.Nodes.Export(go);
+                    var node = Context.Exporters.Nodes.Export(go);
                     return new IndexedResource<Transform>[] { node };
                 }
                 else
@@ -115,7 +116,7 @@ namespace VGltf.Unity
                     return Enumerable.Range(0, go.transform.childCount).Select(i =>
                     {
                         var childGo = go.transform.GetChild(i);
-                        return Context.Nodes.Export(childGo);
+                        return Context.Exporters.Nodes.Export(childGo);
                     }).ToArray();
                 }
             };
