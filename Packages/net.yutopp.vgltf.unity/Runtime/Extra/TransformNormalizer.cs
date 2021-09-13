@@ -105,7 +105,7 @@ namespace VGltf.Unity.Ext
 
                 smr.BakeMesh(mesh);
 
-                mesh.name = string.Format("{0}(VGltf.Baked)", sharedMesh.name);
+                mesh.name = sharedMesh.name;
                 mesh.boneWeights = weights;
 
                 var vertices = mesh.vertices;
