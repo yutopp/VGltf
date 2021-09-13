@@ -22,23 +22,37 @@ namespace VGltf.Unity
 
         public int Export(Texture tex)
         {
+            byte[] pngBytes;
+
+            RenderTexture previous = RenderTexture.active;
+
+            Texture2D readableTex = null;
             RenderTexture renderTex = RenderTexture.GetTemporary(
                 tex.width,
                 tex.height,
                 0,
                 RenderTextureFormat.Default,
                 RenderTextureReadWrite.Linear);
+            try
+            {
+                Graphics.Blit(tex, renderTex);
 
-            Graphics.Blit(tex, renderTex);
-            RenderTexture previous = RenderTexture.active;
-            RenderTexture.active = renderTex;
-            Texture2D readableText = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, true, true);
-            readableText.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
-            readableText.Apply();
-            RenderTexture.active = previous;
-            RenderTexture.ReleaseTemporary(renderTex); // TODO: fix resource leak when exceptions raised
+                RenderTexture.active = renderTex;
 
-            var pngBytes = readableText.EncodeToPNG();
+                readableTex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, true, true);
+                readableTex.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
+                readableTex.Apply();
+
+                pngBytes = readableTex.EncodeToPNG();
+            }
+            finally
+            {
+                RenderTexture.active = previous;
+
+                RenderTexture.ReleaseTemporary(renderTex);
+                Utils.Destroy(readableTex);
+            }
+
             var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(pngBytes));
 
             return Context.Gltf.AddImage(new Types.Image
