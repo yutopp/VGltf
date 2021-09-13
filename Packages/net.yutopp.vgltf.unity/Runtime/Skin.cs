@@ -7,7 +7,7 @@
 
 namespace VGltf.Unity
 {
-    public class Skin
+    public sealed class Skin : UnityEngine.Object
     {
     }
 }

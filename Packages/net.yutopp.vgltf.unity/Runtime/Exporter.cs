@@ -15,7 +15,7 @@ namespace VGltf.Unity
 {
     public abstract class ExporterHookBase
     {
-        public virtual void PostHook(Exporter exporter, Transform trans)
+        public virtual void PostHook(Exporter exporter, GameObject go)
         {
         }
     }
@@ -57,7 +57,7 @@ namespace VGltf.Unity
 
             void IDisposable.Dispose()
             {
-                // TODO: Remove resources
+                Resources.Dispose();
             }
         }
 
@@ -104,19 +104,19 @@ namespace VGltf.Unity
 
         void ExportGameObjectAsSceneWithoutNormalize(GameObject go)
         {
-            Func<IndexedResource<Transform>[]> generator = () =>
+            Func<IndexedResource<GameObject>[]> generator = () =>
             {
                 if (_config.IncludeRootObject)
                 {
                     var node = Context.Exporters.Nodes.Export(go);
-                    return new IndexedResource<Transform>[] { node };
+                    return new IndexedResource<GameObject>[] { node };
                 }
                 else
                 {
                     return Enumerable.Range(0, go.transform.childCount).Select(i =>
                     {
                         var childGo = go.transform.GetChild(i);
-                        return Context.Exporters.Nodes.Export(childGo);
+                        return Context.Exporters.Nodes.Export(childGo.gameObject);
                     }).ToArray();
                 }
             };
@@ -131,7 +131,7 @@ namespace VGltf.Unity
 
             foreach (var hook in Hooks)
             {
-                hook.PostHook(this, go.transform);
+                hook.PostHook(this, go);
             }
         }
 

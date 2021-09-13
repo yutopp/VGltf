@@ -13,10 +13,8 @@ namespace VGltf.Unity.Ext
 {
     public class AvatarExporter : NodeExporterHook
     {
-        public override void PostHook(NodeExporter exporter, Transform trans, VGltf.Types.Node gltfNode)
+        public override void PostHook(NodeExporter exporter, GameObject go, VGltf.Types.Node gltfNode)
         {
-            var go = trans.gameObject;
-
             var anim = go.GetComponent<Animator>();
             if (anim == null)
             {

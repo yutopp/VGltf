@@ -13,7 +13,7 @@ namespace VGltf.Unity.Ext
 {
     public class AvatarImporter : NodeImporterHook
     {
-        public override void PostHook(NodeImporter importer, int nodeIndex, Transform trans)
+        public override void PostHook(NodeImporter importer, int nodeIndex, GameObject go)
         {
             var container = importer.Context.Container;
 
@@ -70,7 +70,6 @@ namespace VGltf.Unity.Ext
                 };
             }).ToArray();
 
-            var go = trans.gameObject;
             var anim = go.AddComponent<Animator>();
             anim.avatar = AvatarBuilder.BuildHumanAvatar(go, hd);
         }

@@ -53,7 +53,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             // Thus all nodes under scenes should be reconstructed as children of root game object.
 
             var gltfScene = context.Container.Gltf.GetSceneObject();
-            var childrenNodes = gltfScene.Nodes.Select(nodeIndex => context.Resources.Nodes[nodeIndex].Value);
+            var childrenNodes = gltfScene.Nodes.Select(nodeIndex => context.Resources.Nodes[nodeIndex].Value.transform);
 
             foreach (var childrenNode in childrenNodes)
             {
@@ -76,7 +76,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             // NOTE: Maybe VRM humanoid is a broken format.
             // There is not enough information in HumanBones, so we need to scan all the data (recursively).
             // It's going to get weird when we get duplicate names.
-            var allNodes = context.Resources.Nodes.Map(t => t.Value).Where(n =>
+            var allNodes = context.Resources.Nodes.Map(t => t.Value.transform).Where(n =>
             {
                 return
                     (n.GetComponent<MeshRenderer>() == null) &&

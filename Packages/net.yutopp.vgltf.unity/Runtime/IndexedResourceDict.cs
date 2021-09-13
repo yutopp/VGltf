@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace VGltf.Unity
 {
-    public sealed class IndexedResourceDict<K, V>
+    public sealed class IndexedResourceDict<K, V> : IDisposable where V : UnityEngine.Object
     {
         public delegate IndexedResource<V> Gerenator();
 
@@ -26,7 +26,11 @@ namespace VGltf.Unity
                 Value = v,
             };
             _dict.Add(k, resource);
-            _nameDict.Add(name, resource);
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                _nameDict.Add(name, resource);
+            }
 
             return resource;
         }
@@ -70,6 +74,16 @@ namespace VGltf.Unity
         public bool TryGetValueByName(string k, out IndexedResource<V> res)
         {
             return _nameDict.TryGetValue(k, out res);
+        }
+
+        public void Dispose()
+        {
+            foreach (var v in _dict.Values)
+            {
+                Utils.Destroy(v.Value);
+            }
+            _dict.Clear();
+            _nameDict.Clear();
         }
     }
 }

@@ -16,17 +16,17 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 {
     public class ExporterHook : ExporterHookBase
     {
-        public override void PostHook(Exporter exporter, Transform trans)
+        public override void PostHook(Exporter exporter, GameObject go)
         {
             var gltf = exporter.Context.Gltf;
 
             var extVrm = new Types.Vrm();
             extVrm.ExporterVersion = "VGltf.Ext.Vrm0";
 
-            ExportMeta(exporter, extVrm, trans);
-            ExportHumanoid(exporter, extVrm, trans);
+            ExportMeta(exporter, extVrm, go);
+            ExportHumanoid(exporter, extVrm, go);
             // firstPerson
-            ExportBlendShapeMaster(exporter, extVrm, trans);
+            ExportBlendShapeMaster(exporter, extVrm, go);
             // secondaryAnimation
             ExportMaterial(exporter, extVrm);
 
@@ -35,10 +35,8 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             gltf.AddExtensionUsed(Types.Vrm.ExtensionName);
         }
 
-        void ExportMeta(Exporter exporter, Types.Vrm extVrm, Transform trans)
+        void ExportMeta(Exporter exporter, Types.Vrm extVrm, GameObject go)
         {
-            var go = trans.gameObject;
-
             var meta = go.GetComponent<VRM0Meta>();
             if (meta == null)
             {
@@ -64,10 +62,8 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             extVrm.Meta = vrmMeta;
         }
 
-        void ExportHumanoid(Exporter exporter, Types.Vrm extVrm, Transform trans)
+        void ExportHumanoid(Exporter exporter, Types.Vrm extVrm, GameObject go)
         {
-            var go = trans.gameObject;
-
             var anim = go.GetComponent<Animator>();
             if (anim == null)
             {
@@ -127,10 +123,8 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             extVrm.Humanoid = vrmHum;
         }
 
-        void ExportBlendShapeMaster(Exporter exporter, Types.Vrm extVrm, Transform trans)
+        void ExportBlendShapeMaster(Exporter exporter, Types.Vrm extVrm, GameObject go)
         {
-            var go = trans.gameObject;
-
             var proxy = go.GetComponent<VRM0BlendShapeProxy>();
             if (proxy == null)
             {

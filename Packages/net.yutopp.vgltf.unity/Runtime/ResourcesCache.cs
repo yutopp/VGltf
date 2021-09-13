@@ -5,27 +5,39 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public class ImporterRuntimeResources
+    public sealed class ImporterRuntimeResources : IDisposable
     {
-        public IndexedResourceDict<int, Transform> Nodes = new IndexedResourceDict<int, Transform>();
+        public IndexedResourceDict<int, GameObject> Nodes = new IndexedResourceDict<int, GameObject>();
         public IndexedResourceDict<int, Texture2D> Textures = new IndexedResourceDict<int, Texture2D>();
         public IndexedResourceDict<int, Material> Materials = new IndexedResourceDict<int, Material>();
         public IndexedResourceDict<int, Mesh> Meshes = new IndexedResourceDict<int, Mesh>();
-        public IndexedResourceDict<int, Skin> Skins = new IndexedResourceDict<int, Skin>();
-        public IndexedResourceDict<int, Avatar> Avatars = new IndexedResourceDict<int, Avatar>();
+
+        public void Dispose()
+        {
+            Nodes.Dispose();
+            Meshes.Dispose();
+            Materials.Dispose();
+            Textures.Dispose();
+        }
     }
 
-    public class ExporterRuntimeResources
+    public sealed class ExporterRuntimeResources : IDisposable
     {
-        public IndexedResourceDict<string, Transform> Nodes = new IndexedResourceDict<string, Transform>();
+        public IndexedResourceDict<string, GameObject> Nodes = new IndexedResourceDict<string, GameObject>();
         public IndexedResourceDict<string, Texture> Textures = new IndexedResourceDict<string, Texture>();
         public IndexedResourceDict<string, Material> Materials = new IndexedResourceDict<string, Material>();
         public IndexedResourceDict<string, Mesh> Meshes = new IndexedResourceDict<string, Mesh>();
-        public IndexedResourceDict<string, Skin> Skins = new IndexedResourceDict<string, Skin> ();
+        public IndexedResourceDict<string, Skin> Skins = new IndexedResourceDict<string, Skin>();
+
+        public void Dispose()
+        {
+            // DO NOT Dispose any resources because these containers have no ownerships.
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace VGltf.Unity
 {
     public abstract class NodeExporterHook
     {
-        public virtual void PostHook(NodeExporter exporter, Transform trans, Types.Node gltfNode)
+        public virtual void PostHook(NodeExporter exporter, GameObject go, Types.Node gltfNode)
         {
         }
     }
@@ -32,23 +32,16 @@ namespace VGltf.Unity
             _coordUtils = coordUtils;
         }
 
-        public IndexedResource<Transform> Export(GameObject go)
+        public IndexedResource<GameObject> Export(GameObject go)
         {
-            return Export(go.transform);
-        }
-
-        public IndexedResource<Transform> Export(Transform trans)
-        {
-            return Context.Resources.Nodes.GetOrCall(trans.name, () =>
+            return Context.Resources.Nodes.GetOrCall(go.name, () =>
             {
-                return ForceExport(trans);
+                return ForceExport(go);
             });
         }
 
-        public IndexedResource<Transform> ForceExport(Transform trans)
+        public IndexedResource<GameObject> ForceExport(GameObject go)
         {
-            var go = trans.gameObject;
-
             IndexedResource<Mesh> meshResource = null;
             int? skinIndex = null;
             var mr = go.GetComponent<MeshRenderer>();
@@ -89,7 +82,7 @@ namespace VGltf.Unity
             };
 
             var nodeIndex = Context.Gltf.AddNode(gltfNode);
-            var resource = Context.Resources.Nodes.Add(trans.name, nodeIndex, go.name, trans);
+            var resource = Context.Resources.Nodes.Add(go.name, nodeIndex, go.name, go);
 
             var nodesIndices = new List<int>();
             for (int i = 0; i < go.transform.childCount; ++i)
@@ -105,7 +98,7 @@ namespace VGltf.Unity
 
             foreach (var h in Hooks)
             {
-                h.PostHook(this, trans, gltfNode);
+                h.PostHook(this, go, gltfNode);
             }
 
             return resource;
@@ -121,9 +114,9 @@ namespace VGltf.Unity
 
         IndexedResource<Skin> ForceExportSkin(SkinnedMeshRenderer smr, Mesh mesh)
         {
-            var rootBone = smr.rootBone != null ? (int?)Export(smr.rootBone).Index : null;
+            var rootBone = smr.rootBone != null ? (int?)Export(smr.rootBone.gameObject).Index : null;
 
-            var boneTransValues = smr.bones.Select(bt => Export(bt)).ToArray();
+            var boneTransValues = smr.bones.Select(bt => Export(bt.gameObject)).ToArray();
             var boneIndices = boneTransValues.Select(t => t.Index).ToArray();
 
             int? matricesAccIndex = null;

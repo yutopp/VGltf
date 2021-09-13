@@ -55,7 +55,7 @@ namespace VGltf.Unity
 
             void IDisposable.Dispose()
             {
-                // TODO: implement
+                Resources.Dispose();
             }
         }
 

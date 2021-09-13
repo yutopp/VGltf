@@ -14,7 +14,7 @@ namespace VGltf.Unity
 {
     public abstract class NodeImporterHook
     {
-        public virtual void PostHook(NodeImporter importer, int nodeIndex, Transform trans)
+        public virtual void PostHook(NodeImporter importer, int nodeIndex, GameObject go)
         {
         }
     }
@@ -39,7 +39,7 @@ namespace VGltf.Unity
             });
         }
 
-        public IndexedResource<Transform> ForceImportGameObjects(int nodeIndex, GameObject parentGo)
+        public IndexedResource<GameObject> ForceImportGameObjects(int nodeIndex, GameObject parentGo)
         {
             var gltf = Context.Container.Gltf;
             var gltfNode = gltf.Nodes[nodeIndex];
@@ -47,7 +47,7 @@ namespace VGltf.Unity
             var go = new GameObject();
             go.name = gltfNode.Name;
 
-            var resource = Context.Resources.Nodes.Add(nodeIndex, nodeIndex, go.name, go.transform);
+            var resource = Context.Resources.Nodes.Add(nodeIndex, nodeIndex, go.name, go);
 
             if (parentGo != null)
             {
@@ -113,7 +113,7 @@ namespace VGltf.Unity
             // TODO: move to elsewhere...
             foreach (var h in Hooks)
             {
-                h.PostHook(this, nodeIndex, go.transform);
+                h.PostHook(this, nodeIndex, go);
             }
         }
 
@@ -130,10 +130,10 @@ namespace VGltf.Unity
 
             if (gltfSkin.Skeleton != null)
             {
-                smr.rootBone = Context.Resources.Nodes[gltfSkin.Skeleton.Value].Value;
+                smr.rootBone = Context.Resources.Nodes[gltfSkin.Skeleton.Value].Value.transform;
             }
 
-            smr.bones = gltfSkin.Joints.Select(i => Context.Resources.Nodes[i].Value).ToArray();
+            smr.bones = gltfSkin.Joints.Select(i => Context.Resources.Nodes[i].Value.transform).ToArray();
 
             if (gltfSkin.InverseBindMatrices != null)
             {
