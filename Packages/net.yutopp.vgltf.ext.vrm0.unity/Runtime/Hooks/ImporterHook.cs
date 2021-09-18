@@ -18,11 +18,11 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 {
     public class ImporterHook : ImporterHookBase
     {
-        GameObject rootGo_;
+        readonly GameObject _rootGo;
 
         public ImporterHook(GameObject rootGo)
         {
-            rootGo_ = rootGo;
+            _rootGo = rootGo;
         }
 
         public override void PostHook(Importer importer)
@@ -57,7 +57,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 
             foreach (var childrenNode in childrenNodes)
             {
-                childrenNode.SetParent(rootGo_.transform, false);
+                childrenNode.SetParent(_rootGo.transform, false);
             }
 
             var vrmHum = vrm.Humanoid;
@@ -76,7 +76,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             // NOTE: Maybe VRM humanoid is a broken format.
             // There is not enough information in HumanBones, so we need to scan all the data (recursively).
             // It's going to get weird when we get duplicate names.
-            var allNodes = context.Resources.Nodes.Map(t => t.Value.transform).Where(n =>
+            var allNodes = _rootGo.GetComponentsInChildren<Transform>().Where(n =>
             {
                 return
                     (n.GetComponent<MeshRenderer>() == null) &&
@@ -114,7 +114,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                 };
             }).ToArray();
 
-            var go = rootGo_;
+            var go = _rootGo;
             Avatar avater = null;
             avater = AvatarBuilder.BuildHumanAvatar(go, hd);
 
