@@ -16,6 +16,13 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 {
     public class ExporterHook : ExporterHookBase
     {
+        readonly Bridge.IExporterBridge _bridge;
+
+        public ExporterHook(Bridge.IExporterBridge bridge)
+        {
+            _bridge = bridge;
+        }
+
         public override void PostHook(Exporter exporter, GameObject go)
         {
             var gltf = exporter.Context.Gltf;
@@ -37,29 +44,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 
         void ExportMeta(Exporter exporter, Types.Vrm extVrm, GameObject go)
         {
-            var meta = go.GetComponent<VRM0Meta>();
-            if (meta == null)
-            {
-                throw new Exception("There is no VRM0Meta component");
-            }
-
-            var vrmMeta = new Types.Meta();
-
-            vrmMeta.Title = meta.Title;
-            vrmMeta.Version = meta.Version;
-            vrmMeta.Author = meta.Author;
-            vrmMeta.ContactInformation = meta.ContactInformation;
-            vrmMeta.Reference = meta.Reference;
-            vrmMeta.Texture = -1; // ???
-            vrmMeta.AllowedUserName = meta.AllowedUserName;
-            vrmMeta.ViolentUsage = meta.ViolentUsage;
-            vrmMeta.SexualUsage = meta.SexualUsage;
-            vrmMeta.CommercialUsage = meta.CommercialUsage;
-            vrmMeta.OtherPermissionUrl = meta.OtherPermissionUrl;
-            vrmMeta.License = meta.License;
-            vrmMeta.OtherLicenseUrl = meta.OtherLicenseUrl;
-
-            extVrm.Meta = vrmMeta;
+            _bridge.ExportMeta(exporter, extVrm, go);
         }
 
         void ExportHumanoid(Exporter exporter, Types.Vrm extVrm, GameObject go)
