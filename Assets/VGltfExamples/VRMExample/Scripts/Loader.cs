@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -54,11 +55,13 @@ namespace VGltfExamples.VRMExample
             var filePath = filePathInput.text;
 
             // GLTFのコンテナを読む (unity非依存)
-            GltfContainer gltfContainer;
-            using (var fs = new FileStream(filePath, FileMode.Open))
+            var gltfContainer = await Task.Run(() =>
             {
-                gltfContainer = GltfContainer.FromGlb(fs);
-            }
+                using (var fs = new FileStream(filePath, FileMode.Open))
+                {
+                    return GltfContainer.FromGlb(fs);
+                }
+            });
 
             var res = new VRMResource();
             try
