@@ -12,6 +12,8 @@ namespace VGltf.Ext.Vrm0.Unity.Bridge
 {
     public interface IImporterBridge
     {
-        void ReplaceMaterialByMtoon(Importer importer, IndexedResource<Material> mat, Types.Material matProp);
+        void ImportMeta(Importer importer, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go);
+
+        void ReplaceMaterialByMtoon(Importer importer, Types.Material matProp, IndexedResource<Material> mat);
     }
 }

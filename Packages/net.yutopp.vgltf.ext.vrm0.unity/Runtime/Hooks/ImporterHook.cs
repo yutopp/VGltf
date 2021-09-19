@@ -42,13 +42,18 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                 throw new Exception("No vrm extension record");
             }
 
-            // ExportMeta(exporter, extVrm, go);
+            ImportMeta(importer, vrm, _rootGo);
             ImportHumanoid(importer.Context, vrm);
             // firstPerson
             // ExportBlendShapeMaster(exporter, extVrm, go);
             // secondaryAnimation
             // ExportMaterial(exporter, extVrm);
             ImportMaterial(importer, vrm);
+        }
+
+        void ImportMeta(Importer importer, Types.Vrm vrm, GameObject go)
+        {
+            _bridge.ImportMeta(importer, vrm.Meta, go);
         }
 
         void ImportHumanoid(IImporterContext context, Types.Vrm vrm)
@@ -140,12 +145,12 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
         {
             foreach(var matProp in vrm.MaterialProperties)
             {
-                if (!importer.Context.Resources.Materials.TryGetValueByName(matProp.Name, out var mat))
+                if (!importer.Context.Resources.Materials.TryGetValueByName(matProp.Name, out var matRes))
                 {
                     throw new Exception($"VRM0 material is not found: name={matProp.Name}");
                 }
 
-                _bridge.ReplaceMaterialByMtoon(importer, mat, matProp);
+                _bridge.ReplaceMaterialByMtoon(importer, matProp, matRes);
             }
         }
     }

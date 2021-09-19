@@ -1,16 +1,19 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
-using VGltf;
 using VGltf.Unity;
 
 namespace VGltfExamples.VRMExample
 {
     public sealed class VRM0ImporterBridge : VGltf.Ext.Vrm0.Unity.Bridge.IImporterBridge
     {
-        public void ReplaceMaterialByMtoon(Importer importer, IndexedResource<Material> matRes, VGltf.Ext.Vrm0.Types.Material matProp)
+        readonly VGltf.Ext.Vrm0.Unity.DefaultImporterBridge _defaultBridge = new VGltf.Ext.Vrm0.Unity.DefaultImporterBridge();
+
+        public void ImportMeta(Importer importer, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go)
+        {
+            _defaultBridge.ImportMeta(importer, vrmMeta, go);
+        }
+
+        public void ReplaceMaterialByMtoon(Importer importer, VGltf.Ext.Vrm0.Types.Material matProp, IndexedResource<Material> matRes)
         {
             if (matProp.Shader == VGltf.Ext.Vrm0.Types.Material.VRM_USE_GLTFSHADER)
             {
