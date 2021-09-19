@@ -90,13 +90,14 @@ jobs:
             -quit -batchmode -nographics -silent-crashes -logFile \
             -importPackage "$(pwd)/RuntimeUnitTestToolkit.unitypackage"
 
+      # Do not use /headless for the -executeMethod, as the graphics are needed for unit tests to verify that the import/export of shader properties is working
       - name: built unit-tests (Linux64, mono)
         run: |
           /usr/bin/unity-editor \
             -projectPath "$(pwd)" \
             -quit -batchmode -nographics -silent-crashes -logFile \
             -executeMethod UnitTestBuilder.BuildUnitTest \
-              /headless /ScriptBackend Mono2x /BuildTarget StandaloneLinux64
+              /ScriptBackend Mono2x /BuildTarget StandaloneLinux64
 
       - name: run unit-tests
         run: |
