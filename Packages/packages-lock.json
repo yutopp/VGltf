@@ -41,6 +41,13 @@
         "com.unity.modules.imgui": "1.0.0"
       }
     },
+    "com.vrmc.vrmshaders": {
+      "version": "https://github.com/vrm-c/UniVRM.git?path=/Assets/VRMShaders#v0.83.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "889453a8e64c693ab88867c963d16b4165ac242c"
+    },
     "net.yutopp.vgltf": {
       "version": "file:net.yutopp.vgltf",
       "depth": 0,
