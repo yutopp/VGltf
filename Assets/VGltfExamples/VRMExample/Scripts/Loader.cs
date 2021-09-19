@@ -54,7 +54,7 @@ namespace VGltfExamples.VRMExample
         {
             var filePath = filePathInput.text;
 
-            // GLTFのコンテナを読む (unity非依存)
+            // Read the glTF container (unity-independent)
             var gltfContainer = await Task.Run(() =>
             {
                 using (var fs = new FileStream(filePath, FileMode.Open))
@@ -66,27 +66,27 @@ namespace VGltfExamples.VRMExample
             var res = new VRMResource();
             try
             {
-                // GLTFのsceneを指すGameObjectを作る。
-                // 子のNodeのGameObjectがこの下に作成される。
+                // Create a GameObject that points to the glTF scene.
+                // The GameObject of the glTF's child Node will be created under this object.
                 var go = new GameObject();
                 res.Go = go;
 
-                // VRM0はなぜかglTFの座標系の反転をZ軸で行うため
+                // For some reason, VRM0 inverts the coordinate system of glTF in the Z axis.
                 var config = new Importer.Config
                 {
                     FlipZAxisInsteadOfXAsix = true,
                 };
 
-                // GLTFのUnity向けImporterを作成
-                // このImporterの内部のContextにリソースがキャッシュされる。
-                // Importer(または内部のContext)をDisposeすることでリソースが解放される。
+                // Create a glTF Importer for Unity.
+                // The resources will be cached in the internal Context of this Importer.
+                // Resources can be released by calling Dispose of the Importer (or the internal Context).
                 using (var gltfImporter = new Importer(gltfContainer, config))
                 {
                     var bridge = new VRM0ImporterBridge();
-                    // VRM は glTF nodes にGameObjectがフラットに詰め込まれており、RootのGoが存在しないため hook で解消する
+                    // VRM has GameObjects packed flat in glTF nodes, and there is no root Go, so it is solved by hook.
                     gltfImporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ImporterHook(go, bridge));
 
-                    // Sceneを読み込み
+                    // Load the Scene.
                     res.Context = gltfImporter.ImportSceneNodes();
                 }
             }
