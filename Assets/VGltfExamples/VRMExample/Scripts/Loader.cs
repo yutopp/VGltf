@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 using VGltf;
 using VGltf.Unity;
 
@@ -10,7 +11,7 @@ namespace VGltfExamples.VRMExample
 {
     public sealed class Loader : MonoBehaviour
     {
-        [SerializeField] public string FilePath = "SampleModels/Alicia/VRM/AliciaSolid.vrm";
+        [SerializeField] InputField filePathInput;
 
         [SerializeField] public RuntimeAnimatorController RuntimeAnimatorController;
 
@@ -50,9 +51,11 @@ namespace VGltfExamples.VRMExample
 
         async UniTask<VRMResource> LoadVRM()
         {
+            var filePath = filePathInput.text;
+
             // GLTFのコンテナを読む (unity非依存)
             GltfContainer gltfContainer;
-            using (var fs = new FileStream(FilePath, FileMode.Open))
+            using (var fs = new FileStream(filePath, FileMode.Open))
             {
                 gltfContainer = GltfContainer.FromGlb(fs);
             }
