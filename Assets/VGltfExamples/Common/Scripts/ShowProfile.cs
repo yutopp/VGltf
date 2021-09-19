@@ -1,15 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
-using VGltf;
-using VGltf.Unity;
 using UnityEngine.UI;
 using UnityEngine.Profiling;
 
-namespace VGltfExamples.Dynamic.Ext
+namespace VGltfExamples.Common
 {
-    public class MemoryProfile
+    public sealed class MemoryProfile
     {
         public float TotalReservedMB;
         public float TotalAllocatedMB;
@@ -29,7 +24,7 @@ namespace VGltfExamples.Dynamic.Ext
         }
     }
 
-    public class ShowProfile : MonoBehaviour
+    public sealed class ShowProfile : MonoBehaviour
     {
         Text _text;
 

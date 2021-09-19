@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Cysharp.Threading.Tasks;
@@ -7,15 +6,15 @@ using UnityEngine;
 using VGltf;
 using VGltf.Unity;
 
-namespace VGltfExamples.Dynamic
+namespace VGltfExamples.VRMExample
 {
-    public class Loader : MonoBehaviour
+    public sealed class Loader : MonoBehaviour
     {
         [SerializeField] public string FilePath = "SampleModels/Alicia/VRM/AliciaSolid.vrm";
 
         [SerializeField] public RuntimeAnimatorController RuntimeAnimatorController;
 
-        class VRMResource : IDisposable
+        sealed class VRMResource : IDisposable
         {
             public IImporterContext Context;
             public GameObject Go;
@@ -30,7 +29,7 @@ namespace VGltfExamples.Dynamic
             }
         }
 
-        List<VRMResource> _vrmResources = new List<VRMResource>();
+        readonly List<VRMResource> _vrmResources = new List<VRMResource>();
 
         void Start()
         {
@@ -102,7 +101,7 @@ namespace VGltfExamples.Dynamic
 
         public async UniTaskVoid UIOnLoadButtonClickAsync()
         {
-            var p0 = Ext.MemoryProfile.Now;
+            var p0 = Common.MemoryProfile.Now;
             DebugLogProfile(p0);
 
             var res = await LoadVRM();
@@ -112,7 +111,7 @@ namespace VGltfExamples.Dynamic
             var anim = res.Go.GetComponentInChildren<Animator>();
             anim.runtimeAnimatorController = RuntimeAnimatorController;
 
-            var p1 = Ext.MemoryProfile.Now;
+            var p1 = Common.MemoryProfile.Now;
             DebugLogProfile(p1, p0);
         }
 
@@ -123,7 +122,7 @@ namespace VGltfExamples.Dynamic
                 return;
             }
 
-            var p0 = Ext.MemoryProfile.Now;
+            var p0 = Common.MemoryProfile.Now;
             DebugLogProfile(p0);
 
             var head = _vrmResources[0];
@@ -131,11 +130,11 @@ namespace VGltfExamples.Dynamic
 
             head.Dispose();
 
-            var p1 = Ext.MemoryProfile.Now;
+            var p1 = Common.MemoryProfile.Now;
             DebugLogProfile(p1, p0);
         }
 
-        void DebugLogProfile(Ext.MemoryProfile now, Ext.MemoryProfile prev = null)
+        void DebugLogProfile(Common.MemoryProfile now, Common.MemoryProfile prev = null)
         {
             Debug.Log($"----------");
             Debug.Log($"(totalReservedMB, totalAllocatedMB, totalUnusedReservedMB)");

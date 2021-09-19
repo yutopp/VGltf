@@ -1,12 +1,6 @@
 {
-    "name": "Unity.VGltfEamples.Dynamic",
-    "references": [
-        "Unity.net.yutopp.vgltf",
-        "Unity.net.yutopp.vgltf.unity",
-        "Unity.net.yutopp.vgltf.ext.vrm0",
-        "Unity.net.yutopp.vgltf.ext.vrm0.unity",
-        "UniTask"
-    ],
+    "name": "Unity.VGltfEamples.Common",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

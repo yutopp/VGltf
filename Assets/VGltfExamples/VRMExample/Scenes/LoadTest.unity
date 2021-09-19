@@ -923,7 +923,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FilePath: SampleModels/Alicia/VRM/AliciaSolid-0.51.vrm
-  RuntimeAnimatorController: {fileID: 9100000, guid: 0477eb8d140de5e5892e04e32fe5e217,
+  RuntimeAnimatorController: {fileID: 9100000, guid: 2cea6e6c09d444995bfbd16d68eaeb49,
     type: 2}
 --- !u!1 &2003198534
 GameObject:
