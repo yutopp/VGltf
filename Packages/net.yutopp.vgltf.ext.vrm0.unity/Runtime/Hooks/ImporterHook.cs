@@ -19,10 +19,12 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
     public class ImporterHook : ImporterHookBase
     {
         readonly GameObject _rootGo;
+        readonly Bridge.IImporterBridge _bridge;
 
-        public ImporterHook(GameObject rootGo)
+        public ImporterHook(GameObject rootGo, Bridge.IImporterBridge bridge)
         {
             _rootGo = rootGo;
+            _bridge = bridge;
         }
 
         public override void PostHook(Importer importer)
@@ -40,7 +42,13 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                 throw new Exception("No vrm extension record");
             }
 
+            // ExportMeta(exporter, extVrm, go);
             ImportHumanoid(importer.Context, vrm);
+            // firstPerson
+            // ExportBlendShapeMaster(exporter, extVrm, go);
+            // secondaryAnimation
+            // ExportMaterial(exporter, extVrm);
+            ImportMaterial(importer, vrm);
         }
 
         void ImportHumanoid(IImporterContext context, Types.Vrm vrm)
@@ -125,6 +133,19 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             if (!avater.isValid || !avater.isHuman)
             {
                 throw new Exception("Avatar is invalid or not human");
+            }
+        }
+
+        void ImportMaterial(Importer importer, Types.Vrm vrm)
+        {
+            foreach(var matProp in vrm.MaterialProperties)
+            {
+                if (!importer.Context.Resources.Materials.TryGetValueByName(matProp.Name, out var mat))
+                {
+                    throw new Exception($"VRM0 material is not found: name={matProp.Name}");
+                }
+
+                _bridge.ReplaceMaterialByMtoon(importer, mat, matProp);
             }
         }
     }

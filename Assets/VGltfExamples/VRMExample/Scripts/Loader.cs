@@ -76,8 +76,9 @@ namespace VGltfExamples.VRMExample
                 // Importer(または内部のContext)をDisposeすることでリソースが解放される。
                 using (var gltfImporter = new Importer(gltfContainer, config))
                 {
+                    var bridge = new VRM0ImporterBridge();
                     // VRM は glTF nodes にGameObjectがフラットに詰め込まれており、RootのGoが存在しないため hook で解消する
-                    gltfImporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ImporterHook(go));
+                    gltfImporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ImporterHook(go, bridge));
 
                     // Sceneを読み込み
                     res.Context = gltfImporter.ImportSceneNodes();

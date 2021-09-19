@@ -6,7 +6,8 @@
         "Unity.net.yutopp.vgltf.ext.vrm0",
         "Unity.net.yutopp.vgltf.ext.vrm0.unity",
         "UniTask",
-        "Unity.VGltfEamples.Common"
+        "Unity.VGltfEamples.Common",
+        "MToon"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
