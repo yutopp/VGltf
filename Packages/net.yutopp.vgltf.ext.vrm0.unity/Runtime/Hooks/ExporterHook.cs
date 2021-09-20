@@ -99,7 +99,10 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                 vrmHumBone.Bone = h.humanName.AsHumanBoneNameToVrm();
 
                 var boneTrans = nodeTransMap[h.boneName];
-                var boneNode = exporter.Context.Resources.Nodes[boneTrans.name];
+                if (!exporter.Context.Resources.Nodes.TryGetValueByName(boneTrans.name, out var boneNode))
+                {
+                    throw new Exception($"bone transform is not found: name={boneTrans.name}");
+                }
                 vrmHumBone.Node = boneNode.Index;
 
                 return vrmHumBone;
@@ -126,7 +129,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                 foreach (var shape in proxyGroup.MeshShapes)
                 {
                     var smr = shape.SkinnedMeshRenderer;
-                    if (!exporter.Context.Resources.Meshes.TryGetValue(smr.sharedMesh.name, out var mesh))
+                    if (!exporter.Context.Resources.Meshes.TryGetValueByName(smr.sharedMesh.name, out var mesh))
                     {
                         continue;
                     }
@@ -154,16 +157,16 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 
         void ExportMaterial(Exporter exporter, Types.Vrm extVrm)
         {
-            var vrmMats = exporter.Context.Resources.Materials.Map(mat =>
+            var vrmMats = exporter.Context.Resources.Materials.Map(matRes =>
             {
                 var vrmMat = new Types.Material();
 
                 // TODO: if mat.shader is MToon, support that
 
-                vrmMat.Name = mat.Value.name;
+                vrmMat.Name = matRes.Value.name;
                 vrmMat.Shader = Types.Material.VRM_USE_GLTFSHADER;
 
-                return (mat.Index, vrmMat);
+                return (matRes.Index, vrmMat);
             }).OrderBy(tup => tup.Index).Select(tup => tup.vrmMat).ToList();
 
             extVrm.MaterialProperties = vrmMats;
