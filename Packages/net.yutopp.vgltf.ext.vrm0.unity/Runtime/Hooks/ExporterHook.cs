@@ -159,13 +159,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
         {
             var vrmMats = exporter.Context.Resources.Materials.Map(matRes =>
             {
-                var vrmMat = new Types.Material();
-
-                // TODO: if mat.shader is MToon, support that
-
-                vrmMat.Name = matRes.Value.name;
-                vrmMat.Shader = Types.Material.VRM_USE_GLTFSHADER;
-
+                var vrmMat = _bridge.CreateMaterialProp(exporter, extVrm, matRes);
                 return (matRes.Index, vrmMat);
             }).OrderBy(tup => tup.Index).Select(tup => tup.vrmMat).ToList();
 

@@ -40,9 +40,16 @@ namespace VGltf.Ext.Vrm0.Unity
             vrm.Meta = vrmMeta;
         }
 
-        public Types.Material CreateMaterialPropForMToon(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, IndexedResource<Material> matRes)
+        public Types.Material CreateMaterialProp(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, IndexedResource<Material> matRes)
         {
-            throw new NotImplementedException();
+            var vrmMat = new Types.Material();
+
+            // TODO: if mat.shader is MToon, support that
+
+            vrmMat.Name = matRes.Value.name;
+            vrmMat.Shader = Types.Material.VRM_USE_GLTFSHADER;
+
+            return vrmMat;
         }
     }
 }

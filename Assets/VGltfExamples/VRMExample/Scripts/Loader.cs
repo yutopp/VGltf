@@ -174,7 +174,7 @@ namespace VGltfExamples.VRMExample
 
                 using (var gltfExporter = new Exporter(config))
                 {
-                    var bridge = new VGltf.Ext.Vrm0.Unity.DefaultExporterBridge();
+                    var bridge = new VRM0ExporterBridge();
                     gltfExporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ExporterHook(bridge));
 
                     gltfExporter.ExportGameObjectAsScene(head.Go);
