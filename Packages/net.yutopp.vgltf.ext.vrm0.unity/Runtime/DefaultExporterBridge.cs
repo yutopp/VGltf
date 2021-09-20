@@ -39,5 +39,10 @@ namespace VGltf.Ext.Vrm0.Unity
 
             vrm.Meta = vrmMeta;
         }
+
+        public Types.Material CreateMaterialPropForMToon(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, IndexedResource<Material> matRes)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

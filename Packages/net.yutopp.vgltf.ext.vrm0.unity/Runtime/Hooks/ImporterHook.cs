@@ -47,7 +47,6 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             // firstPerson
             // ExportBlendShapeMaster(exporter, extVrm, go);
             // secondaryAnimation
-            // ExportMaterial(exporter, extVrm);
             ImportMaterial(importer, vrm);
         }
 

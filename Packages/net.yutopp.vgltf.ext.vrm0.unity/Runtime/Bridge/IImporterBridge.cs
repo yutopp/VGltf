@@ -13,5 +13,7 @@ namespace VGltf.Ext.Vrm0.Unity.Bridge
     public interface IExporterBridge
     {
         void ExportMeta(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go);
+
+        Types.Material CreateMaterialPropForMToon(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, IndexedResource<Material> matRes);
     }
 }
