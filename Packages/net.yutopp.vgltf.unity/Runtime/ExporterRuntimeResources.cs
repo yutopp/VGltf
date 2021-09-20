@@ -10,13 +10,14 @@ using UnityEngine;
 
 namespace VGltf.Unity
 {
+    // Cache resources by reference
     public sealed class ExporterRuntimeResources : IDisposable
     {
-        public IndexedResourceDict<string, GameObject> Nodes = new IndexedResourceDict<string, GameObject>();
-        public IndexedResourceDict<string, Texture> Textures = new IndexedResourceDict<string, Texture>();
-        public IndexedResourceDict<string, Material> Materials = new IndexedResourceDict<string, Material>();
-        public IndexedResourceDict<string, Mesh> Meshes = new IndexedResourceDict<string, Mesh>();
-        public IndexedResourceDict<string, Skin> Skins = new IndexedResourceDict<string, Skin>();
+        public IndexedResourceDict<GameObject, GameObject> Nodes = new IndexedResourceDict<GameObject, GameObject>();
+        public IndexedResourceDict<Texture, Texture> Textures = new IndexedResourceDict<Texture, Texture>();
+        public IndexedResourceDict<Material, Material> Materials = new IndexedResourceDict<Material, Material>();
+        public IndexedResourceDict<Mesh, Mesh> Meshes = new IndexedResourceDict<Mesh, Mesh>();
+        public IndexedResourceDict<Mesh, Skin> Skins = new IndexedResourceDict<Mesh, Skin>();
 
         public void Dispose()
         {
