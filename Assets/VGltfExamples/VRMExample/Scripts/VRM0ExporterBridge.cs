@@ -14,6 +14,11 @@ namespace VGltfExamples.VRMExample
             _defaultBridge.ExportMeta(exporter, vrm, go);
         }
 
+        public void ExportBlendShapeMaster(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go)
+        {
+            _defaultBridge.ExportBlendShapeMaster(exporter, vrm, go);
+        }
+
         public VGltf.Ext.Vrm0.Types.Material CreateMaterialProp(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, IndexedResource<Material> matRes)
         {
             var mat = matRes.Value;
@@ -71,7 +76,8 @@ namespace VGltfExamples.VRMExample
                     case MToonProps.PropKind.Tex:
                         {
                             var v = mat.GetTexture(prop.Key);
-                            if (v == null) {
+                            if (v == null)
+                            {
                                 continue;
                             }
                             var vRes = exporter.Context.Exporters.Textures.Export(v);

@@ -113,46 +113,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 
         void ExportBlendShapeMaster(Exporter exporter, Types.Vrm extVrm, GameObject go)
         {
-            var proxy = go.GetComponent<VRM0BlendShapeProxy>();
-            if (proxy == null)
-            {
-                // blendshape proxy is optional
-                return;
-            }
-
-            foreach (var proxyGroup in proxy.Groups)
-            {
-                var g = new Types.BlendShape.GroupType();
-                g.Name = proxyGroup.Name;
-                g.PresetName = ToVRM0Preset(proxyGroup.Preset);
-
-                foreach (var shape in proxyGroup.MeshShapes)
-                {
-                    var smr = shape.SkinnedMeshRenderer;
-                    if (!exporter.Context.Resources.Meshes.TryGetValueByName(smr.sharedMesh.name, out var mesh))
-                    {
-                        continue;
-                    }
-
-                    foreach (var weight in shape.Weights)
-                    {
-                        var index = mesh.Value.GetBlendShapeIndex(weight.ShapeKeyName);
-                        if (index == -1)
-                        {
-                            continue;
-                        }
-
-                        g.Binds.Add(new Types.BlendShape.BindType
-                        {
-                            Mesh = mesh.Index,
-                            Index = index,
-                            Weight = weight.WeightValue,
-                        });
-                    }
-                }
-
-                extVrm.BlendShapeMaster.BlendShapeGroups.Add(g);
-            }
+            _bridge.ExportBlendShapeMaster(exporter, extVrm, go);
         }
 
         void ExportMaterial(Exporter exporter, Types.Vrm extVrm)
@@ -164,57 +125,6 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             }).OrderBy(tup => tup.Index).Select(tup => tup.vrmMat).ToList();
 
             extVrm.MaterialProperties = vrmMats;
-        }
-
-        static Types.BlendShape.GroupType.BlendShapePresetEnum ToVRM0Preset(VRM0BlendShapeProxy.BlendShapePreset kind)
-        {
-            switch (kind)
-            {
-                case VRM0BlendShapeProxy.BlendShapePreset.Unknown:
-
-                case VRM0BlendShapeProxy.BlendShapePreset.Neutral:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.Neutral;
-
-                case VRM0BlendShapeProxy.BlendShapePreset.A:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.A;
-                case VRM0BlendShapeProxy.BlendShapePreset.I:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.I;
-                case VRM0BlendShapeProxy.BlendShapePreset.U:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.U;
-                case VRM0BlendShapeProxy.BlendShapePreset.E:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.E;
-                case VRM0BlendShapeProxy.BlendShapePreset.O:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.O;
-
-                case VRM0BlendShapeProxy.BlendShapePreset.Blink:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.Blink;
-
-                case VRM0BlendShapeProxy.BlendShapePreset.Joy:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.Joy;
-                case VRM0BlendShapeProxy.BlendShapePreset.Angry:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.Angry;
-                case VRM0BlendShapeProxy.BlendShapePreset.Sorrow:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.Sorrow;
-                case VRM0BlendShapeProxy.BlendShapePreset.Fun:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.Fun;
-
-                case VRM0BlendShapeProxy.BlendShapePreset.LookUp:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.LookUp;
-                case VRM0BlendShapeProxy.BlendShapePreset.LookDown:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.LookDown;
-                case VRM0BlendShapeProxy.BlendShapePreset.LookLeft:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.LookLeft;
-                case VRM0BlendShapeProxy.BlendShapePreset.LookRight:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.LookRight;
-
-                case VRM0BlendShapeProxy.BlendShapePreset.Blink_L:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.Blink_L;
-                case VRM0BlendShapeProxy.BlendShapePreset.Blink_R:
-                    return Types.BlendShape.GroupType.BlendShapePresetEnum.Blink_R;
-
-                default:
-                    throw new NotImplementedException();
-            }
         }
     }
 }
