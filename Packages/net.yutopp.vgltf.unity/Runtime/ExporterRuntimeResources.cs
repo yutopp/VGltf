@@ -6,27 +6,10 @@
 //
 
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace VGltf.Unity
 {
-    public sealed class ImporterRuntimeResources : IDisposable
-    {
-        public IndexedResourceDict<int, GameObject> Nodes = new IndexedResourceDict<int, GameObject>();
-        public IndexedResourceDict<int, Texture2D> Textures = new IndexedResourceDict<int, Texture2D>();
-        public IndexedResourceDict<int, Material> Materials = new IndexedResourceDict<int, Material>();
-        public IndexedResourceDict<int, Mesh> Meshes = new IndexedResourceDict<int, Mesh>();
-
-        public void Dispose()
-        {
-            Nodes.Dispose();
-            Meshes.Dispose();
-            Materials.Dispose();
-            Textures.Dispose();
-        }
-    }
-
     public sealed class ExporterRuntimeResources : IDisposable
     {
         public IndexedResourceDict<string, GameObject> Nodes = new IndexedResourceDict<string, GameObject>();
