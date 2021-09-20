@@ -13,7 +13,7 @@ namespace VGltf.Ext.Vrm0.Unity.Bridge
     public interface IImporterBridge
     {
         void ImportMeta(Importer importer, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go);
-
+        void ImportBlendShapeMaster(Importer importer, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go);
         void ReplaceMaterialByMtoon(Importer importer, Types.Material matProp, IndexedResource<Material> mat);
     }
 }

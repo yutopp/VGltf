@@ -45,7 +45,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             ImportMeta(importer, vrm, _rootGo);
             ImportHumanoid(importer.Context, vrm);
             // firstPerson
-            // ExportBlendShapeMaster(exporter, extVrm, go);
+            ImportBlendShapeMaster(importer, vrm, _rootGo);
             // secondaryAnimation
             ImportMaterial(importer, vrm);
         }
@@ -140,9 +140,14 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             }
         }
 
+        void ImportBlendShapeMaster(Importer importer, Types.Vrm vrm, GameObject go)
+        {
+            _bridge.ImportBlendShapeMaster(importer, vrm.BlendShapeMaster, go);
+        }
+
         void ImportMaterial(Importer importer, Types.Vrm vrm)
         {
-            foreach(var matProp in vrm.MaterialProperties)
+            foreach (var matProp in vrm.MaterialProperties)
             {
                 if (!importer.Context.Resources.Materials.TryGetValueByName(matProp.Name, out var matRes))
                 {

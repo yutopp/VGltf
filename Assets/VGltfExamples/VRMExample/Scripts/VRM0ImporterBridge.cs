@@ -13,6 +13,11 @@ namespace VGltfExamples.VRMExample
             _defaultBridge.ImportMeta(importer, vrmMeta, go);
         }
 
+        public void ImportBlendShapeMaster(Importer importer, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
+        {
+            _defaultBridge.ImportBlendShapeMaster(importer, vrmBlendShape, go);
+        }
+
         public void ReplaceMaterialByMtoon(Importer importer, VGltf.Ext.Vrm0.Types.Material matProp, IndexedResource<Material> matRes)
         {
             if (matProp.Shader == VGltf.Ext.Vrm0.Types.Material.VRM_USE_GLTFSHADER)
