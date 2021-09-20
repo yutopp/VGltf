@@ -101,6 +101,7 @@ namespace VGltf.Ext.Vrm0.Unity
             switch (kind)
             {
                 case VRM0BlendShapeProxy.BlendShapePreset.Unknown:
+                    return Types.BlendShape.GroupType.BlendShapePresetEnum.Unknown;
 
                 case VRM0BlendShapeProxy.BlendShapePreset.Neutral:
                     return Types.BlendShape.GroupType.BlendShapePresetEnum.Neutral;
