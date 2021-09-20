@@ -10,10 +10,10 @@ using VGltf.Unity;
 
 namespace VGltf.Ext.Vrm0.Unity.Bridge
 {
-    public interface IImporterBridge
+    public interface IExporterBridge
     {
-        void ImportMeta(Importer importer, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go);
+        void ExportMeta(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go);
 
-        void ReplaceMaterialByMtoon(Importer importer, Types.Material matProp, IndexedResource<Material> mat);
+        Types.Material CreateMaterialPropForMToon(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, IndexedResource<Material> matRes);
     }
 }
