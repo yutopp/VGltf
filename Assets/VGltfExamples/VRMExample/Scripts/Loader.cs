@@ -14,6 +14,9 @@ namespace VGltfExamples.VRMExample
     {
         [SerializeField] InputField filePathInput;
 
+        [SerializeField] Button exportButton;
+        [SerializeField] InputField outputFilePathInput;
+
         [SerializeField] public RuntimeAnimatorController RuntimeAnimatorController;
 
         sealed class VRMResource : IDisposable
@@ -35,6 +38,7 @@ namespace VGltfExamples.VRMExample
 
         void Start()
         {
+            exportButton.onClick.AddListener(UIOnExportButtonClicked);
         }
 
         // Update is called once per frame
@@ -114,7 +118,7 @@ namespace VGltfExamples.VRMExample
             var res = await LoadVRM();
             _vrmResources.Insert(0, res);
 
-            // 動かす
+            // Start animations
             var anim = res.Go.GetComponentInChildren<Animator>();
             anim.runtimeAnimatorController = RuntimeAnimatorController;
 
@@ -139,6 +143,60 @@ namespace VGltfExamples.VRMExample
 
             var p1 = Common.MemoryProfile.Now;
             DebugLogProfile(p1, p0);
+        }
+
+        void UIOnExportButtonClicked()
+        {
+            UIOnExportButtonClickedAsync().Forget();
+        }
+
+        public async UniTaskVoid UIOnExportButtonClickedAsync()
+        {
+            if (_vrmResources.Count == 0)
+            {
+                return;
+            }
+
+            var head = _vrmResources[0];
+
+            var anim = head.Go.GetComponentInChildren<Animator>();
+            var animCtrl = anim.runtimeAnimatorController;
+            anim.runtimeAnimatorController = null; // Make the model to the rest pose
+
+            GltfContainer gltfContainer = null;
+            try
+            {
+                // For some reason, VRM0 inverts the coordinate system of glTF in the Z axis.
+                var config = new Exporter.Config
+                {
+                    FlipZAxisInsteadOfXAsix = true,
+                };
+
+                using (var gltfExporter = new Exporter(config))
+                {
+                    var bridge = new VGltf.Ext.Vrm0.Unity.DefaultExporterBridge();
+                    gltfExporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ExporterHook(bridge));
+
+                    gltfExporter.ExportGameObjectAsScene(head.Go);
+
+                    gltfContainer = gltfExporter.IntoGlbContainer();
+                }
+            }
+            finally
+            {
+                anim.runtimeAnimatorController = animCtrl;
+            }
+
+            var filePath = outputFilePathInput.text;
+            await Task.Run(() =>
+            {
+                using (var fs = new FileStream(filePath, FileMode.OpenOrCreate))
+                {
+                    GltfContainer.ToGlb(fs, gltfContainer);
+                }
+
+                Debug.Log("exported");
+            });
         }
 
         void DebugLogProfile(Common.MemoryProfile now, Common.MemoryProfile prev = null)
