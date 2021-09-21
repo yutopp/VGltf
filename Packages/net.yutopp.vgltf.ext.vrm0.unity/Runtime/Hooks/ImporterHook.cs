@@ -154,7 +154,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                     throw new Exception($"VRM0 material is not found: name={matProp.Name}");
                 }
 
-                _bridge.ReplaceMaterialByMtoon(importer, matProp, matRes);
+                _bridge.ReplaceMaterialByMtoon(importer.Context, matProp, matRes.Value);
             }
         }
     }

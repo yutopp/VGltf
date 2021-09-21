@@ -14,6 +14,6 @@ namespace VGltf.Ext.Vrm0.Unity.Bridge
     {
         void ExportMeta(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go);
         void ExportBlendShapeMaster(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go);
-        Types.Material CreateMaterialProp(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, IndexedResource<Material> matRes);
+        Types.Material CreateMaterialProp(IExporterContext context, Material matRes);
     }
 }

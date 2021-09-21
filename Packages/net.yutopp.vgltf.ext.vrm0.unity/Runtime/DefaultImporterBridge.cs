@@ -81,7 +81,7 @@ namespace VGltf.Ext.Vrm0.Unity
             }
         }
 
-        public void ReplaceMaterialByMtoon(Importer importer, VGltf.Ext.Vrm0.Types.Material matProp, IndexedResource<Material> matRes)
+        public void ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat)
         {
             throw new NotImplementedException();
         }

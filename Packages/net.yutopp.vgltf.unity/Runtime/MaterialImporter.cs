@@ -15,7 +15,7 @@ namespace VGltf.Unity
 {
     public abstract class MaterialImporterHook
     {
-        public abstract IndexedResource<Material> Import(MaterialImporter importer, int matIndex);
+        public abstract IndexedResource<Material> Import(IImporterContext context, int matIndex);
     }
 
     public class MaterialImporter : ImporterRefHookable<MaterialImporterHook>
@@ -41,7 +41,7 @@ namespace VGltf.Unity
         {
             foreach(var h in Hooks)
             {
-                var r = h.Import(this, matIndex);
+                var r = h.Import(Context, matIndex);
                 if (r != null)
                 {
                     return r;

@@ -13,7 +13,7 @@ namespace VGltf.Unity
 {
     public abstract class MaterialExporterHook
     {
-        public abstract IndexedResource<Material> Export(MaterialExporter exporter, Material mat);
+        public abstract IndexedResource<Material> Export(IExporterContext context, Material mat);
     }
 
     public class MaterialExporter : ExporterRefHookable<MaterialExporterHook>
@@ -37,7 +37,7 @@ namespace VGltf.Unity
         {
             foreach (var h in Hooks)
             {
-                var r = h.Export(this, mat);
+                var r = h.Export(Context, mat);
                 if (r != null)
                 {
                     return r;

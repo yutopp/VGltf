@@ -19,23 +19,19 @@ namespace VGltfExamples.VRMExample
             _defaultBridge.ExportBlendShapeMaster(exporter, vrm, go);
         }
 
-        public VGltf.Ext.Vrm0.Types.Material CreateMaterialProp(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, IndexedResource<Material> matRes)
+        public VGltf.Ext.Vrm0.Types.Material CreateMaterialProp(IExporterContext context, Material mat)
         {
-            var mat = matRes.Value;
-
             switch (mat.shader.name)
             {
                 case MToon.Utils.ShaderName:
-                    return CreateMaterialPropForMToon(exporter, vrm, matRes);
+                    return CreateMaterialPropForMToon(context, mat);
                 default:
-                    return _defaultBridge.CreateMaterialProp(exporter, vrm, matRes);
+                    return _defaultBridge.CreateMaterialProp(context, mat);
             }
         }
 
-        VGltf.Ext.Vrm0.Types.Material CreateMaterialPropForMToon(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, IndexedResource<Material> matRes)
+        VGltf.Ext.Vrm0.Types.Material CreateMaterialPropForMToon(IExporterContext context, Material mat)
         {
-            var mat = matRes.Value;
-
             var vrmMat = new VGltf.Ext.Vrm0.Types.Material();
 
             vrmMat.Name = mat.name;
@@ -80,7 +76,7 @@ namespace VGltfExamples.VRMExample
                             {
                                 continue;
                             }
-                            var vRes = exporter.Context.Exporters.Textures.Export(v);
+                            var vRes = context.Exporters.Textures.Export(v);
                             vrmMat.TextureProperties.Add(prop.Key, vRes.Index);
                             break;
                         }

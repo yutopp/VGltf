@@ -120,7 +120,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
         {
             var vrmMats = exporter.Context.Resources.Materials.Map(matRes =>
             {
-                var vrmMat = _bridge.CreateMaterialProp(exporter, extVrm, matRes);
+                var vrmMat = _bridge.CreateMaterialProp(exporter.Context, matRes.Value);
                 return (matRes.Index, vrmMat);
             }).OrderBy(tup => tup.Index).Select(tup => tup.vrmMat).ToList();
 

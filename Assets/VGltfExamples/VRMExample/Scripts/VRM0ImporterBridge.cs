@@ -18,7 +18,7 @@ namespace VGltfExamples.VRMExample
             _defaultBridge.ImportBlendShapeMaster(importer, vrmBlendShape, go);
         }
 
-        public void ReplaceMaterialByMtoon(Importer importer, VGltf.Ext.Vrm0.Types.Material matProp, IndexedResource<Material> matRes)
+        public void ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat)
         {
             if (matProp.Shader == VGltf.Ext.Vrm0.Types.Material.VRM_USE_GLTFSHADER)
             {
@@ -31,8 +31,6 @@ namespace VGltfExamples.VRMExample
             {
                 throw new Exception("VRM0 shader is not found");
             }
-
-            var mat = matRes.Value;
 
             mat.shader = shader;
             mat.renderQueue = matProp.RenderQueue;
@@ -57,9 +55,9 @@ namespace VGltfExamples.VRMExample
             }
             foreach (var kv in matProp.TextureProperties)
             {
-                if (!importer.Context.Resources.Textures.TryGetValue(kv.Value, out var texRes))
+                if (!context.Resources.Textures.TryGetValue(kv.Value, out var texRes))
                 {
-                    texRes = importer.Context.Importers.Textures.Import(kv.Value);
+                    texRes = context.Importers.Textures.Import(kv.Value);
                 }
                 mat.SetTexture(kv.Key, texRes.Value);
             }
