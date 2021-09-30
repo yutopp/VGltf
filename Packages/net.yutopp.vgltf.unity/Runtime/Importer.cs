@@ -14,7 +14,7 @@ namespace VGltf.Unity
 {
     public abstract class ImporterHookBase
     {
-        public virtual void PostHook(Importer importer)
+        public virtual async Task PostHook(IImporterContext context, CancellationToken ct)
         {
         }
     }
@@ -99,7 +99,8 @@ namespace VGltf.Unity
 
             foreach (var hook in Hooks)
             {
-                hook.PostHook(this);
+                await hook.PostHook(Context, ct);
+                await _context.TimeSlicer.Slice(ct);
             }
 
             return TakeContext();

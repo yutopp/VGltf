@@ -12,8 +12,8 @@ namespace VGltf.Ext.Vrm0.Unity.Bridge
 {
     public interface IImporterBridge
     {
-        void ImportMeta(Importer importer, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go);
-        void ImportBlendShapeMaster(Importer importer, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go);
+        void ImportMeta(IImporterContext context, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go);
+        void ImportBlendShapeMaster(IImporterContext context, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go);
         void ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat);
     }
 }

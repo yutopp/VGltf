@@ -15,7 +15,7 @@ namespace VGltf.Ext.Vrm0.Unity
 {
     public sealed class DefaultImporterBridge : VGltf.Ext.Vrm0.Unity.Bridge.IImporterBridge
     {
-        public void ImportMeta(Importer importer, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go)
+        public void ImportMeta(IImporterContext context, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go)
         {
             var meta = go.AddComponent<VRM0Meta>();
 
@@ -34,7 +34,7 @@ namespace VGltf.Ext.Vrm0.Unity
             meta.OtherLicenseUrl = vrmMeta.OtherLicenseUrl;
         }
 
-        public void ImportBlendShapeMaster(Importer importer, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
+        public void ImportBlendShapeMaster(IImporterContext context, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
         {
             var proxy = go.AddComponent<VRM0BlendShapeProxy>();
 
@@ -54,7 +54,7 @@ namespace VGltf.Ext.Vrm0.Unity
                 {
                     if (!meshShapes.TryGetValue(vrmBind.Mesh, out var meshShape))
                     {
-                        var meshRes = importer.Context.Resources.Meshes[vrmBind.Mesh];
+                        var meshRes = context.Resources.Meshes[vrmBind.Mesh];
                         var smr = smrs.Where(s => s.sharedMesh == meshRes.Value).First();
 
                         meshShape = new VRM0BlendShapeProxy.MeshShape();
