@@ -84,14 +84,15 @@ namespace VGltfExamples.VRMExample
                 // Create a glTF Importer for Unity.
                 // The resources will be cached in the internal Context of this Importer.
                 // Resources can be released by calling Dispose of the Importer (or the internal Context).
-                using (var gltfImporter = new Importer(gltfContainer, config))
+                var timeSlicer = new TimeSlicer();
+                using (var gltfImporter = new Importer(gltfContainer, timeSlicer, config))
                 {
                     var bridge = new VRM0ImporterBridge();
                     // VRM has GameObjects packed flat in glTF nodes, and there is no root Go, so it is solved by hook.
                     gltfImporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ImporterHook(go, bridge));
 
                     // Load the Scene.
-                    res.Context = gltfImporter.ImportSceneNodes();
+                    res.Context = await gltfImporter.ImportSceneNodes(System.Threading.CancellationToken.None);
                 }
             }
             catch (Exception)

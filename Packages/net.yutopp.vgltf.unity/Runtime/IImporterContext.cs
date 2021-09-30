@@ -6,6 +6,8 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace VGltf.Unity
 {
@@ -15,6 +17,7 @@ namespace VGltf.Unity
         ResourcesStore GltfResources { get; }
 
         ImporterRuntimeResources Resources { get; }
+        ITimeSlicer TimeSlicer { get; }
 
         ResourceImporters Importers { get; }
     }
