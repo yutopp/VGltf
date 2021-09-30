@@ -127,8 +127,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             }).ToArray();
 
             var go = _rootGo;
-            Avatar avater = null;
-            avater = AvatarBuilder.BuildHumanAvatar(go, hd);
+            var avater = AvatarBuilder.BuildHumanAvatar(go, hd);
 
             var anim = go.AddComponent<Animator>();
             anim.avatar = avater;
