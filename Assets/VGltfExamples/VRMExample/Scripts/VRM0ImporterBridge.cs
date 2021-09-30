@@ -8,14 +8,14 @@ namespace VGltfExamples.VRMExample
     {
         readonly VGltf.Ext.Vrm0.Unity.DefaultImporterBridge _defaultBridge = new VGltf.Ext.Vrm0.Unity.DefaultImporterBridge();
 
-        public void ImportMeta(Importer importer, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go)
+        public void ImportMeta(IImporterContext context, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go)
         {
-            _defaultBridge.ImportMeta(importer, vrmMeta, go);
+            _defaultBridge.ImportMeta(context, vrmMeta, go);
         }
 
-        public void ImportBlendShapeMaster(Importer importer, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
+        public void ImportBlendShapeMaster(IImporterContext context, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
         {
-            _defaultBridge.ImportBlendShapeMaster(importer, vrmBlendShape, go);
+            _defaultBridge.ImportBlendShapeMaster(context, vrmBlendShape, go);
         }
 
         public void ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat)
