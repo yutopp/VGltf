@@ -87,7 +87,7 @@ namespace VGltf.Types
             Extras.Add(name, node);
         }
 
-        public bool TryGetExtra<T>(string name, JsonSchemaRegistory reg, out T value)
+        public bool TryGetExtra<T>(string name, JsonSchemaRegistry reg, out T value)
         {
             if (Extras == null)
             {

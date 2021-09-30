@@ -79,7 +79,7 @@ namespace VGltf.Glb
 
                 Types.Gltf gltf = null;
                 StoredBuffer buffer = null;
-                VJson.Schema.JsonSchemaRegistory reg = new VJson.Schema.JsonSchemaRegistory();
+                var reg = new VJson.Schema.JsonSchemaRegistry();
 
                 for (var i = 0; ; ++i)
                 {

@@ -15,7 +15,7 @@ namespace VGltf
 {
     public static class GltfReader
     {
-        public static Types.Gltf Read(Stream s, JsonSchemaRegistory reg, bool withRepairment = true)
+        public static Types.Gltf Read(Stream s, JsonSchemaRegistry reg, bool withRepairment = true)
         {
             using (var r = new JsonReader(s))
             {
@@ -29,7 +29,7 @@ namespace VGltf
                 var jd = new JsonDeserializer(typeof(Types.Gltf));
                 var gltf = (Types.Gltf)jd.DeserializeFromNode(node);
 
-                // If JsonSchemaRegistory is passed, we interpret it as an intention to validate JsonSchema
+                // If JsonSchemaRegistry is passed, we interpret it as an intention to validate JsonSchema
                 if (reg != null)
                 {
                     var schema = JsonSchemaAttribute.CreateFromClass<Types.Gltf>(reg);
