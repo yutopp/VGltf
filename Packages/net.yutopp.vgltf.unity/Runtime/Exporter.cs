@@ -156,7 +156,8 @@ namespace VGltf.Unity
                 Context.Gltf.Buffers != null ? new Glb.StoredBuffer
                 {
                     Payload = new ArraySegment<byte>(bufferBytes),
-                } : null);
+                } : null,
+                null);
             return container;
         }
 

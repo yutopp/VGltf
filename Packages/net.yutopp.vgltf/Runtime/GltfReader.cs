@@ -13,9 +13,9 @@ using VJson.Schema;
 
 namespace VGltf
 {
-    public class GltfReader
+    public static class GltfReader
     {
-        public static Types.Gltf Read(Stream s, bool withRepairment = true, bool withValidation = true)
+        public static Types.Gltf Read(Stream s, JsonSchemaRegistory reg, bool withRepairment = true)
         {
             using (var r = new JsonReader(s))
             {
@@ -29,10 +29,11 @@ namespace VGltf
                 var jd = new JsonDeserializer(typeof(Types.Gltf));
                 var gltf = (Types.Gltf)jd.DeserializeFromNode(node);
 
-                if (withValidation)
+                // If JsonSchemaRegistory is passed, we interpret it as an intention to validate JsonSchema
+                if (reg != null)
                 {
-                    var schema = JsonSchemaAttribute.CreateFromClass<Types.Gltf>();
-                    var ex = schema.Validate(gltf);
+                    var schema = JsonSchemaAttribute.CreateFromClass<Types.Gltf>(reg);
+                    var ex = schema.Validate(gltf, reg);
                     if (ex != null)
                     {
                         throw ex;
@@ -45,7 +46,7 @@ namespace VGltf
 
         public static Types.Gltf ReadWithoutValidation(Stream s, bool withRepairment = true)
         {
-            return Read(s, withRepairment, false);
+            return Read(s, null, withRepairment);
         }
 
         public static void RepairKnownInvalidFormat(INode node)

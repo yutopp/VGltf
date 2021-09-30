@@ -73,11 +73,6 @@ namespace VGltf.Types
 
         internal class ExtensionsResolverTag { }
 
-        public static void RegisterExtension(string name, Type type)
-        {
-            DynamicResolver.Register<ExtensionsResolverTag>(name, type);
-        }
-
         //
 
         public void AddExtra<T>(string name, T value)
@@ -92,7 +87,7 @@ namespace VGltf.Types
             Extras.Add(name, node);
         }
 
-        public bool TryGetExtra<T>(string name, out T value)
+        public bool TryGetExtra<T>(string name, JsonSchemaRegistory reg, out T value)
         {
             if (Extras == null)
             {
@@ -107,8 +102,8 @@ namespace VGltf.Types
                 return false;
             }
 
-            var v = JsonSchemaAttribute.CreateFromClass<T>();
-            var ex = v.Validate(node);
+            var v = JsonSchemaAttribute.CreateFromClass<T>(reg);
+            var ex = v.Validate(node, reg);
             if (ex != null)
             {
                 // TODO: 

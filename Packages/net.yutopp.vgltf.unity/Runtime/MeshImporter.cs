@@ -424,7 +424,7 @@ namespace VGltf.Unity
             {
                 // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
                 string[] targetNames = null;
-                gltfMesh.TryGetExtra("targetNames", out targetNames);
+                gltfMesh.TryGetExtra("targetNames", Context.Container.JsonSchemas, out targetNames);
 
                 var blendSpapes = new List<BlendShapeResource>();
                 var i = 0;

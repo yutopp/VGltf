@@ -14,18 +14,21 @@ namespace VGltf
     {
         public Types.Gltf Gltf { get; private set; }
         public Glb.StoredBuffer Buffer { get; private set; }
+        public VJson.Schema.JsonSchemaRegistory JsonSchemas { get; private set; }
 
-        public GltfContainer(Types.Gltf gltf, Glb.StoredBuffer buffer = null)
+        public GltfContainer(Types.Gltf gltf, Glb.StoredBuffer buffer = null, VJson.Schema.JsonSchemaRegistory reg = null)
         {
             Gltf = gltf;
             Buffer = buffer;
+            JsonSchemas = reg;
         }
 
         public static GltfContainer FromGltf(Stream s, Glb.StoredBuffer buffer = null)
         {
-            var gltf = GltfReader.Read(s);
+            var reg = new VJson.Schema.JsonSchemaRegistory();
+            var gltf = GltfReader.Read(s, reg);
 
-            return new GltfContainer(gltf, buffer);
+            return new GltfContainer(gltf, buffer, reg);
         }
 
         public static void FromGltf(Stream s, GltfContainer container)

@@ -79,6 +79,7 @@ namespace VGltf.Glb
 
                 Types.Gltf gltf = null;
                 StoredBuffer buffer = null;
+                VJson.Schema.JsonSchemaRegistory reg = new VJson.Schema.JsonSchemaRegistory();
 
                 for (var i = 0; ; ++i)
                 {
@@ -105,7 +106,7 @@ namespace VGltf.Glb
 
                             using (var cs = new MemoryStream(c.ChunkData))
                             {
-                                gltf = GltfReader.Read(cs);
+                                gltf = GltfReader.Read(cs, reg);
                             }
 
                             break;
@@ -141,7 +142,7 @@ namespace VGltf.Glb
                     throw new NotImplementedException("Json is empty"); // TODO: change type
                 }
 
-                return new GltfContainer(gltf, buffer);
+                return new GltfContainer(gltf, buffer, reg);
             }
         }
     }

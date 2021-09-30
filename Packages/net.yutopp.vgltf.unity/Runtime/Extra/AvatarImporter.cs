@@ -20,7 +20,7 @@ namespace VGltf.Unity.Ext
             var gltfNode = container.Gltf.Nodes[nodeIndex];
 
             AvatarType extAvatar;
-            if (!gltfNode.TryGetExtra(AvatarType.ExtraName, out extAvatar))
+            if (!gltfNode.TryGetExtra(AvatarType.ExtraName, container.JsonSchemas, out extAvatar))
             {
                 // TODO: raise error?
                 return;
