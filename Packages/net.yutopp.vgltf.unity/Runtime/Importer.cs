@@ -39,7 +39,7 @@ namespace VGltf.Unity
             public InnerContext(GltfContainer container, IResourceLoader loader, CoordUtils coordUtils)
             {
                 Container = container;
-                GltfResources = new ResourcesStore(container.Gltf, container.Buffer, loader);
+                GltfResources = new ResourcesStore(container, loader);
 
                 Resources = new ImporterRuntimeResources();
 

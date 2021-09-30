@@ -157,7 +157,7 @@ namespace VGltf.Unity
                 {
                     Payload = new ArraySegment<byte>(bufferBytes),
                 } : null,
-                null);
+                new VJson.Schema.JsonSchemaRegistry());
             return container;
         }
 

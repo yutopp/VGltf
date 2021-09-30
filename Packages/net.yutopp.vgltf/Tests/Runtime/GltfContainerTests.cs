@@ -25,14 +25,14 @@ namespace VGltf.UnitTests
             {
                 var c = GltfContainer.FromGltf(fs);
 
-                var schema = VJson.Schema.JsonSchemaAttribute.CreateFromClass<Types.Gltf>();
-                var ex = schema.Validate(c.Gltf);
+                var schema = VJson.Schema.JsonSchemaAttribute.CreateFromClass<Types.Gltf>(c.JsonSchemas);
+                var ex = schema.Validate(c.Gltf, c.JsonSchemas);
                 Assert.Null(ex);
 
                 var storageDir = Directory.GetParent(path).ToString();
                 var loader = new ResourceLoaderFromFileStorage(storageDir);
 
-                var store = new ResourcesStore(c.Gltf, c.Buffer, loader);
+                var store = new ResourcesStore(c, loader);
                 tester.TestModel(store);
             }
         }
@@ -46,13 +46,13 @@ namespace VGltf.UnitTests
             {
                 var c = GltfContainer.FromGlb(fs);
 
-                var schema = VJson.Schema.JsonSchemaAttribute.CreateFromClass<Types.Gltf>();
-                var ex = schema.Validate(c.Gltf);
+                var schema = VJson.Schema.JsonSchemaAttribute.CreateFromClass<Types.Gltf>(c.JsonSchemas);
+                var ex = schema.Validate(c.Gltf, c.JsonSchemas);
                 Assert.Null(ex);
 
                 var loader = new ResourceLoaderFromEmbedOnly(); // Glb files should be packed.
 
-                var store = new ResourcesStore(c.Gltf, c.Buffer, loader);
+                var store = new ResourcesStore(c, loader);
                 tester.TestModel(store);
             }
         }

@@ -58,7 +58,7 @@ namespace VGltf.Glb
                 }
                 using (var cs = new MemoryStream())
                 {
-                    GltfWriter.Write(cs, container.Gltf);
+                    GltfWriter.Write(cs, container.Gltf, container.JsonSchemas);
                     gltf = cs.ToArray();
                 }
                 chunksTotalSize += ChunkHeaderSize + (uint)gltf.Length;

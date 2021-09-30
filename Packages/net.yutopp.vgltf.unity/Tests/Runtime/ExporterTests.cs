@@ -23,10 +23,11 @@ namespace VGltf.Unity.UnitTests
             using (var exporter = new Exporter())
             {
                 exporter.ExportGameObjectAsScene(go);
-                
+
                 var gltfContainer = exporter.IntoGlbContainer();
+                var store = new ResourcesStore(gltfContainer, new ResourceLoaderFromEmbedOnly());
+
                 var gltf = gltfContainer.Gltf;
-                var store = new ResourcesStore(gltf, gltfContainer.Buffer, new ResourceLoaderFromEmbedOnly());
 
                 Assert.AreEqual(0, gltf.Scene);
                 Assert.AreEqual(1, gltf.Scenes.Count);
@@ -44,7 +45,7 @@ namespace VGltf.Unity.UnitTests
 
                 var prim0 = prims[0];
                 Assert.AreEqual(null, prim0.Targets);
-                Assert.AreEqual(0, prim0.Material); 
+                Assert.AreEqual(0, prim0.Material);
                 Assert.AreEqual(4, prim0.Indices);
 
                 var prim0Accessor = gltf.Accessors[prim0.Indices.Value];

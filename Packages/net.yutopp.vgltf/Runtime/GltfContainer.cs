@@ -34,7 +34,7 @@ namespace VGltf
         public static void FromGltf(Stream s, GltfContainer container)
         {
             // TODO: Raise an error if container.Buffer is not empty
-            GltfWriter.Write(s, container.Gltf);
+            GltfWriter.Write(s, container.Gltf, container.JsonSchemas);
         }
 
         public static GltfContainer FromGlb(Stream s)

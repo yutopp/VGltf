@@ -11,21 +11,21 @@ using System.Collections.Generic;
 namespace VGltf
 {
     // TODO: Rename...
-    public class ResourcesStore
+    public sealed class ResourcesStore
     {
         // TODO: Consider concurrent accesses
-        private Dictionary<int, Resource> _bufferResources = new Dictionary<int, Resource>();
-        private Dictionary<int, Resource> _imageResources = new Dictionary<int, Resource>();
+        readonly Dictionary<int, Resource> _bufferResources = new Dictionary<int, Resource>();
+        readonly Dictionary<int, Resource> _imageResources = new Dictionary<int, Resource>();
 
-        public Types.Gltf Gltf { get; private set; }
-        public Glb.StoredBuffer Buffer { get; private set; }
+        public GltfContainer Container { get; }
+        public IResourceLoader Loader { get; }
 
-        public IResourceLoader Loader { get; private set; }
+        public Types.Gltf Gltf { get => Container.Gltf; }
+        public Glb.StoredBuffer Buffer { get => Container.Buffer; }
 
-        public ResourcesStore(Types.Gltf gltf, Glb.StoredBuffer buffer, IResourceLoader loader)
+        public ResourcesStore(GltfContainer container, IResourceLoader loader)
         {
-            Gltf = gltf;
-            Buffer = buffer;
+            Container = container;
 
             Loader = loader;
         }
