@@ -35,13 +35,7 @@ namespace VGltf.Types
             Extensions.Add(name, node);
         }
 
-        [Obsolete]
-        public bool GetExtension<T>(string name, out T value)
-        {
-            return TryGetExtension<T>(name, out value);
-        }
-
-        public bool TryGetExtension<T>(string name, out T value)
+        public bool TryGetExtension<T>(string name, JsonSchemaRegistry reg, out T value)
         {
             if (Extensions == null)
             {
@@ -56,8 +50,8 @@ namespace VGltf.Types
                 return false;
             }
 
-            var v = JsonSchemaAttribute.CreateFromClass<T>();
-            var ex = v.Validate(node);
+            var v = JsonSchemaAttribute.CreateFromClass<T>(reg);
+            var ex = v.Validate(node, reg);
             if (ex != null)
             {
                 // TODO: 

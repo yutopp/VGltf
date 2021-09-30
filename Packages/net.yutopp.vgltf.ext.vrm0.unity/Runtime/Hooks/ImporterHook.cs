@@ -37,7 +37,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             }
 
             // TODO: migration
-            if (!gltf.TryGetExtension<Types.Vrm>(Types.Vrm.ExtensionName, out var vrm))
+            if (!gltf.TryGetExtension<Types.Vrm>(Types.Vrm.ExtensionName, importer.Context.Container.JsonSchemas, out var vrm))
             {
                 throw new Exception("No vrm extension record");
             }
