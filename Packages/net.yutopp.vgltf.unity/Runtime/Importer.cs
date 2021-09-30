@@ -54,13 +54,33 @@ namespace VGltf.Unity
                 };
             }
 
-            void IDisposable.Dispose()
+            public void Dispose()
             {
                 Resources.Dispose();
             }
+
+            // helper functions
+
+            public void SetRendererEnebled(bool value)
+            {
+                foreach (var go in Resources.Nodes.Map(r => r.Value))
+                {
+                    var r = go.GetComponent<MeshRenderer>();
+                    if (r != null)
+                    {
+                        r.enabled = value;
+                    }
+
+                    var smr = go.GetComponent<SkinnedMeshRenderer>();
+                    if (smr != null)
+                    {
+                        smr.enabled = value;
+                    }
+                }
+            }
         }
 
-        IImporterContext _context;
+        InnerContext _context;
 
         public override IImporterContext Context { get => _context; }
 
@@ -100,6 +120,8 @@ namespace VGltf.Unity
                 await hook.PostHook(Context, ct);
                 await _context.TimeSlicer.Slice(ct);
             }
+
+            _context.SetRendererEnebled(true);
 
             return TakeContext();
         }

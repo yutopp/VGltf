@@ -170,6 +170,7 @@ namespace VGltf.Unity
             {
                 var smr = go.AddComponent<SkinnedMeshRenderer>();
                 smr.sharedMesh = mesh;
+                smr.enabled = false; // Do not render by default until explicitly enabled
 
                 // Default blend shape weight
                 if (gltfMesh.Weights != null)
@@ -189,6 +190,7 @@ namespace VGltf.Unity
                 mf.sharedMesh = mesh;
 
                 var mr = go.AddComponent<MeshRenderer>();
+                mr.enabled = false; // Do not render by default until explicitly enabled
                 r = mr;
             }
 
