@@ -95,8 +95,6 @@ namespace VGltf.Unity
                 await _context.TimeSlicer.Slice(ct);
             }
 
-            // await Context.Tasks.Run();
-
             foreach (var hook in Hooks)
             {
                 await hook.PostHook(Context, ct);
