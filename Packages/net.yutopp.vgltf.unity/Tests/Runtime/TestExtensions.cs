@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace VGltf.Unity.UnitTests
@@ -14,8 +15,10 @@ namespace VGltf.Unity.UnitTests
 
             if (task.IsFaulted)
             {
-                throw task.Exception;
+                ExceptionDispatchInfo.Capture(task.Exception).Throw();
             }
+
+            yield return null;
         }
     }
 }
