@@ -17,7 +17,7 @@ namespace VGltf.Unity
 {
     public abstract class MaterialImporterHook
     {
-        public abstract IndexedResource<Material> Import(IImporterContext context, int matIndex);
+        public abstract Task<IndexedResource<Material>> Import(IImporterContext context, int matIndex, CancellationToken ct);
     }
 
     public class MaterialImporter : ImporterRefHookable<MaterialImporterHook>
@@ -44,7 +44,7 @@ namespace VGltf.Unity
         {
             foreach (var h in Hooks)
             {
-                var r = h.Import(Context, matIndex);
+                var r = await h.Import(Context, matIndex, ct);
                 if (r != null)
                 {
                     return r;
@@ -72,7 +72,7 @@ namespace VGltf.Unity
                 if (pbrMR.BaseColorTexture != null)
                 {
                     var bct = pbrMR.BaseColorTexture;
-                    var textureResource = Context.Importers.Textures.Import(bct.Index);
+                    var textureResource = await Context.Importers.Textures.Import(bct.Index, ct);
                     mat.SetTexture("_MainTex", textureResource.Value);
                 }
             }

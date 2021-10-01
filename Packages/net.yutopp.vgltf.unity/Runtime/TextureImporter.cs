@@ -6,6 +6,8 @@
 //
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace VGltf.Unity
@@ -17,7 +19,7 @@ namespace VGltf.Unity
         }
     }
 
-    public class TextureImporter : ImporterRefHookable<TextureImporterHook>
+    public sealed class TextureImporter : ImporterRefHookable<TextureImporterHook>
     {
         public override IImporterContext Context { get; }
 
@@ -26,17 +28,17 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public IndexedResource<Texture2D> Import(int texIndex)
+        public async Task<IndexedResource<Texture2D>> Import(int texIndex, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
 
-            return Context.Resources.Textures.GetOrCall(texIndex, () =>
+            return await Context.Resources.Textures.GetOrCallAsync(texIndex, async () =>
             {
-                return ForceImport(texIndex);
+                return await ForceImport(texIndex, ct);
             });
         }
 
-        public IndexedResource<Texture2D> ForceImport(int texIndex)
+        public async Task<IndexedResource<Texture2D>> ForceImport(int texIndex, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfTex = gltf.Textures[texIndex];
@@ -53,6 +55,7 @@ namespace VGltf.Unity
                 var imageBuffer = new byte[imageResource.Data.Count];
                 Array.Copy(imageResource.Data.Array, imageResource.Data.Offset, imageBuffer, 0, imageResource.Data.Count);
 
+                // offload texture decoding...
                 tex.LoadImage(imageBuffer);
             }
 

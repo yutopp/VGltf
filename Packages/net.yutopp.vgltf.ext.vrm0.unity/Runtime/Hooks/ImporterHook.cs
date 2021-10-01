@@ -47,7 +47,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             // firstPerson
             ImportBlendShapeMaster(context, vrm, _rootGo);
             // secondaryAnimation
-            ImportMaterial(context, vrm);
+            await ImportMaterial(context, vrm, ct);
         }
 
         void ImportMeta(IImporterContext context, Types.Vrm vrm, GameObject go)
@@ -144,7 +144,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             _bridge.ImportBlendShapeMaster(context, vrm.BlendShapeMaster, go);
         }
 
-        void ImportMaterial(IImporterContext context, Types.Vrm vrm)
+        async Task ImportMaterial(IImporterContext context, Types.Vrm vrm, CancellationToken ct)
         {
             foreach (var matProp in vrm.MaterialProperties)
             {
@@ -153,7 +153,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                     throw new Exception($"VRM0 material is not found: name={matProp.Name}");
                 }
 
-                _bridge.ReplaceMaterialByMtoon(context, matProp, matRes.Value);
+                await _bridge.ReplaceMaterialByMtoon(context, matProp, matRes.Value, ct);
             }
         }
     }

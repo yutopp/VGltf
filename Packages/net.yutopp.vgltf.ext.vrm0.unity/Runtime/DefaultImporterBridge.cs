@@ -8,6 +8,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using VGltf.Unity;
 
@@ -81,7 +83,7 @@ namespace VGltf.Ext.Vrm0.Unity
             }
         }
 
-        public void ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat)
+        public Task ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat, CancellationToken ct)
         {
             throw new NotImplementedException();
         }
