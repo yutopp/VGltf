@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using VGltf.Unity;
 
@@ -8,17 +10,17 @@ namespace VGltfExamples.VRMExample
     {
         readonly VGltf.Ext.Vrm0.Unity.DefaultImporterBridge _defaultBridge = new VGltf.Ext.Vrm0.Unity.DefaultImporterBridge();
 
-        public void ImportMeta(Importer importer, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go)
+        public void ImportMeta(IImporterContext context, VGltf.Ext.Vrm0.Types.Meta vrmMeta, GameObject go)
         {
-            _defaultBridge.ImportMeta(importer, vrmMeta, go);
+            _defaultBridge.ImportMeta(context, vrmMeta, go);
         }
 
-        public void ImportBlendShapeMaster(Importer importer, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
+        public void ImportBlendShapeMaster(IImporterContext context, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
         {
-            _defaultBridge.ImportBlendShapeMaster(importer, vrmBlendShape, go);
+            _defaultBridge.ImportBlendShapeMaster(context, vrmBlendShape, go);
         }
 
-        public void ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat)
+        public async Task ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat, CancellationToken ct)
         {
             if (matProp.Shader == VGltf.Ext.Vrm0.Types.Material.VRM_USE_GLTFSHADER)
             {
@@ -57,7 +59,8 @@ namespace VGltfExamples.VRMExample
             {
                 if (!context.Resources.Textures.TryGetValue(kv.Value, out var texRes))
                 {
-                    texRes = context.Importers.Textures.Import(kv.Value);
+                    texRes = await context.Importers.Textures.Import(kv.Value, ct);
+                    await context.TimeSlicer.Slice(ct);
                 }
                 mat.SetTexture(kv.Key, texRes.Value);
             }

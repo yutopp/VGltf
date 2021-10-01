@@ -8,6 +8,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace VGltf.Unity
@@ -85,7 +87,7 @@ namespace VGltf.Unity
             return resource;
         }
 
-        public void ImportMeshesAndSkins(int nodeIndex)
+        public async Task ImportMeshesAndSkins(int nodeIndex, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfNode = gltf.Nodes[nodeIndex];
@@ -94,7 +96,7 @@ namespace VGltf.Unity
 
             if (gltfNode.Mesh != null)
             {
-                var meshResource = Context.Importers.Meshes.Import(gltfNode.Mesh.Value, go);
+                var meshResource = await Context.Importers.Meshes.Import(gltfNode.Mesh.Value, go, ct);
 
                 if (gltfNode.Skin != null)
                 {
@@ -106,7 +108,8 @@ namespace VGltf.Unity
             {
                 foreach (var childIndex in gltfNode.Children)
                 {
-                    ImportMeshesAndSkins(childIndex);
+                    await ImportMeshesAndSkins(childIndex, ct);
+                    await Context.TimeSlicer.Slice(ct);
                 }
             }
 

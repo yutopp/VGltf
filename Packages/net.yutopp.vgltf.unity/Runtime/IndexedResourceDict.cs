@@ -8,13 +8,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace VGltf.Unity
 {
     public sealed class IndexedResourceDict<K, V> : IDisposable where V : UnityEngine.Object
     {
-        public delegate IndexedResource<V> Gerenator();
-
         readonly Dictionary<K, IndexedResource<V>> _dict = new Dictionary<K, IndexedResource<V>>();
         readonly Dictionary<string, IndexedResource<V>> _nameDict = new Dictionary<string, IndexedResource<V>>();
 
@@ -40,7 +39,7 @@ namespace VGltf.Unity
             get => _dict[k];
         }
 
-        public IndexedResource<V> GetOrCall(K k, Gerenator generator)
+        public IndexedResource<V> GetOrCall(K k, Func<IndexedResource<V>> generator)
         {
             // Cached by reference
             if (TryGetValue(k, out var res))
@@ -49,6 +48,17 @@ namespace VGltf.Unity
             }
 
             return generator();
+        }
+
+        public async Task<IndexedResource<V>> GetOrCallAsync(K k, Func<Task<IndexedResource<V>>> generator)
+        {
+            // Cached by reference
+            if (TryGetValue(k, out var res))
+            {
+                return res;
+            }
+
+            return await generator();
         }
 
         public IEnumerable<T> Map<T>(Func<IndexedResource<V>, T> f)

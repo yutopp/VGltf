@@ -6,13 +6,13 @@
 //
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using VGltf.Types.Extensions;
 using VGltf.Unity;
 using VGltf.Ext.Vrm0.Unity.Extensions;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace VGltf.Ext.Vrm0.Unity.Hooks
 {
@@ -27,9 +27,9 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             _bridge = bridge;
         }
 
-        public override void PostHook(Importer importer)
+        public override async Task PostHook(IImporterContext context, CancellationToken ct)
         {
-            var gltf = importer.Context.Container.Gltf;
+            var gltf = context.Container.Gltf;
 
             if (!gltf.ContainsExtensionUsed(Types.Vrm.ExtensionName))
             {
@@ -37,22 +37,22 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             }
 
             // TODO: migration
-            if (!gltf.TryGetExtension<Types.Vrm>(Types.Vrm.ExtensionName, importer.Context.Container.JsonSchemas, out var vrm))
+            if (!gltf.TryGetExtension<Types.Vrm>(Types.Vrm.ExtensionName, context.Container.JsonSchemas, out var vrm))
             {
                 throw new Exception("No vrm extension record");
             }
 
-            ImportMeta(importer, vrm, _rootGo);
-            ImportHumanoid(importer.Context, vrm);
+            ImportMeta(context, vrm, _rootGo);
+            ImportHumanoid(context, vrm);
             // firstPerson
-            ImportBlendShapeMaster(importer, vrm, _rootGo);
+            ImportBlendShapeMaster(context, vrm, _rootGo);
             // secondaryAnimation
-            ImportMaterial(importer, vrm);
+            await ImportMaterial(context, vrm, ct);
         }
 
-        void ImportMeta(Importer importer, Types.Vrm vrm, GameObject go)
+        void ImportMeta(IImporterContext context, Types.Vrm vrm, GameObject go)
         {
-            _bridge.ImportMeta(importer, vrm.Meta, go);
+            _bridge.ImportMeta(context, vrm.Meta, go);
         }
 
         void ImportHumanoid(IImporterContext context, Types.Vrm vrm)
@@ -127,8 +127,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             }).ToArray();
 
             var go = _rootGo;
-            Avatar avater = null;
-            avater = AvatarBuilder.BuildHumanAvatar(go, hd);
+            var avater = AvatarBuilder.BuildHumanAvatar(go, hd);
 
             var anim = go.AddComponent<Animator>();
             anim.avatar = avater;
@@ -140,21 +139,21 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             }
         }
 
-        void ImportBlendShapeMaster(Importer importer, Types.Vrm vrm, GameObject go)
+        void ImportBlendShapeMaster(IImporterContext context, Types.Vrm vrm, GameObject go)
         {
-            _bridge.ImportBlendShapeMaster(importer, vrm.BlendShapeMaster, go);
+            _bridge.ImportBlendShapeMaster(context, vrm.BlendShapeMaster, go);
         }
 
-        void ImportMaterial(Importer importer, Types.Vrm vrm)
+        async Task ImportMaterial(IImporterContext context, Types.Vrm vrm, CancellationToken ct)
         {
             foreach (var matProp in vrm.MaterialProperties)
             {
-                if (!importer.Context.Resources.Materials.TryGetValueByName(matProp.Name, out var matRes))
+                if (!context.Resources.Materials.TryGetValueByName(matProp.Name, out var matRes))
                 {
                     throw new Exception($"VRM0 material is not found: name={matProp.Name}");
                 }
 
-                _bridge.ReplaceMaterialByMtoon(importer.Context, matProp, matRes.Value);
+                await _bridge.ReplaceMaterialByMtoon(context, matProp, matRes.Value, ct);
             }
         }
     }

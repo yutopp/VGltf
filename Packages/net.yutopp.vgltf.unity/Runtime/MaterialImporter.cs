@@ -9,13 +9,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace VGltf.Unity
 {
     public abstract class MaterialImporterHook
     {
-        public abstract IndexedResource<Material> Import(IImporterContext context, int matIndex);
+        public abstract Task<IndexedResource<Material>> Import(IImporterContext context, int matIndex, CancellationToken ct);
     }
 
     public class MaterialImporter : ImporterRefHookable<MaterialImporterHook>
@@ -27,21 +29,22 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public IndexedResource<Material> Import(int matIndex)
+        public async Task<IndexedResource<Material>> Import(int matIndex, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfMat = gltf.Materials[matIndex];
 
-            return Context.Resources.Materials.GetOrCall(matIndex, () => {
-                return ForceImport(matIndex);
+            return await Context.Resources.Materials.GetOrCallAsync(matIndex, async () =>
+            {
+                return await ForceImport(matIndex, ct);
             });
         }
 
-        public IndexedResource<Material> ForceImport(int matIndex)
+        public async Task<IndexedResource<Material>> ForceImport(int matIndex, CancellationToken ct)
         {
-            foreach(var h in Hooks)
+            foreach (var h in Hooks)
             {
-                var r = h.Import(Context, matIndex);
+                var r = await h.Import(Context, matIndex, ct);
                 if (r != null)
                 {
                     return r;
@@ -55,7 +58,7 @@ namespace VGltf.Unity
             var shader = Shader.Find("Standard");
             if (shader == null)
             {
-                throw new NotImplementedException();
+                throw new Exception($"Standard shader is not found");
             }
 
             var mat = new Material(shader);
@@ -69,7 +72,7 @@ namespace VGltf.Unity
                 if (pbrMR.BaseColorTexture != null)
                 {
                     var bct = pbrMR.BaseColorTexture;
-                    var textureResource = Context.Importers.Textures.Import(bct.Index);
+                    var textureResource = await Context.Importers.Textures.Import(bct.Index, ct);
                     mat.SetTexture("_MainTex", textureResource.Value);
                 }
             }

@@ -11,14 +11,26 @@ using System.Collections;
 using System.Linq;
 using System.IO;
 using System;
+using UnityEngine.TestTools;
+using System.Threading.Tasks;
 
 namespace VGltf.Unity.UnitTests
 {
     public class IdentityTests
     {
-        [Test]
-        [TestCaseSource("PrimitiveTypes")]
-        public void IdentityTest(PrimitiveType primType)
+        // Combining UnityTest, TestCaseSource and IEnumerator doesn't work...
+        [UnityTest]
+        //[TestCaseSource(nameof(PrimitiveTypes))]
+        public IEnumerator IdentityTestRunner(/*PrimitiveType primType*/)
+        {
+            foreach(var v in PrimitiveTypes)
+            {
+                var task = IdentityTest((PrimitiveType) ((object[]) v)[0]);
+                yield return task.AsIEnumerator();
+            }
+        }
+
+        async Task IdentityTest(PrimitiveType primType)
         {
             GameObject srcGo = GameObject.CreatePrimitive(primType);
 
@@ -48,9 +60,9 @@ namespace VGltf.Unity.UnitTests
             var rootNodeIndex = scene.Nodes[0];
 
             IImporterContext ctx = null;
-            using (var importer = new Importer(gltfConteiner))
+            using (var importer = new Importer(gltfConteiner, new DefaultTimeSlicer()))
             {
-                ctx = importer.ImportSceneNodes();
+                ctx = await importer.ImportSceneNodes(System.Threading.CancellationToken.None);
             }
             using (ctx)
             {

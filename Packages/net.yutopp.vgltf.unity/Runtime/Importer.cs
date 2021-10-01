@@ -6,16 +6,15 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace VGltf.Unity
 {
     public abstract class ImporterHookBase
     {
-        public virtual void PostHook(Importer importer)
+        public virtual async Task PostHook(IImporterContext context, CancellationToken ct)
         {
         }
     }
@@ -33,15 +32,17 @@ namespace VGltf.Unity
             public ResourcesStore GltfResources { get; }
 
             public ImporterRuntimeResources Resources { get; }
+            public ITimeSlicer TimeSlicer { get; }
 
             public ResourceImporters Importers { get; }
 
-            public InnerContext(GltfContainer container, IResourceLoader loader, CoordUtils coordUtils)
+            public InnerContext(GltfContainer container, IResourceLoader loader, ITimeSlicer timeSlicer, CoordUtils coordUtils)
             {
                 Container = container;
                 GltfResources = new ResourcesStore(container, loader);
 
                 Resources = new ImporterRuntimeResources();
+                TimeSlicer = timeSlicer;
 
                 Importers = new ResourceImporters
                 {
@@ -53,17 +54,37 @@ namespace VGltf.Unity
                 };
             }
 
-            void IDisposable.Dispose()
+            public void Dispose()
             {
                 Resources.Dispose();
             }
+
+            // helper functions
+
+            public void SetRendererEnebled(bool value)
+            {
+                foreach (var go in Resources.Nodes.Map(r => r.Value))
+                {
+                    var r = go.GetComponent<MeshRenderer>();
+                    if (r != null)
+                    {
+                        r.enabled = value;
+                    }
+
+                    var smr = go.GetComponent<SkinnedMeshRenderer>();
+                    if (smr != null)
+                    {
+                        smr.enabled = value;
+                    }
+                }
+            }
         }
 
-        IImporterContext context_;
+        InnerContext _context;
 
-        public override IImporterContext Context { get => context_; }
+        public override IImporterContext Context { get => _context; }
 
-        public Importer(GltfContainer container, IResourceLoader loader, Config config = null)
+        public Importer(GltfContainer container, IResourceLoader loader, ITimeSlicer timeSlicer, Config config = null)
         {
             if (config == null)
             {
@@ -71,15 +92,15 @@ namespace VGltf.Unity
             }
 
             var coordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
-            context_ = new InnerContext(container, loader, coordUtils);
+            _context = new InnerContext(container, loader, timeSlicer, coordUtils);
         }
 
-        public Importer(GltfContainer container, Config config = null)
-            : this(container, new ResourceLoaderFromEmbedOnly(), config)
+        public Importer(GltfContainer container, ITimeSlicer timeSlicer, Config config = null)
+            : this(container, new ResourceLoaderFromEmbedOnly(), timeSlicer, config)
         {
         }
 
-        public IImporterContext ImportSceneNodes()
+        public async Task<IImporterContext> ImportSceneNodes(CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfScene = VGltf.Types.Extensions.GltfExtensions.GetSceneObject(gltf);
@@ -90,13 +111,17 @@ namespace VGltf.Unity
             }
             foreach (var nodeIndex in gltfScene.Nodes)
             {
-                Context.Importers.Nodes.ImportMeshesAndSkins(nodeIndex);
+                await Context.Importers.Nodes.ImportMeshesAndSkins(nodeIndex, ct);
+                await _context.TimeSlicer.Slice(ct);
             }
 
             foreach (var hook in Hooks)
             {
-                hook.PostHook(this);
+                await hook.PostHook(Context, ct);
+                await _context.TimeSlicer.Slice(ct);
             }
+
+            _context.SetRendererEnebled(true);
 
             return TakeContext();
         }
@@ -104,16 +129,16 @@ namespace VGltf.Unity
         // Take ownership of Context from importer.
         public IImporterContext TakeContext()
         {
-            var ctx = context_;
-            context_ = null;
+            var ctx = _context;
+            _context = null;
 
             return ctx;
         }
 
         void IDisposable.Dispose()
         {
-            context_?.Dispose();
-            context_ = null;
+            _context?.Dispose();
+            _context = null;
         }
     }
 }

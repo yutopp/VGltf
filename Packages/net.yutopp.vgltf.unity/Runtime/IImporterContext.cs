@@ -15,6 +15,7 @@ namespace VGltf.Unity
         ResourcesStore GltfResources { get; }
 
         ImporterRuntimeResources Resources { get; }
+        ITimeSlicer TimeSlicer { get; }
 
         ResourceImporters Importers { get; }
     }

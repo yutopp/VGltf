@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace VGltf.Unity
@@ -32,17 +34,18 @@ namespace VGltf.Unity
             _coordUtils = coordUtils;
         }
 
-        public IndexedResource<Mesh> Import(int meshIndex, GameObject go)
+        public async Task<IndexedResource<Mesh>> Import(int meshIndex, GameObject go, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
 
-            return Context.Resources.Meshes.GetOrCall(meshIndex, () => {
-                return ForceImport(meshIndex, go);
+            return await Context.Resources.Meshes.GetOrCallAsync(meshIndex, async () =>
+            {
+                return await ForceImport(meshIndex, go, ct);
             });
         }
 
-        class Target : IEquatable<Target>
+        sealed class Target : IEquatable<Target>
         {
             public int Position;
             public int? Normal;
@@ -67,7 +70,7 @@ namespace VGltf.Unity
             }
         }
 
-        class Primitive
+        sealed class Primitive
         {
             public int? Indices;
             public int? Material;
@@ -82,7 +85,7 @@ namespace VGltf.Unity
             public List<Target> Targets;
         }
 
-        class PrimitiveResource
+        sealed class PrimitiveResource
         {
             public int[] Indices;
             public Material Material;
@@ -96,7 +99,7 @@ namespace VGltf.Unity
             public BlendShapeResource[] BlendShapes;
         }
 
-        class BlendShapeResource
+        sealed class BlendShapeResource
         {
             public string Name;
             public Vector3[] Vertices;
@@ -104,7 +107,7 @@ namespace VGltf.Unity
             public Vector3[] Tangents;
         }
 
-        public IndexedResource<Mesh> ForceImport(int meshIndex, GameObject go)
+        public async Task<IndexedResource<Mesh>> ForceImport(int meshIndex, GameObject go, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
@@ -119,8 +122,7 @@ namespace VGltf.Unity
                 ValidateSubPrimitives(primsRaw[0], p, i);
             }
 
-            var prims =
-                primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0));
+            var prims = await Task.WhenAll(primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0, ct)));
 
             var mesh = new Mesh();
             mesh.name = gltfMesh.Name;
@@ -168,6 +170,7 @@ namespace VGltf.Unity
             {
                 var smr = go.AddComponent<SkinnedMeshRenderer>();
                 smr.sharedMesh = mesh;
+                smr.enabled = false; // Do not render by default until explicitly enabled
 
                 // Default blend shape weight
                 if (gltfMesh.Weights != null)
@@ -187,6 +190,7 @@ namespace VGltf.Unity
                 mf.sharedMesh = mesh;
 
                 var mr = go.AddComponent<MeshRenderer>();
+                mr.enabled = false; // Do not render by default until explicitly enabled
                 r = mr;
             }
 
@@ -351,7 +355,7 @@ namespace VGltf.Unity
             }
         }
 
-        PrimitiveResource ImportPrimitive(Types.Mesh gltfMesh, Primitive prim, bool isPrimary)
+        async Task<PrimitiveResource> ImportPrimitive(Types.Mesh gltfMesh, Primitive prim, bool isPrimary, CancellationToken ct)
         {
             var res = new PrimitiveResource();
 
@@ -362,7 +366,9 @@ namespace VGltf.Unity
 
             if (prim.Material != null)
             {
-                var materialRes = Context.Importers.Materials.Import(prim.Material.Value);
+                var materialRes = await Context.Importers.Materials.Import(prim.Material.Value, ct);
+                await Context.TimeSlicer.Slice(ct);
+
                 res.Material = materialRes.Value;
             }
 
