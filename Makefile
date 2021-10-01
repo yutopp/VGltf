@@ -1,5 +1,4 @@
 PROJECT_NAME:=VGltf
-PROJECT_VERSION:=0.1.1
 
 PACKAGE_NAME:=net.yutopp.vgltf
 PACKAGE_DIR:=Packages/${PACKAGE_NAME}
