@@ -1,0 +1,13 @@
+{
+    "name": "Unity.net.yutopp.vgltf.Tests.Shims.UnityStreamingAssets",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
