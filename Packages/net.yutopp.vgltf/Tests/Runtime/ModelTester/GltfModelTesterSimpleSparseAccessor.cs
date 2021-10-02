@@ -7,6 +7,7 @@
 
 using System.Linq;
 using NUnit.Framework;
+using VGltf.UnitTests.Shims;
 
 namespace VGltf.UnitTests.ModelTester
 {

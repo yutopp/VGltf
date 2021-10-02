@@ -5,7 +5,7 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
-namespace VGltf.UnitTests
+namespace VGltf.UnitTests.Shims
 {
     // For testing purpose
     struct Vec2<T> where T : struct
