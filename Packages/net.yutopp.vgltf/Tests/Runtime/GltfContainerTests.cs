@@ -9,12 +9,11 @@ using System;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using VGltf.UnitTests.Shims;
+using VJson.Schema;
 
 namespace VGltf.UnitTests
 {
-    using VGltf.UnitTests.Shims;
-    using VJson.Schema;
-
     public class GltfContainerTests
     {
         [Test]
@@ -30,8 +29,9 @@ namespace VGltf.UnitTests
                 var ex = schema.Validate(c.Gltf, c.JsonSchemas);
                 Assert.Null(ex);
 
-                var storageDir = Directory.GetParent(path).ToString();
-                var loader = new Shims.ResourceLoaderFromAssets(storageDir);
+                var fullStorageDir = Directory.GetParent(path).FullName;
+                var relStorageDir = FilePath.GetRelativePath(fullStorageDir, Directory.GetCurrentDirectory());
+                var loader = new Shims.ResourceLoaderFromAssets(relStorageDir);
 
                 var store = new ResourcesStore(c, loader);
                 tester.TestModel(store);

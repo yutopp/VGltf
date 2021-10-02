@@ -12,11 +12,11 @@ namespace VGltf.UnitTests.Shims
 {
     public sealed class ResourceLoaderFromAssets : IResourceLoader
     {
-        readonly string _baseDir;
+        readonly string _relBaseDir;
 
-        public ResourceLoaderFromAssets(string baseDir)
+        public ResourceLoaderFromAssets(string relBaseDir)
         {
-            _baseDir = baseDir;
+            _relBaseDir = relBaseDir;
         }
 
         public Resource Load(string uri)
@@ -26,7 +26,7 @@ namespace VGltf.UnitTests.Shims
                 return DataUriUtil.Extract(uri);
             }
 
-            using (var fs = StreamReaderFactory.CreateStream(Path.Combine(_baseDir, uri)))
+            using (var fs = StreamReaderFactory.CreateStream(Path.Combine(_relBaseDir, uri)))
             using (var ms = new MemoryStream())
             {
                 fs.CopyTo(ms);
