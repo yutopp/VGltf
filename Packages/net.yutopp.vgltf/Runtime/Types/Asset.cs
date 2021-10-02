@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "asset.schema.json")]
-    public class Asset : GltfProperty
+    public sealed class Asset : GltfProperty
     {
         [JsonField(Name = "copyright"), JsonFieldIgnorable]
         public string Copyright;

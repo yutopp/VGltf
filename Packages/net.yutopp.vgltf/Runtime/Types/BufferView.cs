@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "bufferView.schema.json")]
-    public class BufferView : GltfChildOfRootProperty
+    public sealed class BufferView : GltfChildOfRootProperty
     {
         [JsonField(Name = "buffer")]
         [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]

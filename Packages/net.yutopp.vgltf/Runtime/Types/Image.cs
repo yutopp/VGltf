@@ -14,7 +14,7 @@ namespace VGltf.Types
 {
     [JsonSchema(Id = "image.schema.json")]
     // TODO: oneOf required: Uri OR bufferView
-    public class Image : GltfChildOfRootProperty
+    public sealed class Image : GltfChildOfRootProperty
     {
         [JsonField(Name = "uri"), JsonFieldIgnorable]
         // TODO: "format": "uriref"

@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "accessor.schema.json")]
-    public class Accessor : GltfChildOfRootProperty
+    public sealed class Accessor : GltfChildOfRootProperty
     {
         [JsonField(Name = "bufferView"), JsonFieldIgnorable]
         [JsonSchemaRef(typeof(GltfID))]
@@ -81,7 +81,7 @@ namespace VGltf.Types
         }
 
         [JsonSchema(Id = "accessor.sparse.schema.json")]
-        public class SparseType : GltfProperty
+        public sealed class SparseType : GltfProperty
         {
             [JsonField(Name = "count")]
             [JsonSchema(Minimum = 0), JsonSchemaRequired]
@@ -123,7 +123,7 @@ namespace VGltf.Types
             }
 
             [JsonSchema(Id = "accessor.sparse.values.schema.json")]
-            public class ValuesType : GltfProperty
+            public sealed class ValuesType : GltfProperty
             {
                 [JsonField(Name = "bufferView")]
                 [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]

@@ -8,14 +8,14 @@
 // Reference: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#glb-file-format-specification
 namespace VGltf.Glb
 {
-    public class Header
+    public sealed class Header
     {
         public uint Magic;
         public uint Version;
         public uint Length;
     }
 
-    public class Chunk
+    public sealed class Chunk
     {
         public uint ChunkLength;
         public uint ChunkType;

@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "sampler.schema.json")]
-    public class Sampler : GltfChildOfRootProperty
+    public sealed class Sampler : GltfChildOfRootProperty
     {
         [JsonField(Name = "magFilter")]
         public MagFilterEnum MagFilter;

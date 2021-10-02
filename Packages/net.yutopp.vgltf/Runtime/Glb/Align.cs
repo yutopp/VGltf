@@ -10,7 +10,7 @@ using System.IO;
 
 namespace VGltf.Glb
 {
-    public class Align
+    public static class Align
     {
         public static uint CalcPadding(uint offset, uint alignment)
         {

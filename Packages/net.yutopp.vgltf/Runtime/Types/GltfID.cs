@@ -10,7 +10,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Minimum = 0)]
-    public class GltfID : RefTag<int>
+    public sealed class GltfID : RefTag<int>
     {
     }
 }

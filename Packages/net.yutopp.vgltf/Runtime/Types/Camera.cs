@@ -14,7 +14,7 @@ namespace VGltf.Types
 {
     [JsonSchema(Id = "camera.schema.json")]
     // TODO: not: "required": [ "perspective", "orthographic" ]
-    public class Camera : GltfChildOfRootProperty
+    public sealed class Camera : GltfChildOfRootProperty
     {
         [JsonField(Name = "orthographic"), JsonFieldIgnorable]
         public OrthographicType Orthographic;
@@ -29,7 +29,7 @@ namespace VGltf.Types
         //
 
         [JsonSchema(Id = "camera.orthographic.schema.json")]
-        public class OrthographicType : GltfProperty
+        public sealed class OrthographicType : GltfProperty
         {
             [JsonField(Name = "xmag")]
             [JsonSchemaRequired]
@@ -49,7 +49,7 @@ namespace VGltf.Types
         }
 
         [JsonSchema(Id = "camera.perspective.schema.json")]
-        public class PerspectiveType
+        public sealed class PerspectiveType
         {
             [JsonField(Name = "aspectRatio"), JsonFieldIgnorable]
             [JsonSchema(ExclusiveMinimum = 0.0f)]

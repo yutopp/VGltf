@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "buffer.schema.json")]
-    public class Buffer : GltfChildOfRootProperty
+    public sealed class Buffer : GltfChildOfRootProperty
     {
         [JsonField(Name = "uri"), JsonFieldIgnorable]
         // TODO: "format": "uriref"

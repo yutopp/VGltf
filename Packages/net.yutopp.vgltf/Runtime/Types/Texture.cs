@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "texture.schema.json")]
-    public class Texture : GltfChildOfRootProperty
+    public sealed class Texture : GltfChildOfRootProperty
     {
         [JsonField(Name = "sampler"), JsonFieldIgnorable]
         [JsonSchemaRef(typeof(GltfID))]

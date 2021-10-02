@@ -15,7 +15,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "glTF.schema.json")]
-    public class Gltf : GltfProperty
+    public sealed class Gltf : GltfProperty
     {
         [JsonField(Name = "extensionsUsed"), JsonFieldIgnorable]
         [JsonSchema(UniqueItems = true, MinItems = 1)]

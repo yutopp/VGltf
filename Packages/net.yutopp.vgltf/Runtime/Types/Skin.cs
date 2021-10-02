@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "skin.schema.json")]
-    public class Skin : GltfChildOfRootProperty
+    public sealed class Skin : GltfChildOfRootProperty
     {
         [JsonField(Name = "inverseBindMatrices"), JsonFieldIgnorable]
         [JsonSchemaRef(typeof(GltfID))]

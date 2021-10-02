@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "material.schema.json")]
-    public class Material : GltfChildOfRootProperty
+    public sealed class Material : GltfChildOfRootProperty
     {
         [JsonField(Name = "pbrMetallicRoughness"), JsonFieldIgnorable]
         public PbrMetallicRoughnessType PbrMetallicRoughness;
@@ -46,7 +46,7 @@ namespace VGltf.Types
         //
 
         [JsonSchema(Id = "material.pbrMetallicRoughness.schema.json")]
-        public class PbrMetallicRoughnessType : GltfProperty
+        public sealed class PbrMetallicRoughnessType : GltfProperty
         {
             [JsonField(Name = "baseColorFactor")]
             [JsonSchema(MinItems = 4, MaxItems = 4)]
@@ -68,18 +68,18 @@ namespace VGltf.Types
             public MetallicRoughnessTextureInfoType MetallicRoughnessTexture;
         }
 
-        public class BaseColorTextureInfoType : TextureInfo
+        public sealed class BaseColorTextureInfoType : TextureInfo
         {
             public override TextureInfoKind Kind { get { return TextureInfoKind.BaseColor; } }
         }
 
-        public class MetallicRoughnessTextureInfoType : TextureInfo
+        public sealed class MetallicRoughnessTextureInfoType : TextureInfo
         {
             public override TextureInfoKind Kind { get { return TextureInfoKind.MetallicRoughness; } }
         }
 
         [JsonSchema(Id = "material.normalTextureInfo.schema.json")]
-        public class NormalTextureInfoType : TextureInfo
+        public sealed class NormalTextureInfoType : TextureInfo
         {
             [JsonField(Name = "scale")]
             public float Scale = 1.0f;
@@ -88,7 +88,7 @@ namespace VGltf.Types
         }
 
         [JsonSchema(Id = "material.occlusionTextureInfo.schema.json")]
-        public class OcclusionTextureInfoType : TextureInfo
+        public sealed class OcclusionTextureInfoType : TextureInfo
         {
             [JsonField(Name = "strength")]
             [JsonSchema(Minimum = 0.0f, Maximum = 1.0f)]
@@ -97,7 +97,7 @@ namespace VGltf.Types
             public override TextureInfoKind Kind { get { return TextureInfoKind.Occlusion; } }
         }
 
-        public class EmissiveTextureInfoType : TextureInfo
+        public sealed class EmissiveTextureInfoType : TextureInfo
         {
             public override TextureInfoKind Kind { get { return TextureInfoKind.Emissive; } }
         }

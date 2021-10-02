@@ -13,7 +13,7 @@ using VJson.Schema;
 // Reference: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/schema/*
 namespace VGltf.Types
 {
-    public class GltfProperty
+    public abstract class GltfProperty
     {
         [JsonField(Name = "extensions"), JsonFieldIgnorable]
         public Dictionary<string, INode> Extensions;

@@ -11,14 +11,14 @@ using VJson;
 
 namespace VGltf.Glb
 {
-    public class StoredBuffer
+    public sealed class StoredBuffer
     {
         public ArraySegment<byte> Payload;
     }
 
-    public class Reader : IDisposable
+    public sealed class Reader : IDisposable
     {
-        BinaryReader _r;
+        readonly BinaryReader _r;
 
         public Reader(Stream s)
         {

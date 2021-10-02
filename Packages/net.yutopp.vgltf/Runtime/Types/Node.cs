@@ -13,7 +13,7 @@ namespace VGltf.Types
 {
     [JsonSchema(Id = "node.schema.json")]
     // TODO: not
-    public class Node : GltfChildOfRootProperty
+    public sealed class Node : GltfChildOfRootProperty
     {
         [JsonField(Name = "camera"), JsonFieldIgnorable]
         [JsonSchemaRef(typeof(GltfID))]

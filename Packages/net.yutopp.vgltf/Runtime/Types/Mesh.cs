@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "mesh.schema.json")]
-    public class Mesh : GltfChildOfRootProperty
+    public sealed class Mesh : GltfChildOfRootProperty
     {
         [JsonField(Name = "primitives")]
         [JsonSchema(MinItems = 1), JsonSchemaRequired]
@@ -26,7 +26,7 @@ namespace VGltf.Types
         //
 
         [JsonSchema(Id = "mesh.primitive.schema.json")]
-        public class PrimitiveType : GltfProperty
+        public sealed class PrimitiveType : GltfProperty
         {
             [JsonField(Name = "attributes")]
             [JsonSchema(MinProperties = 1), JsonSchemaRequired]

@@ -10,9 +10,9 @@ using System.IO;
 
 namespace VGltf.Glb
 {
-    public class Writer : IDisposable
+    public sealed class Writer : IDisposable
     {
-        BinaryWriter _w;
+        readonly BinaryWriter _w;
 
         public Writer(Stream s)
         {

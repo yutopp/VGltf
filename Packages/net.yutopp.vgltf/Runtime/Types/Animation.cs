@@ -13,7 +13,7 @@ using VJson.Schema;
 namespace VGltf.Types
 {
     [JsonSchema(Id = "animation.schema.json")]
-    public class Animation : GltfChildOfRootProperty
+    public sealed class Animation : GltfChildOfRootProperty
     {
         [JsonField(Name = "channels")]
         [JsonSchema(MinItems = 1), JsonSchemaRequired]

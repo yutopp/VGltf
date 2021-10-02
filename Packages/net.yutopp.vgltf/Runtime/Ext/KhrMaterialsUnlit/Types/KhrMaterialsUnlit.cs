@@ -14,7 +14,7 @@ namespace VGltf.Ext.KhrMaterialsUnlit.Types
     [JsonSchema(Title = "KHR_materials_unlit glTF extension",
             Description = "glTF extension that defines the unlit material model.",
             Id = "glTF.KHR_materials_unlit.schema.json")]
-    public class KhrMaterialsUnlit
+    public sealed class KhrMaterialsUnlit
     {
         public static readonly string ExtensionName = "KHR_materials_unlit";
     }
