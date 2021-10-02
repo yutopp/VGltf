@@ -12,6 +12,7 @@ using NUnit.Framework;
 
 namespace VGltf.UnitTests
 {
+    using VGltf.UnitTests.Shims;
     using VJson.Schema;
 
     public class GltfContainerTests
@@ -21,7 +22,7 @@ namespace VGltf.UnitTests
         public void FromGltfTest(string[] modelPath, ModelTester.IModelTester tester)
         {
             var path = modelPath.Aggregate("SampleModels", (b, p) => Path.Combine(b, p));
-            using (var fs = new FileStream(path, FileMode.Open))
+            using (var fs = StreamReaderFactory.CreateStream(path))
             {
                 var c = GltfContainer.FromGltf(fs);
 
@@ -30,7 +31,7 @@ namespace VGltf.UnitTests
                 Assert.Null(ex);
 
                 var storageDir = Directory.GetParent(path).ToString();
-                var loader = new ResourceLoaderFromFileStorage(storageDir);
+                var loader = new Shims.ResourceLoaderFromAssets(storageDir);
 
                 var store = new ResourcesStore(c, loader);
                 tester.TestModel(store);
@@ -42,7 +43,7 @@ namespace VGltf.UnitTests
         public void FromGlbTest(string[] modelPath, ModelTester.IModelTester tester)
         {
             var path = modelPath.Aggregate("SampleModels", (b, p) => Path.Combine(b, p));
-            using (var fs = new FileStream(path, FileMode.Open))
+            using (var fs = StreamReaderFactory.CreateStream(path))
             {
                 var c = GltfContainer.FromGlb(fs);
 

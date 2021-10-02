@@ -97,13 +97,19 @@ namespace VGltf.UnitTests.ModelTester
             Array.Copy(imageResource.Data.Array, imageResource.Data.Offset, imageBytes, 0, imageResource.Data.Count);
 
             // Compare to the base texture image
-            var baseImagePath = new string[]{
-                            "BoxTextured",
-                            "glTF",
-                            "CesiumLogoFlat.png"
-                        }.Aggregate("SampleModels", (b, p) => Path.Combine(b, p));
-            var baseImageBytes = File.ReadAllBytes(baseImagePath);
+            var imagePath = new string[] {
+                "BoxTextured",
+                "glTF",
+                "CesiumLogoFlat.png"
+            }.Aggregate("SampleModels", (b, p) => Path.Combine(b, p));
 
+            byte[] baseImageBytes;
+            using (var fs = StreamReaderFactory.CreateStream(imagePath))
+            using (var ms = new MemoryStream())
+            {
+                fs.CopyTo(ms);
+                baseImageBytes = ms.ToArray();
+            }
             Assert.AreEqual(BitConverter.ToString(baseImageBytes),
                             BitConverter.ToString(imageBytes));
         }

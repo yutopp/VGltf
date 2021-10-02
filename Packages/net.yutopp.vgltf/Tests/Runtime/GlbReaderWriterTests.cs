@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using VGltf.UnitTests.Shims;
 
 namespace VGltf.UnitTests
 {
@@ -23,7 +24,7 @@ namespace VGltf.UnitTests
             Glb.Header header0;
             Glb.Chunk c0Json;
             Glb.Chunk c0Buffer;
-            using (var fs = new FileStream(path, FileMode.Open))
+            using (var fs = StreamReaderFactory.CreateStream(path))
             using (var r0 = new Glb.Reader(fs))
             {
                 header0 = r0.ReadHeader();
@@ -33,7 +34,7 @@ namespace VGltf.UnitTests
 
             // re-export glb
             byte[] output;
-            using (var fs = new FileStream(path, FileMode.Open))
+            using (var fs = StreamReaderFactory.CreateStream(path))
             {
                 var c = GltfContainer.FromGlb(fs);
                 using (var ms = new MemoryStream())

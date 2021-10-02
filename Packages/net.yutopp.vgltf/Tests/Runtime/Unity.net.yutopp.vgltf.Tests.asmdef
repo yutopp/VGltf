@@ -4,7 +4,8 @@
         "Unity.net.yutopp.vgltf",
         "Unity.net.yutopp.vjson",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Unity.net.yutopp.vgltf.Tests.Shims.UnityStreamingAssets"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
