@@ -26,9 +26,9 @@
 
   <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
     <ItemGroup>
-      <MyBinFolder Include="../../SampleModels/**/*.*" />
+      <MyBinFolder Include="../../Assets/StreamingAssets/SampleModels/**/*.*" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(MyBinFolder)" DestinationFiles="$(OutDir)/SampleModels/%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyBinFolder)" DestinationFiles="$(OutDir)/Assets/StreamingAssets/SampleModels/%(RecursiveDir)%(Filename)%(Extension)" />
   </Target>
 </Project>
