@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641252, b: 0.574817, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -901,7 +901,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: SampleModels/Alicia/VRM/AliciaSolid-0.51.vrm
+  m_Text: StreamingAssets/sample-models/VRM/Alicia/VRM/AliciaSolid-0.51.vrm
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -1143,6 +1143,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   filePathInput: {fileID: 1103151024}
+  exportButton: {fileID: 0}
+  outputFilePathInput: {fileID: 0}
   RuntimeAnimatorController: {fileID: 9100000, guid: 2cea6e6c09d444995bfbd16d68eaeb49,
     type: 2}
 --- !u!1 &2003198534
@@ -1305,7 +1307,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: SampleModels/Alicia/VRM/AliciaSolid-0.51.vrm
+  m_Text: StreamingAssets/sample-models/VRM/Alicia/VRM/AliciaSoli
 --- !u!222 &2093987082
 CanvasRenderer:
   m_ObjectHideFlags: 0
