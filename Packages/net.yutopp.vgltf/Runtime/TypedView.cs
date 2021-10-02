@@ -13,8 +13,7 @@ using VGltf.Types;
 
 namespace VGltf
 {
-    public interface TypedViewBase<T>
-    where T : struct
+    public interface ITypedView<T> where T : struct
     {
         ArraySegment<T> GetView();
         IEnumerable<T> GetEnumerable();
@@ -23,10 +22,9 @@ namespace VGltf
     /// <summary>
     ///
     /// </summary>
-    public class TypedArray<T> : TypedViewBase<T>
-    where T : struct
+    public sealed class TypedArray<T> : ITypedView<T> where T : struct
     {
-        public T[] TypedBuffer { get; private set; }
+        public T[] TypedBuffer { get; }
 
         public TypedArray(T[] typedBuffer)
         {
@@ -48,10 +46,9 @@ namespace VGltf
     /// <summary>
     ///
     /// </summary>
-    public class TypedArrayView<T> : TypedViewBase<T>
-    where T : struct
+    public sealed class TypedArrayView<T> : ITypedView<T> where T : struct
     {
-        public ArraySegment<T> TypedBuffer { get; private set; }
+        public ArraySegment<T> TypedBuffer { get; }
 
         public TypedArrayView(ArraySegment<T> typedBuffer)
         {
@@ -77,11 +74,10 @@ namespace VGltf
     /// <summary>
     ///
     /// </summary>
-    public class TypedArrayStorage<T> : TypedViewBase<T>
-    where T : struct
+    public sealed class TypedArrayStorage<T> : ITypedView<T> where T : struct
     {
-        public ArraySegment<byte> RawBuffer { get; private set; }
-        public T[] TypedBuffer { get; private set; }
+        public ArraySegment<byte> RawBuffer { get; }
+        public T[] TypedBuffer { get; }
 
         public TypedArrayStorage(ArraySegment<byte> rawBuffer,
                                  int byteOffset,
@@ -114,16 +110,15 @@ namespace VGltf
             return TypedBuffer;
         }
 
-        public TypedViewBase<U> CastTo<U>() where U : struct
+        public ITypedView<U> CastTo<U>() where U : struct
         {
             return new TypedArray<U>(TypedBuffer.Select(x => (U)Convert.ChangeType(x, typeof(U))).ToArray());
         }
     }
 
-    public class TypedArrayStorageFromBufferView<T> : TypedViewBase<T>
-    where T : struct
+    public sealed class TypedArrayStorageFromBufferView<T> : ITypedView<T> where T : struct
     {
-        public TypedArrayStorage<T> Storage { get; private set; }
+        public TypedArrayStorage<T> Storage { get; }
 
         public TypedArrayStorageFromBufferView(ResourcesStore store,
                                                int bufferViewIndex,
@@ -153,21 +148,20 @@ namespace VGltf
             return Storage.GetEnumerable();
         }
 
-        public TypedViewBase<U> CastTo<U>() where U : struct
+        public ITypedView<U> CastTo<U>() where U : struct
         {
             return Storage.CastTo<U>();
         }
     }
 
-    public class TypedArrayEntity<T> : TypedViewBase<T>
-    where T : struct
+    public sealed class TypedArrayEntity<T> : ITypedView<T> where T : struct
     {
-        public TypedViewBase<T> DenseView { get; private set; }
+        public ITypedView<T> DenseView { get; }
 
-        public TypedViewBase<uint> SparseIndices { get; private set; }
-        public TypedViewBase<T> SparseValues { get; private set; }
+        public ITypedView<uint> SparseIndices { get; }
+        public ITypedView<T> SparseValues { get; }
 
-        public int Length { get; private set; }
+        public int Length { get; }
 
         public TypedArrayEntity(ResourcesStore store, Accessor accessor)
         {
@@ -277,10 +271,10 @@ namespace VGltf
         }
     }
 
-    public class TypedBuffer
+    public sealed class TypedBuffer
     {
-        public ResourcesStore Store { get; private set; }
-        public Types.Accessor Accessor { get; private set; }
+        public ResourcesStore Store { get; }
+        public Types.Accessor Accessor { get; }
 
         public TypedBuffer(ResourcesStore store, Types.Accessor accessor)
         {

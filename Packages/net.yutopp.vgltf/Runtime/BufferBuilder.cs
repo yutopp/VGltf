@@ -21,7 +21,7 @@ namespace VGltf
             public BufferView.TargetEnum? Target;
         }
 
-        private List<AsView> _asViews = new List<AsView>();
+        readonly List<AsView> _asViews = new List<AsView>();
 
         public int AddView(ArraySegment<byte> payload, int? byteStride = null, BufferView.TargetEnum? target = null)
         {

@@ -10,11 +10,11 @@ using System.IO;
 
 namespace VGltf
 {
-    public class GltfContainer
+    public sealed class GltfContainer
     {
-        public Types.Gltf Gltf { get; private set; }
-        public Glb.StoredBuffer Buffer { get; private set; }
-        public VJson.Schema.JsonSchemaRegistry JsonSchemas { get; private set; }
+        public Types.Gltf Gltf { get; }
+        public Glb.StoredBuffer Buffer { get; }
+        public VJson.Schema.JsonSchemaRegistry JsonSchemas { get; }
 
         public GltfContainer(Types.Gltf gltf, Glb.StoredBuffer buffer = null, VJson.Schema.JsonSchemaRegistry reg = null)
         {

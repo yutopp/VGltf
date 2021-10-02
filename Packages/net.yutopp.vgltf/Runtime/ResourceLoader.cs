@@ -10,7 +10,7 @@ using System.IO;
 
 namespace VGltf
 {
-    public class Resource
+    public sealed class Resource
     {
         // TODO
         // public string MimeType;
@@ -25,9 +25,9 @@ namespace VGltf
         string FullPathOf(string uri);
     }
 
-    public class ResourceLoaderFromFileStorage : IResourceLoader
+    public sealed class ResourceLoaderFromFileStorage : IResourceLoader
     {
-        private string _baseDir;
+        readonly string _baseDir;
 
         public ResourceLoaderFromFileStorage(string baseDir)
         {
@@ -82,7 +82,7 @@ namespace VGltf
         }
     }
 
-    public class ResourceLoaderFromEmbedOnly : IResourceLoader
+    public sealed class ResourceLoaderFromEmbedOnly : IResourceLoader
     {
         public Resource Load(string uri)
         {
@@ -100,7 +100,7 @@ namespace VGltf
         }
     }
 
-    public class DataUriUtil
+    public static class DataUriUtil
     {
         public static bool IsData(string uri)
         {
