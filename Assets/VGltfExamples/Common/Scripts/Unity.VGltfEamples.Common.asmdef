@@ -1,6 +1,10 @@
 {
     "name": "Unity.VGltfEamples.Common",
-    "references": [],
+    "references": [
+        "Unity.net.yutopp.vgltf",
+        "Unity.net.yutopp.vgltf.unity",
+        "UniTask"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

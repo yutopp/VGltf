@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace VGltfExamples.VRMExample
+namespace VGltfExamples.Common
 {
     public sealed class TimeSlicer : VGltf.Unity.ITimeSlicer
     {

@@ -84,7 +84,7 @@ namespace VGltfExamples.VRMExample
                 // Create a glTF Importer for Unity.
                 // The resources will be cached in the internal Context of this Importer.
                 // Resources can be released by calling Dispose of the Importer (or the internal Context).
-                var timeSlicer = new TimeSlicer();
+                var timeSlicer = new Common.TimeSlicer();
                 using (var gltfImporter = new Importer(gltfContainer, timeSlicer, config))
                 {
                     var bridge = new VRM0ImporterBridge();

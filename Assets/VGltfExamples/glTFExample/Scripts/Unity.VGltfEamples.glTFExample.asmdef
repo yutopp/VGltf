@@ -1,13 +1,10 @@
 {
-    "name": "Unity.VGltfEamples.VRMExample",
+    "name": "Unity.VGltfEamples.glTFExample",
     "references": [
         "Unity.net.yutopp.vgltf",
         "Unity.net.yutopp.vgltf.unity",
-        "Unity.net.yutopp.vgltf.ext.vrm0",
-        "Unity.net.yutopp.vgltf.ext.vrm0.unity",
         "UniTask",
-        "Unity.VGltfEamples.Common",
-        "MToon"
+        "Unity.VGltfEamples.Common"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
