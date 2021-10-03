@@ -22,6 +22,8 @@ namespace VGltf.Unity
 
         public int Export(Texture tex)
         {
+            var isLinear = false;
+
             byte[] pngBytes;
 
             RenderTexture previous = RenderTexture.active;
@@ -39,7 +41,7 @@ namespace VGltf.Unity
 
                 RenderTexture.active = renderTex;
 
-                readableTex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, true, true);
+                readableTex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, true, isLinear);
                 readableTex.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
                 readableTex.Apply();
 
