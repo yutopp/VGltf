@@ -33,6 +33,7 @@ namespace VGltf.Unity
 
             public ImporterRuntimeResources Resources { get; }
             public ITimeSlicer TimeSlicer { get; }
+            public CoordUtils CoordUtils { get; }
 
             public ResourceImporters Importers { get; }
 
@@ -43,11 +44,12 @@ namespace VGltf.Unity
 
                 Resources = new ImporterRuntimeResources();
                 TimeSlicer = timeSlicer;
+                CoordUtils = coordUtils;
 
                 Importers = new ResourceImporters
                 {
-                    Nodes = new NodeImporter(this, coordUtils),
-                    Meshes = new MeshImporter(this, coordUtils),
+                    Nodes = new NodeImporter(this),
+                    Meshes = new MeshImporter(this),
                     Materials = new MaterialImporter(this),
                     Textures = new TextureImporter(this),
                     Images = new ImageImporter(this),

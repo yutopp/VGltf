@@ -16,6 +16,7 @@ namespace VGltf.Unity
 
         ImporterRuntimeResources Resources { get; }
         ITimeSlicer TimeSlicer { get; }
+        CoordUtils CoordUtils { get; }
 
         ResourceImporters Importers { get; }
     }

@@ -57,13 +57,6 @@ namespace VGltf.Unity
             return new Vector2(v.x, 1 - v.y);
         }
 
-        // TODO: color space conversion (currently, assume gamma(sRGB) space in all cases)
-        // glTF world -> Unity
-        public Color ConvertColorSpace(Vector4 v)
-        {
-            return v;
-        }
-
         public Vector3 ConvertSpace(Vector3 v)
         {
             return new Vector3(v.x * CoordinateSpaceAxisFlip.x, v.y * CoordinateSpaceAxisFlip.y, v.z * CoordinateSpaceAxisFlip.z);
@@ -127,6 +120,20 @@ namespace VGltf.Unity
                 );
 
             return s;
+        }
+
+        // TODO: color space conversion (currently, assume gamma(sRGB) space in all cases)
+        // glTF world(sRGB) -> Unity(sRGB)
+        public Color ColorFromSRGB(Vector4 v)
+        {
+            return v;
+        }
+
+        // TODO: color space conversion (currently, assume gamma(sRGB) space in all cases)
+        // glTF world(sRGB) -> Unity(sRGB)
+        public Color ColorFromSRGB(Vector3 v)
+        {
+            return new Color(v.x, v.y, v.z, 1.0f);
         }
     }
 }

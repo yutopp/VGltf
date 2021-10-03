@@ -23,6 +23,8 @@ ShaderVariantCollection:
   - first: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
     second:
       variants:
+      - keywords: DIRECTIONAL _EMISSION
+        passType: 4
       - keywords: 
         passType: 8
   - first: {fileID: 106, guid: 0000000000000000f000000000000000, type: 0}

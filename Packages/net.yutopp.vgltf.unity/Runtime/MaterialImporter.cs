@@ -66,18 +66,78 @@ namespace VGltf.Unity
 
             var resource = Context.Resources.Materials.Add(matIndex, matIndex, mat.name, mat);
 
+            await ImportStandardMaterialProps(mat, gltfMat, ct);
+
+            return resource;
+        }
+
+        public async Task ImportStandardMaterialProps(Material mat, Types.Material gltfMat, CancellationToken ct)
+        {
+            if (gltfMat.DoubleSided)
+            {
+                // Not supported
+            }
+
+            // https://forum.unity.com/threads/standard-material-shader-ignoring-setfloat-property-_mode.344557/
+            switch (gltfMat.AlphaMode)
+            {
+                case Types.Material.AlphaModeEnum.Opaque:
+                    mat.SetFloat("_Mode", (float)0);
+                    mat.SetOverrideTag("RenderType", "");
+                    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                    mat.SetInt("_ZWrite", 1);
+                    mat.DisableKeyword("_ALPHATEST_ON");
+                    mat.DisableKeyword("_ALPHABLEND_ON");
+                    mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    mat.renderQueue = -1;
+                    break;
+
+                case Types.Material.AlphaModeEnum.Blend:
+                    // Not implemented
+                    break;
+
+                case Types.Material.AlphaModeEnum.Mask:
+                    mat.SetFloat("_Mode", (float)1);
+                    mat.SetOverrideTag("RenderType", "TransparentCutout");
+                    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                    mat.SetInt("_ZWrite", 1);
+                    mat.EnableKeyword("_ALPHATEST_ON");
+                    mat.DisableKeyword("_ALPHABLEND_ON");
+                    mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    mat.renderQueue = 2450;
+
+                    mat.SetFloat("_Cutoff", gltfMat.AlphaCutoff);
+                    break;
+            }
+
+            var emissionColor = Context.CoordUtils.ColorFromSRGB(PrimitiveImporter.AsVector3(gltfMat.EmissiveFactor));
+            if (emissionColor != Color.black)
+            {
+                mat.EnableKeyword("_EMISSION");
+                mat.SetColor("_EmissionColor", emissionColor);
+            }
+
+            if (gltfMat.EmissiveTexture != null)
+            {
+                var textureResource = await Context.Importers.Textures.Import(gltfMat.EmissiveTexture.Index, ct);
+                mat.SetTexture("_EmissionMap", textureResource.Value);
+            }
+
             if (gltfMat.PbrMetallicRoughness != null)
             {
                 var pbrMR = gltfMat.PbrMetallicRoughness;
+
+                var baseColor = Context.CoordUtils.ColorFromSRGB(PrimitiveImporter.AsVector4(pbrMR.BaseColorFactor));
+                mat.SetColor("_Color", baseColor);
+
                 if (pbrMR.BaseColorTexture != null)
                 {
-                    var bct = pbrMR.BaseColorTexture;
-                    var textureResource = await Context.Importers.Textures.Import(bct.Index, ct);
+                    var textureResource = await Context.Importers.Textures.Import(pbrMR.BaseColorTexture.Index, ct);
                     mat.SetTexture("_MainTex", textureResource.Value);
                 }
             }
-
-            return resource;
         }
     }
 }
