@@ -54,7 +54,7 @@ namespace VGltf.Unity.UnitTests
                 var prim0Buffer = store.GetOrLoadTypedBufferByAccessorIndex(prim0.Indices.Value);
                 var prim0BufferEntity = prim0Buffer.GetEntity<uint>();
                 Assert.AreEqual(36, prim0BufferEntity.Length);
-                Assert.That(prim0BufferEntity.GetView().Take(6), Is.EquivalentTo(new int[] {
+                Assert.That(prim0BufferEntity.GetEnumerable().Take(6), Is.EquivalentTo(new int[] {
                     0, 2, 3, 0, 3, 1,
                 }));
 

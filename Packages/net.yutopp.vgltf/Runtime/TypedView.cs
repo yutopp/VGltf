@@ -15,7 +15,6 @@ namespace VGltf
 {
     public interface ITypedView<T> where T : struct
     {
-        ArraySegment<T> GetView();
         IEnumerable<T> GetEnumerable();
     }
 
@@ -29,11 +28,6 @@ namespace VGltf
         public TypedArray(T[] typedBuffer)
         {
             TypedBuffer = typedBuffer;
-        }
-
-        public ArraySegment<T> GetView()
-        {
-            return new ArraySegment<T>(TypedBuffer);
         }
 
         // TODO: fix performance
@@ -53,11 +47,6 @@ namespace VGltf
         public TypedArrayView(ArraySegment<T> typedBuffer)
         {
             TypedBuffer = typedBuffer;
-        }
-
-        public ArraySegment<T> GetView()
-        {
-            return TypedBuffer;
         }
 
         // TODO: fix performance
@@ -86,6 +75,12 @@ namespace VGltf
         {
             RawBuffer = rawBuffer;
 
+            // All buffer data are little endian.
+            // See: https://github.com/KhronosGroup/glTF/blob/8e3810c01a04930a8c98b2d76232b63f4dab944f/specification/2.0/Specification.adoc#36-binary-data-storage
+            //
+            // TODO: If you use this library on machines which have other endianness, need to implement supporting that.
+            //
+
             // Deep copy...
             TypedBuffer = new T[elemNum];
             GCHandle gch = GCHandle.Alloc(TypedBuffer, GCHandleType.Pinned);
@@ -98,11 +93,6 @@ namespace VGltf
             {
                 gch.Free();
             }
-        }
-
-        public ArraySegment<T> GetView()
-        {
-            return new ArraySegment<T>(TypedBuffer);
         }
 
         public IEnumerable<T> GetEnumerable()
@@ -136,11 +126,6 @@ namespace VGltf
             var buffer = new ArraySegment<byte>(r.Data.Array, r.Data.Offset + byteOffset, count * stride);
 
             Storage = new TypedArrayStorage<T>(buffer, byteOffset, stride, count);
-        }
-
-        public ArraySegment<T> GetView()
-        {
-            return Storage.GetView();
         }
 
         public IEnumerable<T> GetEnumerable()
@@ -223,12 +208,6 @@ namespace VGltf
                     accessor.Type.NumOfComponents(),
                     sparse.Count);
             }
-        }
-
-        // TODO: fix for performance (Remove ToArray)...
-        public ArraySegment<T> GetView()
-        {
-            return new ArraySegment<T>(GetEnumerable().ToArray());
         }
 
         public IEnumerable<T> GetEnumerable()
