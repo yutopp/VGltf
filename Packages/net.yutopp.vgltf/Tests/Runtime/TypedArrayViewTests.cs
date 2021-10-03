@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using VGltf.UnitTests.Shims;
 
 namespace VGltf.UnitTests
 {
@@ -26,19 +27,18 @@ namespace VGltf.UnitTests
                 /* [1]x */ 0x10, 0x11, 0x12, 0x13, /* [1]y */ 0x14, 0x15, 0x16, 0x17,
             };
 
-            var view = new TypedArrayView<Int32>(new ArraySegment<byte>(buffer), 8 /* stride */ , 4 /* uint32 = 4 */, 2 /* VEC2 = 2 */, 2);
+            var view = new TypedArrayView<UInt32, Vec2<UInt32>>(
+                new ArraySegment<byte>(buffer),
+                8 /* stride */,
+                4 /* uint32 = 4 */,
+                2 /* VEC2 = 2 */,
+                2,
+                Vec2<UInt32>.FromArray);
 
-            var compositedResult = view.GetCompositedEnumerable(xs => xs.ToArray()).ToArray();
+            var compositedResult = view.GetEnumerable().ToArray();
             Assert.That(compositedResult.Length, Is.EqualTo(2));
-            Assert.That(compositedResult[0], Is.EquivalentTo(new Int32[] { 0x03020100, 0x07060504 }));
-            Assert.That(compositedResult[1], Is.EquivalentTo(new Int32[] { 0x13121110, 0x17161514 }));
-
-            var result = view.GetCompositedEnumerable(xs => xs.ToArray()).SelectMany(x => x).ToArray();
-            Assert.That(result.Length, Is.EqualTo(4));
-            Assert.That(result[0], Is.EqualTo(0x03020100));
-            Assert.That(result[1], Is.EqualTo(0x07060504));
-            Assert.That(result[2], Is.EqualTo(0x13121110));
-            Assert.That(result[3], Is.EqualTo(0x17161514));
+            Assert.That(compositedResult[0], Is.EqualTo(new Vec2<UInt32>(0x03020100, 0x07060504)));
+            Assert.That(compositedResult[1], Is.EqualTo(new Vec2<UInt32>(0x13121110, 0x17161514)));
         }
     }
 }

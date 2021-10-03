@@ -28,11 +28,11 @@ namespace VGltf.UnitTests.ModelTester
 
             // Index 1
             var joints0 = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["JOINTS_0"]);
-            Assert.AreEqual(96, joints0.GetEntity<ushort>().GetCompositedEnumerable(Vec4UShort.FromArray).Count());
+            Assert.AreEqual(96, joints0.GetEntity<ushort, Vec4UShort>(Vec4UShort.FromArray).GetEnumerable().Count());
 
             // Index 4
             var weights0 = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["WEIGHTS_0"]);
-            Assert.AreEqual(96, weights0.GetEntity<float>().GetCompositedEnumerable(Vec4Float.FromArray).Count());
+            Assert.AreEqual(96, weights0.GetEntity<float, Vec4Float>(Vec4Float.FromArray).GetEnumerable().Count());
         }
     }
 }

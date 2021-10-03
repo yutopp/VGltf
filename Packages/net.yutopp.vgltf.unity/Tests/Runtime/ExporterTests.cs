@@ -52,9 +52,9 @@ namespace VGltf.Unity.UnitTests
                 Assert.AreEqual(36, prim0Accessor.Count); // 2(poly per faces) * 3(tri) * 6(faces)
 
                 var prim0Buffer = store.GetOrLoadTypedBufferByAccessorIndex(prim0.Indices.Value);
-                var prim0BufferEntity = prim0Buffer.GetEntity<uint>();
+                var prim0BufferEntity = prim0Buffer.GetEntity<uint, uint>(xs => xs[0]);
                 Assert.AreEqual(36, prim0BufferEntity.Length);
-                Assert.That(prim0BufferEntity.GetCompositedEnumerable(xs => xs[0]).Take(6), Is.EquivalentTo(new int[] {
+                Assert.That(prim0BufferEntity.GetEnumerable().Take(6), Is.EquivalentTo(new int[] {
                     0, 2, 3, 0, 3, 1,
                 }));
 

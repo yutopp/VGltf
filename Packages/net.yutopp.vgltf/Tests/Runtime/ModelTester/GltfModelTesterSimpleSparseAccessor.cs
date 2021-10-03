@@ -29,8 +29,8 @@ namespace VGltf.UnitTests.ModelTester
                                 typedBuffer.Accessor.ComponentType);
                 Assert.AreEqual(Types.Accessor.TypeEnum.Scalar, typedBuffer.Accessor.Type);
 
-                var entiry = typedBuffer.GetEntity<ushort>();
-                Assert.AreEqual(36, entiry.Length);
+                var entity = typedBuffer.GetEntity<ushort, ushort>(xs => xs[0]);
+                Assert.AreEqual(36, entity.Length);
             }
 
             // positionView
@@ -43,16 +43,16 @@ namespace VGltf.UnitTests.ModelTester
                 Assert.NotNull(typedBuffer.Accessor.Sparse);
                 Assert.AreEqual(3, typedBuffer.Accessor.Sparse.Count);
 
-                var entiry = typedBuffer.GetEntity<float>();
-                Assert.AreEqual(14, entiry.Length);
+                var entity = typedBuffer.GetEntity<float, Vec3Float>(Vec3Float.FromArray);
+                Assert.AreEqual(14, entity.Length);
 
                 // For indices
-                var indices = entiry.SparseIndices;
+                var indices = entity.SparseIndices;
                 Assert.AreEqual(3, indices.Count());
                 Assert.That(indices, Is.EquivalentTo(new int[] { 8, 10, 12 }));
 
                 // For values
-                var values = entiry.SparseValues.GetCompositedEnumerable(Vec3Float.FromArray).ToArray();
+                var values = entity.SparseValues.GetEnumerable().ToArray();
                 Assert.AreEqual(3, values.Count());
                 Assert.That(values, Is.EquivalentTo(new Vec3Float[] {
                                 new Vec3Float(1.0f, 2.0f, 0.0f),
@@ -61,7 +61,7 @@ namespace VGltf.UnitTests.ModelTester
                             }));
 
                 // For merged view
-                var mergedValues = entiry.GetCompositedEnumerable(Vec3Float.FromArray).ToArray();
+                var mergedValues = entity.GetEnumerable().ToArray();
                 Assert.That(mergedValues, Is.EquivalentTo(new Vec3Float[] {
                                 new Vec3Float(0.0f, 0.0f, 0.0f),
                                 new Vec3Float(1.0f, 0.0f, 0.0f),

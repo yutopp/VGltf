@@ -498,7 +498,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<float>().GetCompositedEnumerable(PrimitiveImporter.AsVector3).Select(_coordUtils.ConvertSpace).ToArray();
+                    return buf.GetEntity<float, Vector3>(PrimitiveImporter.AsVector3).GetEnumerable().Select(_coordUtils.ConvertSpace).ToArray();
                 }
             }
 
@@ -514,7 +514,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<float>().GetCompositedEnumerable(PrimitiveImporter.AsVector3).Select(_coordUtils.ConvertSpace).ToArray();
+                    return buf.GetEntity<float, Vector3>(PrimitiveImporter.AsVector3).GetEnumerable().Select(_coordUtils.ConvertSpace).ToArray();
                 }
             }
 
@@ -530,7 +530,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<float>().GetCompositedEnumerable(PrimitiveImporter.AsVector4).Select(_coordUtils.ConvertSpace).ToArray();
+                    return buf.GetEntity<float, Vector4>(PrimitiveImporter.AsVector4).GetEnumerable().Select(_coordUtils.ConvertSpace).ToArray();
                 }
             }
 
@@ -548,7 +548,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<float>().GetCompositedEnumerable(PrimitiveImporter.AsVector2).Select(_coordUtils.ConvertUV).ToArray();
+                    return buf.GetEntity<float, Vector2>(PrimitiveImporter.AsVector2).GetEnumerable().Select(_coordUtils.ConvertUV).ToArray();
                 }
             }
 
@@ -566,7 +566,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<float>().GetCompositedEnumerable(PrimitiveImporter.AsVector4).Select(_coordUtils.ConvertColorSpace).ToArray();
+                    return buf.GetEntity<float, Vector4>(PrimitiveImporter.AsVector4).GetEnumerable().Select(_coordUtils.ConvertColorSpace).ToArray();
                 }
             }
 
@@ -583,8 +583,8 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.UNSIGNED_SHORT)
                 {
-                    return buf.GetEntity<ushort>()
-                        .GetCompositedEnumerable(xs => new Vec4<int>(xs[0], xs[1], xs[2], xs[3]))
+                    return buf.GetEntity<ushort, Vec4<int>>(xs => new Vec4<int>(xs[0], xs[1], xs[2], xs[3]))
+                        .GetEnumerable()
                         .ToArray();
                 }
             }
@@ -603,7 +603,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<float>().GetCompositedEnumerable(PrimitiveImporter.AsVector4).ToArray();
+                    return buf.GetEntity<float, Vector4>(PrimitiveImporter.AsVector4).GetEnumerable().ToArray();
                 }
             }
 

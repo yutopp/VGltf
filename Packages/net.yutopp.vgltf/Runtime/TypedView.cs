@@ -18,24 +18,19 @@ namespace VGltf
         //IEnumerable<T> GetEnumerable();
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    public sealed class TypedArrayView<T> : ITypedView<T> where T : struct
+    // T: primitive types (e.g. int, float...)
+    // U: extracted types (e.g. int, Vector3...)
+    public sealed class TypedArrayView<T, U> where T : struct where U : struct
     {
-        readonly ArraySegment<byte> _buffer;
-        readonly int _stride;
-
-        readonly int _componentSize;
-        readonly int _componentNum;
-        readonly int _count;
+        public U[] TypedBuffer { get; }
 
         public TypedArrayView(
             ArraySegment<byte> buffer,
             int stride,
             int componentSize, // Size of primitives (e.g. int = 4)
             int componentNum,  // Number of primitives in compound values (e.g. VEC3 = 3)
-            int count)         // Number of compound values (e.g. Number of VEC3)
+            int count,         // Number of compound values (e.g. Number of VEC3)
+            Func<T[], U> mapper)
         {
             // assert sizeof(T) == _componentSize;
             //
@@ -46,23 +41,18 @@ namespace VGltf
             // |---|---|   |---|---|
             // [ x | y ]   [ x | y ] : Vec2<float>
             //
-            _buffer = buffer;
-            _stride = stride;
-            _componentSize = componentSize;
-            _componentNum = componentNum;
-            _count = count;
-        }
 
-        // TODO: improve performance
-        public IEnumerable<U> GetCompositedEnumerable<U>(Func<T[], U> mapper)
-        {
-            var origin = new T[_componentNum];
+            // Deep copy...
+            TypedBuffer = new U[count];
+
+            // TODO: improve performance
+            var origin = new T[componentNum];
             var gch = GCHandle.Alloc(origin, GCHandleType.Pinned);
             try
             {
-                for (var i = 0; i < _count; ++i)
+                for (var i = 0; i < count; ++i)
                 {
-                    var strideHeadOffset = i * _stride;
+                    var strideHeadOffset = i * stride;
 
                     // All buffer data are little endian.
                     // See: https://github.com/KhronosGroup/glTF/blob/8e3810c01a04930a8c98b2d76232b63f4dab944f/specification/2.0/Specification.adoc#36-binary-data-storage
@@ -70,8 +60,8 @@ namespace VGltf
                     // TODO: If you use this library on machines which have other endianness, need to implement supporting that.
                     //
 
-                    Marshal.Copy(_buffer.Array, _buffer.Offset + strideHeadOffset, gch.AddrOfPinnedObject(), _componentSize * _componentNum);
-                    yield return mapper(origin);
+                    Marshal.Copy(buffer.Array, buffer.Offset + strideHeadOffset, gch.AddrOfPinnedObject(), componentSize * componentNum);
+                    TypedBuffer[i] = mapper(origin);
                 }
             }
             finally
@@ -79,18 +69,24 @@ namespace VGltf
                 gch.Free();
             }
         }
+
+        public IEnumerable<U> GetEnumerable()
+        {
+            return TypedBuffer;
+        }
     }
 
-    public sealed class TypedArrayStorageFromBufferView<T> : ITypedView<T> where T : struct
+    public sealed class TypedArrayStorageFromBufferView<T, U> where T : struct where U : struct
     {
-        readonly TypedArrayView<T> _view;
+        readonly TypedArrayView<T, U> _storage;
 
         public TypedArrayStorageFromBufferView(ResourcesStore store,
                                                int bufferViewIndex,
                                                int byteOffset,
                                                int componentSize, // Size of primitives (e.g. int = 4)
                                                int componentNum,  // Number of primitives in compound values (e.g. VEC3 = 3)
-                                               int count)         // Number of compound values (e.g. Number of VEC3)
+                                               int count,         // Number of compound values (e.g. Number of VEC3)
+                                               Func<T[], U> mapper)
         {
             var bufferView = store.Gltf.BufferViews[bufferViewIndex];
             var r = store.GetOrLoadBufferViewResourceAt(bufferViewIndex);
@@ -108,39 +104,40 @@ namespace VGltf
 
             var buffer = new ArraySegment<byte>(r.Data.Array, r.Data.Offset + byteOffset, count * stride);
 
-            _view = new TypedArrayView<T>(buffer, stride, componentSize, componentNum, count);
+            _storage = new TypedArrayView<T, U>(buffer, stride, componentSize, componentNum, count, mapper);
         }
 
-        public IEnumerable<U> GetCompositedEnumerable<U>(Func<T[], U> mapper)
+        public IEnumerable<U> GetEnumerable()
         {
-            return _view.GetCompositedEnumerable<U>(mapper);
+            return _storage.GetEnumerable();
         }
     }
 
-    public sealed class TypedArrayEntity<T> : ITypedView<T> where T : struct
+    public sealed class TypedArrayEntity<T, U> where T : struct where U : struct
     {
-        public TypedArrayStorageFromBufferView<T> DenseView { get; }
+        public TypedArrayStorageFromBufferView<T, U> DenseView { get; }
 
         public uint[] SparseIndices { get; }
-        public TypedArrayStorageFromBufferView<T> SparseValues { get; }
+        public TypedArrayStorageFromBufferView<T, U> SparseValues { get; }
 
         public int Length { get; }
         readonly int _componentNum; // Number of primitives in compound values (e.g. VEC3 = 3)
 
-        public TypedArrayEntity(ResourcesStore store, Accessor accessor)
+        public TypedArrayEntity(ResourcesStore store, Accessor accessor, Func<T[], U> mapper)
         {
             Length = accessor.Count;
             _componentNum = accessor.Type.NumOfComponents();
 
             if (accessor.BufferView != null)
             {
-                DenseView = new TypedArrayStorageFromBufferView<T>(
+                DenseView = new TypedArrayStorageFromBufferView<T, U>(
                     store,
                     accessor.BufferView.Value,
                     accessor.ByteOffset,
                     accessor.ComponentType.SizeInBytes(),
                     accessor.Type.NumOfComponents(),
-                    accessor.Count);
+                    accessor.Count,
+                    mapper);
             }
 
             if (accessor.Sparse != null)
@@ -151,60 +148,64 @@ namespace VGltf
                 switch (indices.ComponentType)
                 {
                     case Types.Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_BYTE:
-                        SparseIndices = new TypedArrayStorageFromBufferView<byte>(
+                        SparseIndices = new TypedArrayStorageFromBufferView<byte, uint>(
                             store,
                             indices.BufferView,
                             indices.ByteOffset,
                             indices.ComponentType.SizeInBytes(),
                             1, // must be scalar
-                            sparse.Count
+                            sparse.Count,
+                            xs => (uint)xs[0]
                             )
-                            .GetCompositedEnumerable(xs => (uint)xs[0])
+                            .GetEnumerable()
                             .ToArray();
                         break;
 
                     case Types.Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_SHORT:
-                        SparseIndices = new TypedArrayStorageFromBufferView<ushort>(
+                        SparseIndices = new TypedArrayStorageFromBufferView<ushort, uint>(
                             store,
                             indices.BufferView,
                             indices.ByteOffset,
                             indices.ComponentType.SizeInBytes(),
                             1, // must be scalar
-                            sparse.Count
+                            sparse.Count,
+                            xs => (uint)xs[0]
                             )
-                            .GetCompositedEnumerable(xs => (uint)xs[0])
+                            .GetEnumerable()
                             .ToArray();
                         break;
 
                     case Types.Accessor.SparseType.IndicesType.ComponentTypeEnum.UNSIGNED_INT:
-                        SparseIndices = new TypedArrayStorageFromBufferView<uint>(
+                        SparseIndices = new TypedArrayStorageFromBufferView<uint, uint>(
                             store,
                             indices.BufferView,
                             indices.ByteOffset,
                             indices.ComponentType.SizeInBytes(),
                             1, // must be scalar
-                            sparse.Count
+                            sparse.Count,
+                            xs => (uint)xs[0]
                             )
-                            .GetCompositedEnumerable(xs => (uint)xs[0])
+                            .GetEnumerable()
                             .ToArray();
                         break;
                 }
 
                 var values = sparse.Values;
-                SparseValues = new TypedArrayStorageFromBufferView<T>(
+                SparseValues = new TypedArrayStorageFromBufferView<T, U>(
                     store,
                     values.BufferView,
                     values.ByteOffset,
                     accessor.ComponentType.SizeInBytes(),
                     accessor.Type.NumOfComponents(),
-                    sparse.Count);
+                    sparse.Count,
+                    mapper);
             }
         }
 
-        public IEnumerable<U> GetCompositedEnumerable<U>(Func<T[], U> mapper)
+        public IEnumerable<U> GetEnumerable()
         {
-            var denseArrayView = DenseView != null ? DenseView.GetCompositedEnumerable(mapper) : null;
-            var sparseValuesArrayView = SparseValues != null ? SparseValues.GetCompositedEnumerable(mapper) : null;
+            var denseArrayView = DenseView != null ? DenseView.GetEnumerable() : null;
+            var sparseValuesArrayView = SparseValues != null ? SparseValues.GetEnumerable() : null;
 
             var sparseTargetIndex = uint.MaxValue;
             if (SparseIndices != null)
@@ -249,10 +250,10 @@ namespace VGltf
             Accessor = accessor;
         }
 
-        public TypedArrayEntity<T> GetEntity<T>() where T : struct
+        public TypedArrayEntity<T, U> GetEntity<T, U>(Func<T[], U> mapper) where T : struct where U : struct
         {
             // TODO: Type check for safety
-            return new TypedArrayEntity<T>(Store, Accessor);
+            return new TypedArrayEntity<T, U>(Store, Accessor, mapper);
         }
 
         public IEnumerable<U> GetPrimitivesAsCasted<U>() where U : struct
@@ -265,28 +266,22 @@ namespace VGltf
             switch (Accessor.ComponentType)
             {
                 case Types.Accessor.ComponentTypeEnum.BYTE:
-                    return GetEntity<sbyte>()
-                        .GetCompositedEnumerable(xs => (U)Convert.ChangeType(xs[0], typeof(U)));
+                    return GetEntity<sbyte, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.UNSIGNED_BYTE:
-                    return GetEntity<byte>()
-                        .GetCompositedEnumerable(xs => (U)Convert.ChangeType(xs[0], typeof(U)));
+                    return GetEntity<byte, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.SHORT:
-                    return GetEntity<short>()
-                        .GetCompositedEnumerable(xs => (U)Convert.ChangeType(xs[0], typeof(U)));
+                    return GetEntity<short, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.UNSIGNED_SHORT:
-                    return GetEntity<ushort>()
-                        .GetCompositedEnumerable(xs => (U)Convert.ChangeType(xs[0], typeof(U)));
+                    return GetEntity<ushort, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.UNSIGNED_INT:
-                    return GetEntity<uint>()
-                        .GetCompositedEnumerable(xs => (U)Convert.ChangeType(xs[0], typeof(U)));
+                    return GetEntity<uint, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.FLOAT:
-                    return GetEntity<float>()
-                        .GetCompositedEnumerable(xs => (U)Convert.ChangeType(xs[0], typeof(U)));
+                    return GetEntity<float, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
 
                 default:
                     throw new InvalidOperationException("Unexpected ComponentType: Actual = " + Accessor.ComponentType);
