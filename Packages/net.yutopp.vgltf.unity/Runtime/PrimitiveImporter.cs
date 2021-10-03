@@ -15,14 +15,14 @@ namespace VGltf.Unity
 {
     public class PrimitiveImporter
     {
+        public static Vector2 AsVector2(float[] fx)
+        {
+            return new Vector2(fx[0], fx[1]);
+        }
+
         public static Vector3 AsVector3(float[] fx)
         {
             return new Vector3(fx[0], fx[1], fx[2]);
-        }
-
-        public static Color AsColor(float[] fx)
-        {
-            return new Color(fx[0], fx[1], fx[2], fx[3]);
         }
 
         public static Vector4 AsVector4(float[] fx)
