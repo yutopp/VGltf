@@ -19,6 +19,11 @@ namespace VGltf.UnitTests.Shims
             this.y = y;
         }
 
+        public static Vec2<T> FromArray(T[] xs)
+        {
+            return new Vec2<T>(xs[0], xs[1]);
+        }
+
         public override string ToString()
         {
             return string.Format("{{{0}, {1}}}", x, y);
@@ -36,6 +41,11 @@ namespace VGltf.UnitTests.Shims
             this.x = x;
             this.y = y;
             this.z = z;
+        }
+
+        public static Vec3<T> FromArray(T[] xs)
+        {
+            return new Vec3<T>(xs[0], xs[1], xs[2]);
         }
 
         public override string ToString()
@@ -57,6 +67,11 @@ namespace VGltf.UnitTests.Shims
             this.y = y;
             this.z = z;
             this.w = w;
+        }
+
+        public static Vec4<T> FromArray(T[] xs)
+        {
+            return new Vec4<T>(xs[0], xs[1], xs[2], xs[3]);
         }
 
         public override string ToString()

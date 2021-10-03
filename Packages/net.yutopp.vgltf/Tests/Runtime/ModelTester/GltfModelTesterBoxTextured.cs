@@ -57,15 +57,15 @@ namespace VGltf.UnitTests.ModelTester
             // Accesses
             // index 1
             var normal = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["NORMAL"]);
-            Assert.AreEqual(24, normal.GetEntity<Vec3Float>().GetEnumerable().Count());
+            Assert.AreEqual(24, normal.GetEntity<float>().GetCompositedEnumerable(Vec3Float.FromArray).Count());
 
             // index 2
             var position = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["POSITION"]);
-            Assert.AreEqual(24, position.GetEntity<Vec3Float>().GetEnumerable().Count());
+            Assert.AreEqual(24, position.GetEntity<float>().GetCompositedEnumerable(Vec3Float.FromArray).Count());
 
             // index 3
             var texCoord0 = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["TEXCOORD_0"]);
-            Assert.AreEqual(24, texCoord0.GetEntity<Vec2Float>().GetEnumerable().Count());
+            Assert.AreEqual(24, texCoord0.GetEntity<float>().GetCompositedEnumerable(Vec2Float.FromArray).Count());
 
             // index 0
             var indicies = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Indices.Value);

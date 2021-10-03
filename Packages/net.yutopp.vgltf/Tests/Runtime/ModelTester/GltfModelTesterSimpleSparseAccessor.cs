@@ -43,25 +43,26 @@ namespace VGltf.UnitTests.ModelTester
                 Assert.NotNull(typedBuffer.Accessor.Sparse);
                 Assert.AreEqual(3, typedBuffer.Accessor.Sparse.Count);
 
-                var entiry = typedBuffer.GetEntity<Vec3Float>();
+                var entiry = typedBuffer.GetEntity<float>();
                 Assert.AreEqual(14, entiry.Length);
 
                 // For indices
                 var indices = entiry.SparseIndices;
-                Assert.AreEqual(3, indices.GetEnumerable().Count());
-                Assert.That(indices.GetEnumerable(), Is.EquivalentTo(new int[] { 8, 10, 12 }));
+                Assert.AreEqual(3, indices.Count());
+                Assert.That(indices, Is.EquivalentTo(new int[] { 8, 10, 12 }));
 
                 // For values
-                var values = entiry.SparseValues;
-                Assert.AreEqual(3, values.GetEnumerable().Count());
-                Assert.That(values.GetEnumerable(), Is.EquivalentTo(new Vec3Float[] {
+                var values = entiry.SparseValues.GetCompositedEnumerable(Vec3Float.FromArray).ToArray();
+                Assert.AreEqual(3, values.Count());
+                Assert.That(values, Is.EquivalentTo(new Vec3Float[] {
                                 new Vec3Float(1.0f, 2.0f, 0.0f),
                                 new Vec3Float(3.0f, 3.0f, 0.0f),
                                 new Vec3Float(5.0f, 4.0f, 0.0f),
                             }));
 
                 // For merged view
-                Assert.That(entiry.GetEnumerable(), Is.EquivalentTo(new Vec3Float[] {
+                var mergedValues = entiry.GetCompositedEnumerable(Vec3Float.FromArray).ToArray();
+                Assert.That(mergedValues, Is.EquivalentTo(new Vec3Float[] {
                                 new Vec3Float(0.0f, 0.0f, 0.0f),
                                 new Vec3Float(1.0f, 0.0f, 0.0f),
                                 new Vec3Float(2.0f, 0.0f, 0.0f),
