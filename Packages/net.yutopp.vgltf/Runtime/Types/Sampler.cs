@@ -15,16 +15,16 @@ namespace VGltf.Types
     [JsonSchema(Id = "sampler.schema.json")]
     public sealed class Sampler : GltfChildOfRootProperty
     {
-        [JsonField(Name = "magFilter")]
-        public MagFilterEnum MagFilter;
+        [JsonField(Name = "magFilter"), JsonFieldIgnorable]
+        public MagFilterEnum? MagFilter;
 
-        [JsonField(Name = "minFilter")]
-        public MinFilterEnum MinFilter;
+        [JsonField(Name = "minFilter"), JsonFieldIgnorable]
+        public MinFilterEnum? MinFilter;
 
-        [JsonField(Name = "wrapS")]
+        [JsonField(Name = "wrapS"), JsonFieldIgnorable(WhenValueIs = WrapEnum.Repeat)]
         public WrapEnum WrapS = WrapEnum.Repeat;
 
-        [JsonField(Name = "wrapT")]
+        [JsonField(Name = "wrapT"), JsonFieldIgnorable(WhenValueIs = WrapEnum.Repeat)]
         public WrapEnum WrapT = WrapEnum.Repeat;
 
         //
