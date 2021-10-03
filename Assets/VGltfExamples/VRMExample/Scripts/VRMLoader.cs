@@ -10,12 +10,14 @@ using VGltf.Unity;
 
 namespace VGltfExamples.VRMExample
 {
-    public sealed class Loader : MonoBehaviour
+    public sealed class VRMLoader : MonoBehaviour
     {
         [SerializeField] InputField filePathInput;
+        [SerializeField] Button loadButton;
+        [SerializeField] Button unloadButton;
 
-        [SerializeField] Button exportButton;
         [SerializeField] InputField outputFilePathInput;
+        [SerializeField] Button exportButton;        
 
         [SerializeField] public RuntimeAnimatorController RuntimeAnimatorController;
 
@@ -38,6 +40,9 @@ namespace VGltfExamples.VRMExample
 
         void Start()
         {
+            loadButton.onClick.AddListener(UIOnLoadButtonClick);
+            unloadButton.onClick.AddListener(UIOnUnloadButtonClick);
+
             exportButton.onClick.AddListener(UIOnExportButtonClicked);
         }
 
@@ -106,12 +111,12 @@ namespace VGltfExamples.VRMExample
 
         // UI
 
-        public void UIOnLoadButtonClick()
+        void UIOnLoadButtonClick()
         {
             UIOnLoadButtonClickAsync().Forget();
         }
 
-        public async UniTaskVoid UIOnLoadButtonClickAsync()
+        async UniTaskVoid UIOnLoadButtonClickAsync()
         {
             var p0 = Common.MemoryProfile.Now;
             DebugLogProfile(p0);
@@ -127,7 +132,7 @@ namespace VGltfExamples.VRMExample
             DebugLogProfile(p1, p0);
         }
 
-        public void UIOnUnloadButtonClick()
+        void UIOnUnloadButtonClick()
         {
             if (_vrmResources.Count == 0)
             {
@@ -151,7 +156,7 @@ namespace VGltfExamples.VRMExample
             UIOnExportButtonClickedAsync().Forget();
         }
 
-        public async UniTaskVoid UIOnExportButtonClickedAsync()
+        async UniTaskVoid UIOnExportButtonClickedAsync()
         {
             if (_vrmResources.Count == 0)
             {
