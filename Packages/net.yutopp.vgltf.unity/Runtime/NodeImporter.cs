@@ -141,11 +141,15 @@ namespace VGltf.Unity
             if (gltfSkin.InverseBindMatrices != null)
             {
                 var buf = Context.GltfResources.GetOrLoadTypedBufferByAccessorIndex(gltfSkin.InverseBindMatrices.Value);
-                var matrices = buf.GetEntity<Matrix4x4>().GetEnumerable().Select(_coordUtils.ConvertSpace).ToArray();
+                var matrices = buf.GetEntity<float>().GetCompositedEnumerable(Matrix4x4FromArray).Select(_coordUtils.ConvertSpace).ToArray();
 
                 var mesh = smr.sharedMesh;
                 mesh.bindposes = matrices;
             }
+        }
+
+        public static Matrix4x4 Matrix4x4FromArray(float[] xs) {
+            return Matrix4x4.zero;
         }
     }
 }
