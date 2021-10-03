@@ -129,7 +129,8 @@ namespace VGltf.Unity
             {
                 var pbrMR = gltfMat.PbrMetallicRoughness;
 
-                var baseColor = Context.CoordUtils.ColorFromSRGB(PrimitiveImporter.AsVector4(pbrMR.BaseColorFactor));
+                // baseColorFactor is linear. See: https://github.com/KhronosGroup/glTF/issues/1638
+                var baseColor = Context.CoordUtils.ColorFromLinear(PrimitiveImporter.AsVector4(pbrMR.BaseColorFactor));
                 mat.SetColor("_Color", baseColor);
 
                 if (pbrMR.BaseColorTexture != null)

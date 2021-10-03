@@ -26,7 +26,7 @@ namespace VGltf.Unity
     {
         readonly Vector3 CoordinateSpaceAxisFlip = new Vector3(-1, 1, 1); // +X -> -X
 
-        public CoordUtils() {}
+        public CoordUtils() { }
 
         public CoordUtils(Vector3 axis)
         {
@@ -122,18 +122,24 @@ namespace VGltf.Unity
             return s;
         }
 
-        // TODO: color space conversion (currently, assume gamma(sRGB) space in all cases)
-        // glTF world(sRGB) -> Unity(sRGB)
+        // IMPORTANT: We assume that Linear workflow is used.
+
+        // glTF world(sRGB) -> Shader(sRGB)|Unity(Linear)
         public Color ColorFromSRGB(Vector4 v)
         {
             return v;
         }
 
-        // TODO: color space conversion (currently, assume gamma(sRGB) space in all cases)
-        // glTF world(sRGB) -> Unity(sRGB)
+        // glTF world(sRGB) -> Shader(sRGB)|Unity(Linear)
         public Color ColorFromSRGB(Vector3 v)
         {
-            return new Color(v.x, v.y, v.z, 1.0f);
+            return ColorFromLinear(new Vector4(v.x, v.y, v.z, 1.0f));
+        }
+
+        // glTF world(Linear) -> Shader(sRGB)|Unity(Linear)
+        public Color ColorFromLinear(Vector4 v)
+        {
+            return ((Color)v).gamma;
         }
     }
 }
