@@ -38,6 +38,7 @@ namespace VGltfExamples.GltfExamples
         {
             filePathInput.AddOptions(new List<Dropdown.OptionData>{
                 new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\TextureLinearInterpolationTest\\glTF-Binary\\TextureLinearInterpolationTest.glb"),
+                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\TextureEncodingTest\\glTF-Binary\\TextureEncodingTest.glb"),
             });
 
             loadButton.onClick.AddListener(UIOnLoadButtonClick);
