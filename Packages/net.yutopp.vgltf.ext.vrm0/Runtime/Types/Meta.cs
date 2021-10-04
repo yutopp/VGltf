@@ -73,30 +73,30 @@ namespace VGltf.Ext.Vrm0.Types
         [Json(EnumConversion = EnumConversionType.AsString)]
         public enum AllowedUserEnum
         {
-            OnlyAuthor,
-            ExplicitlyLicensedPerson,
-            Everyone,
+            [JsonField] OnlyAuthor,
+            [JsonField] ExplicitlyLicensedPerson,
+            [JsonField] Everyone,
         }
 
         [Json(EnumConversion = EnumConversionType.AsString)]
         public enum UsageLicenseEnum
         {
-            Disallow,
-            Allow,
+            [JsonField] Disallow,
+            [JsonField] Allow,
         }
 
         [Json(EnumConversion = EnumConversionType.AsString)]
         public enum LicenseEnum
         {
-            Redistribution_Prohibited,
-            CC0,
-            CC_BY,
-            CC_BY_NC,
-            CC_BY_SA,
-            CC_BY_NC_SA,
-            CC_BY_ND,
-            CC_BY_NC_ND,
-            Other
+            [JsonField] Redistribution_Prohibited,
+            [JsonField] CC0,
+            [JsonField] CC_BY,
+            [JsonField] CC_BY_NC,
+            [JsonField] CC_BY_SA,
+            [JsonField] CC_BY_NC_SA,
+            [JsonField] CC_BY_ND,
+            [JsonField] CC_BY_NC_ND,
+            [JsonField] Other
         }
     }
 }

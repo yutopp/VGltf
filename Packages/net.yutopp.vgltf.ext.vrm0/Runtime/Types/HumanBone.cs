@@ -10,10 +10,11 @@ using VJson.Schema;
 
 namespace VGltf.Ext.Vrm0.Types
 {
+    [Json]
     public struct Vector3
     {
-        public float x;
-        public float y;
-        public float z;
+        [JsonField] public float x;
+        [JsonField] public float y;
+        [JsonField] public float z;
     }
 }

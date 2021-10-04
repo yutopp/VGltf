@@ -71,18 +71,18 @@ namespace VGltf.Ext.Vrm0.Types
             [Json(EnumConversion = EnumConversionType.AsString)]
             public enum FirstPersonFlagEnum
             {
-                Auto, // Create headlessModel
-                Both, // Default layer
-                ThirdPersonOnly,
-                FirstPersonOnly,
+                [JsonField] Auto, // Create headlessModel
+                [JsonField] Both, // Default layer
+                [JsonField] ThirdPersonOnly,
+                [JsonField] FirstPersonOnly,
             }
         }
 
         [Json(EnumConversion = EnumConversionType.AsString)]
         public enum LookAtTypeEnum
         {
-            Bone,
-            BlendShape,
+            [JsonField] Bone,
+            [JsonField] BlendShape,
         }
 
         [JsonSchema(Title = "vrm.firstperson.degreemap",
