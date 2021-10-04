@@ -20,10 +20,8 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public int Export(Texture tex)
+        public int Export(Texture tex, bool isLinear = false)
         {
-            var isLinear = false;
-
             byte[] pngBytes;
 
             RenderTexture previous = RenderTexture.active;
@@ -34,7 +32,7 @@ namespace VGltf.Unity
                 tex.height,
                 0,
                 RenderTextureFormat.Default,
-                RenderTextureReadWrite.Linear);
+                isLinear ? RenderTextureReadWrite.Linear : RenderTextureReadWrite.sRGB);
             try
             {
                 Graphics.Blit(tex, renderTex);

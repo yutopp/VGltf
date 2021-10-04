@@ -26,6 +26,7 @@ namespace VGltf.Unity
             Context = context;
         }
 
+        // TODO: fix interface to check condition of linier/sRGB at here
         public Resource Import(int imgIndex)
         {
             var gltfImgResource = Context.GltfResources.GetOrLoadImageResourceAt(imgIndex);
