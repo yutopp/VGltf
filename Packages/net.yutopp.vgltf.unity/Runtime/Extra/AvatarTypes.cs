@@ -4,16 +4,16 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
+using System.Collections.Generic;
+using VJson;
+using VJson.Schema;
 
 namespace VGltf.Unity.Ext
 {
-    using System.Collections.Generic;
-    using VJson;
-    using VJson.Schema;
-
     /// <summary>
     /// Avatar for Unity Humanoid
     /// </summary>
+    [Json]
     public class AvatarType
     {
         public static readonly string ExtraName = "VGLTF_unity_avatar";
@@ -21,6 +21,7 @@ namespace VGltf.Unity.Ext
         [JsonField(Name = "humanDescription")]
         public HumanDescriptionType HumanDescription;
 
+        [Json]
         public class HumanDescriptionType
         {
             [JsonField(Name = "upperArmTwist")]
@@ -50,6 +51,7 @@ namespace VGltf.Unity.Ext
             [JsonField(Name = "skeleton"), JsonFieldIgnorable]
             public List<SkeletonBone> Skeleton = new List<SkeletonBone>();
 
+            [Json]
             public class HumanBone
             {
                 [JsonField(Name = "boneName")]
@@ -62,6 +64,7 @@ namespace VGltf.Unity.Ext
                 public HumanLimit Limit;
             }
 
+            [Json]
             public class SkeletonBone
             {
                 [JsonField(Name = "name")]
@@ -80,6 +83,7 @@ namespace VGltf.Unity.Ext
                 public float[] Scale;
             }
 
+            [Json]
             public class HumanLimit
             {
                 [JsonField(Name = "useDefaultValues")]
