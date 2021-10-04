@@ -36,10 +36,11 @@ namespace VGltf.Types
 
         //
 
+        [Json]
         public enum TargetEnum
         {
-            ARRAY_BUFFER = 34962,
-            ELEMENT_ARRAY_BUFFER = 34963,
+            [JsonField] ARRAY_BUFFER = 34962,
+            [JsonField] ELEMENT_ARRAY_BUFFER = 34963,
         }
     }
 }

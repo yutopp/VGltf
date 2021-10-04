@@ -29,27 +29,30 @@ namespace VGltf.Types
 
         //
 
+        [Json]
         public enum MagFilterEnum
         {
-            NEAREST = 9728,
-            LINEAR = 9729,
+            [JsonField] NEAREST = 9728,
+            [JsonField] LINEAR = 9729,
         }
 
+        [Json]
         public enum MinFilterEnum
         {
-            NEAREST = 9728,
-            LINEAR = 9729,
-            NEAREST_MIPMAP_NEAREST = 9984,
-            LINEAR_MIPMAP_NEAREST = 9985,
-            NEAREST_MIPMAP_LINEAR = 9986,
-            LINEAR_MIPMAP_LINEAR = 9987,
+            [JsonField] NEAREST = 9728,
+            [JsonField] LINEAR = 9729,
+            [JsonField] NEAREST_MIPMAP_NEAREST = 9984,
+            [JsonField] LINEAR_MIPMAP_NEAREST = 9985,
+            [JsonField] NEAREST_MIPMAP_LINEAR = 9986,
+            [JsonField] LINEAR_MIPMAP_LINEAR = 9987,
         }
 
+        [Json]
         public enum WrapEnum
         {
-            ClampToEdge = 33071,
-            MirroredRepeat = 33648,
-            Repeat = 10497,
+            [JsonField] ClampToEdge = 33071,
+            [JsonField] MirroredRepeat = 33648,
+            [JsonField] Repeat = 10497,
         }
     }
 }

@@ -68,11 +68,13 @@ namespace VGltf.Types
             public MetallicRoughnessTextureInfoType MetallicRoughnessTexture;
         }
 
+        [Json]
         public sealed class BaseColorTextureInfoType : TextureInfo
         {
             public override TextureInfoKind Kind { get { return TextureInfoKind.BaseColor; } }
         }
 
+        [Json]
         public sealed class MetallicRoughnessTextureInfoType : TextureInfo
         {
             public override TextureInfoKind Kind { get { return TextureInfoKind.MetallicRoughness; } }
@@ -97,6 +99,7 @@ namespace VGltf.Types
             public override TextureInfoKind Kind { get { return TextureInfoKind.Occlusion; } }
         }
 
+        [Json]
         public sealed class EmissiveTextureInfoType : TextureInfo
         {
             public override TextureInfoKind Kind { get { return TextureInfoKind.Emissive; } }

@@ -51,14 +51,15 @@ namespace VGltf.Types
 
         //
 
+        [Json]
         public enum ComponentTypeEnum
         {
-            BYTE = 5120,
-            UNSIGNED_BYTE = 5121,
-            SHORT = 5122,
-            UNSIGNED_SHORT = 5123,
-            UNSIGNED_INT = 5125,
-            FLOAT = 5126,
+            [JsonField] BYTE = 5120,
+            [JsonField] UNSIGNED_BYTE = 5121,
+            [JsonField] SHORT = 5122,
+            [JsonField] UNSIGNED_SHORT = 5123,
+            [JsonField] UNSIGNED_INT = 5125,
+            [JsonField] FLOAT = 5126,
         }
 
         [Json(EnumConversion = EnumConversionType.AsString)]
@@ -114,11 +115,12 @@ namespace VGltf.Types
 
                 //
 
+                [Json]
                 public enum ComponentTypeEnum
                 {
-                    UNSIGNED_BYTE = 5121,
-                    UNSIGNED_SHORT = 5123,
-                    UNSIGNED_INT = 5125,
+                    [JsonField] UNSIGNED_BYTE = 5121,
+                    [JsonField] UNSIGNED_SHORT = 5123,
+                    [JsonField] UNSIGNED_INT = 5125,
                 }
             }
 

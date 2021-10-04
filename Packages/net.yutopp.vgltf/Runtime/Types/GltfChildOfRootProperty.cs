@@ -10,6 +10,7 @@ using VJson;
 // Reference: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/schema/*
 namespace VGltf.Types
 {
+    [Json]
     public abstract class GltfChildOfRootProperty : GltfProperty
     {
         [JsonField(Name = "name"), JsonFieldIgnorable]

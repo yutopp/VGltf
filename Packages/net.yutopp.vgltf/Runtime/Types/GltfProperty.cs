@@ -13,6 +13,7 @@ using VJson.Schema;
 // Reference: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/schema/*
 namespace VGltf.Types
 {
+    [Json]
     public abstract class GltfProperty
     {
         [JsonField(Name = "extensions"), JsonFieldIgnorable]
@@ -64,8 +65,6 @@ namespace VGltf.Types
 
             return true;
         }
-
-        internal class ExtensionsResolverTag { }
 
         //
 

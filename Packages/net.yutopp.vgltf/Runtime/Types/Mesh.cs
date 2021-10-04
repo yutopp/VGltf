@@ -52,15 +52,16 @@ namespace VGltf.Types
 
             //
 
+            [Json]
             public enum ModeEnum
             {
-                POINTS = 0,
-                LINES = 1,
-                LINE_LOOP = 2,
-                LINE_STRIP = 3,
-                TRIANGLES = 4,
-                TRIANGLE_STRIP = 5,
-                TRIANGLE_FAN = 6,
+                [JsonField] POINTS = 0,
+                [JsonField] LINES = 1,
+                [JsonField] LINE_LOOP = 2,
+                [JsonField] LINE_STRIP = 3,
+                [JsonField] TRIANGLES = 4,
+                [JsonField] TRIANGLE_STRIP = 5,
+                [JsonField] TRIANGLE_FAN = 6,
             }
 
             public static class AttributeName

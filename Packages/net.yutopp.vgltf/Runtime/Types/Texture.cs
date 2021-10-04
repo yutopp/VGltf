@@ -33,6 +33,7 @@ namespace VGltf.Types
         Emissive
     }
 
+    [Json]
     public abstract class TextureInfo : GltfProperty
     {
         [JsonField(Name = "index")]
