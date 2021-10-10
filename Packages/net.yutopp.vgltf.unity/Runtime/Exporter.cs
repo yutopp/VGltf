@@ -50,8 +50,7 @@ namespace VGltf.Unity
                     Nodes = new NodeExporter(this, coordUtils),
                     Meshes = new MeshExporter(this, coordUtils),
                     Materials = new MaterialExporter(this),
-                    Textures = new TextureExporter(this),
-                    Images = new ImageExporter(this),
+                    Textures = new TextureExporter(this)
                 };
             }
 
