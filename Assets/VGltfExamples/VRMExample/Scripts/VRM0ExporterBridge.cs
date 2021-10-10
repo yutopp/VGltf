@@ -14,9 +14,19 @@ namespace VGltfExamples.VRMExample
             _defaultBridge.ExportMeta(exporter, vrm, go);
         }
 
+        public void ExportFirstPerson(IExporterContext context, VGltf.Ext.Vrm0.Types.Vrm extVrm, GameObject go)
+        {
+            _defaultBridge.ExportFirstPerson(context, extVrm, go);
+        }
+
         public void ExportBlendShapeMaster(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go)
         {
             _defaultBridge.ExportBlendShapeMaster(exporter, vrm, go);
+        }
+
+        public void ExportSecondaryAnimation(IExporterContext context, VGltf.Ext.Vrm0.Types.Vrm extVrm, GameObject go)
+        {
+            _defaultBridge.ExportSecondaryAnimation(context, extVrm, go);
         }
 
         public VGltf.Ext.Vrm0.Types.Material CreateMaterialProp(IExporterContext context, Material mat)

@@ -40,6 +40,11 @@ namespace VGltf.Ext.Vrm0.Unity
             vrm.Meta = vrmMeta;
         }
 
+        public void ExportFirstPerson(IExporterContext context, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go)
+        {
+            // Not supported
+        }
+
         public void ExportBlendShapeMaster(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go)
         {
             var proxy = go.GetComponent<VRM0BlendShapeProxy>();
@@ -82,6 +87,11 @@ namespace VGltf.Ext.Vrm0.Unity
 
                 vrm.BlendShapeMaster.BlendShapeGroups.Add(g);
             }
+        }
+
+        public void ExportSecondaryAnimation(IExporterContext context, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go)
+        {
+            // Not supported
         }
 
         public Types.Material CreateMaterialProp(IExporterContext context, Material mat)

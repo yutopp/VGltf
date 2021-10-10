@@ -32,9 +32,9 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
 
             ExportMeta(exporter, extVrm, go);
             ExportHumanoid(exporter, extVrm, go);
-            // firstPerson
+            ExportFirstPerson(exporter, extVrm, go);
             ExportBlendShapeMaster(exporter, extVrm, go);
-            // secondaryAnimation
+            ExportSecondaryAnimation(exporter, extVrm, go);
             ExportMaterial(exporter, extVrm);
 
             //
@@ -111,9 +111,19 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             extVrm.Humanoid = vrmHum;
         }
 
+        void ExportFirstPerson(Exporter exporter, Types.Vrm extVrm, GameObject go)
+        {
+            _bridge.ExportFirstPerson(exporter.Context, extVrm, go);
+        }
+
         void ExportBlendShapeMaster(Exporter exporter, Types.Vrm extVrm, GameObject go)
         {
             _bridge.ExportBlendShapeMaster(exporter, extVrm, go);
+        }
+
+        void ExportSecondaryAnimation(Exporter exporter, Types.Vrm extVrm, GameObject go)
+        {
+            _bridge.ExportSecondaryAnimation(exporter.Context, extVrm, go);
         }
 
         void ExportMaterial(Exporter exporter, Types.Vrm extVrm)
