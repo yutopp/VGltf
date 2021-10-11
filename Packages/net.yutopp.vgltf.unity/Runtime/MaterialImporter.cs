@@ -121,7 +121,7 @@ namespace VGltf.Unity
 
             if (gltfMat.EmissiveTexture != null)
             {
-                var textureResource = await Context.Importers.Textures.Import(gltfMat.EmissiveTexture.Index, ct);
+                var textureResource = await Context.Importers.Textures.Import(gltfMat.EmissiveTexture.Index, false, ct);
                 mat.SetTexture("_EmissionMap", textureResource.Value);
             }
 
@@ -135,7 +135,7 @@ namespace VGltf.Unity
 
                 if (pbrMR.BaseColorTexture != null)
                 {
-                    var textureResource = await Context.Importers.Textures.Import(pbrMR.BaseColorTexture.Index, ct);
+                    var textureResource = await Context.Importers.Textures.Import(pbrMR.BaseColorTexture.Index, false, ct);
                     mat.SetTexture("_MainTex", textureResource.Value);
                 }
             }

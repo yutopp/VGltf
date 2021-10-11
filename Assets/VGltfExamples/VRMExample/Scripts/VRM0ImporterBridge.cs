@@ -59,7 +59,7 @@ namespace VGltfExamples.VRMExample
             {
                 if (!context.Resources.Textures.TryGetValue(kv.Value, out var texRes))
                 {
-                    texRes = await context.Importers.Textures.Import(kv.Value, ct);
+                    texRes = await context.Importers.Textures.Import(kv.Value, false, ct);
                     await context.TimeSlicer.Slice(ct);
                 }
                 mat.SetTexture(kv.Key, texRes.Value);

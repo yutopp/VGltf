@@ -6,15 +6,15 @@
 //
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace VGltf.Unity
 {
     public abstract class ImageImporterHook
     {
-        public virtual void PostHook(ImageImporter importer)
-        {
-        }
+        public abstract Task<Texture2D> Import(IImporterContext importer, int imgIndex, bool isLinear, CancellationToken ct);
     }
 
     public class ImageImporter : ImporterRefHookable<ImageImporterHook>
@@ -27,11 +27,40 @@ namespace VGltf.Unity
         }
 
         // TODO: fix interface to check condition of linier/sRGB at here
-        public Resource Import(int imgIndex)
+        public async Task<Texture2D> ImportAsTex(int imgIndex, bool isLinear, CancellationToken ct)
         {
-            var gltfImgResource = Context.GltfResources.GetOrLoadImageResourceAt(imgIndex);
+            foreach (var h in Hooks)
+            {
+                var customTex = await h.Import(Context, imgIndex, isLinear, ct);
+                if (customTex != null)
+                {
+                    return customTex;
+                }
+            }
 
-            return gltfImgResource;
+            var gltf = Context.Container.Gltf;
+            var gltfImage = gltf.Images[imgIndex];
+
+            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, isLinear);
+            try
+            {
+                // image binary
+                var gltfImgResource = Context.GltfResources.GetOrLoadImageResourceAt(imgIndex);
+
+                var imageBuffer = new byte[gltfImgResource.Data.Count];
+                Array.Copy(gltfImgResource.Data.Array, gltfImgResource.Data.Offset, imageBuffer, 0, gltfImgResource.Data.Count);
+
+                // TODO: check encodings...
+                // TODO: offload texture decoding...
+                tex.LoadImage(imageBuffer);
+
+                return tex;
+            }
+            catch
+            {
+                Utils.Destroy(tex);
+                throw;
+            }
         }
     }
 }

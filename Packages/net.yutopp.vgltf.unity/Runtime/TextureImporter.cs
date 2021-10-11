@@ -14,11 +14,12 @@ namespace VGltf.Unity
 {
     public abstract class TextureImporterHook
     {
-        public virtual void PostHook(TextureImporter importer)
+        public virtual void PostHook(IImporterContext context, int tex)
         {
         }
     }
 
+    // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#textures
     public sealed class TextureImporter : ImporterRefHookable<TextureImporterHook>
     {
         public override IImporterContext Context { get; }
@@ -28,36 +29,42 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public async Task<IndexedResource<Texture2D>> Import(int texIndex, CancellationToken ct)
+        public async Task<IndexedResource<Texture2D>> Import(int texIndex, bool isLinear, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
 
             return await Context.Resources.Textures.GetOrCallAsync(texIndex, async () =>
             {
-                return await ForceImport(texIndex, ct);
+                return await ForceImport(texIndex, isLinear, ct);
             });
         }
 
-        public async Task<IndexedResource<Texture2D>> ForceImport(int texIndex, CancellationToken ct)
+        public async Task<IndexedResource<Texture2D>> ForceImport(int texIndex, bool isLinear, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfTex = gltf.Textures[texIndex];
 
-            var tex = new Texture2D(0, 0);
-            tex.name = gltfTex.Name;
+            IndexedResource<Texture2D> resource = null;
 
-            var resource = Context.Resources.Textures.Add(texIndex, texIndex, tex.name, tex);
-
+            // When texture.source is undefined, the image SHOULD be provided by an extension or application-specific means, otherwise the texture object is undefined.
             if (gltfTex.Source != null)
             {
-                var imageResource = Context.Importers.Images.Import(gltfTex.Source.Value);
+                var tex = await Context.Importers.Images.ImportAsTex(gltfTex.Source.Value, isLinear, ct);
+                tex.name = gltfTex.Name;
 
-                var imageBuffer = new byte[imageResource.Data.Count];
-                Array.Copy(imageResource.Data.Array, imageResource.Data.Offset, imageBuffer, 0, imageResource.Data.Count);
-
-                // offload texture decoding...
-                tex.LoadImage(imageBuffer);
+                resource = Context.Resources.Textures.Add(texIndex, texIndex, tex.name, tex);
             }
+            else
+            {
+                // Source is undefined, thus add dummy texture (u.b.).
+                var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, isLinear);
+                tex.name = gltfTex.Name;
+
+                resource = Context.Resources.Textures.Add(texIndex, texIndex, tex.name, tex);
+            }
+
+            // When texture.sampler is undefined, a sampler with repeat wrapping (in both directions) and auto filtering MUST be used.
+            // NOTE: Not implemented currently
 
             return resource;
         }
