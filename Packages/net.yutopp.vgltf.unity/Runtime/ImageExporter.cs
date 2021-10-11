@@ -59,7 +59,7 @@ namespace VGltf.Unity
             {
                 Name = tex.name,
 
-                MimeType = Types.Image.MimeTypeEnum.ImagePng,
+                MimeType = Types.Image.MimeTypeImagePng,
                 BufferView = viewIndex,
             });
         }
