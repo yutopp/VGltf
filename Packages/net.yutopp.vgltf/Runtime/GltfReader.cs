@@ -32,7 +32,7 @@ namespace VGltf
                 // If JsonSchemaRegistry is passed, we interpret it as an intention to validate JsonSchema
                 if (reg != null)
                 {
-                    var schema = JsonSchemaAttribute.CreateFromClass<Types.Gltf>(reg);
+                    var schema = JsonSchema.CreateFromType<Types.Gltf>(reg);
                     var ex = schema.Validate(gltf, reg);
                     if (ex != null)
                     {

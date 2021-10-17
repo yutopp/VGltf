@@ -17,7 +17,7 @@ namespace VGltf
     {
         public static void Write(Stream s, Types.Gltf gltf, JsonSchemaRegistry reg)
         {
-            var schema = JsonSchemaAttribute.CreateFromClass<Types.Gltf>(reg);
+            var schema = JsonSchema.CreateFromType<Types.Gltf>(reg);
             var ex = schema.Validate(gltf, reg);
             if (ex != null)
             {

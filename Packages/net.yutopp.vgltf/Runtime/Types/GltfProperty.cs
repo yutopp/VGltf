@@ -51,7 +51,7 @@ namespace VGltf.Types
                 return false;
             }
 
-            var v = JsonSchemaAttribute.CreateFromClass<T>(reg);
+            var v = JsonSchema.CreateFromType<T>(reg);
             var ex = v.Validate(node, reg);
             if (ex != null)
             {
@@ -95,7 +95,7 @@ namespace VGltf.Types
                 return false;
             }
 
-            var v = JsonSchemaAttribute.CreateFromClass<T>(reg);
+            var v = JsonSchema.CreateFromType<T>(reg);
             var ex = v.Validate(node, reg);
             if (ex != null)
             {

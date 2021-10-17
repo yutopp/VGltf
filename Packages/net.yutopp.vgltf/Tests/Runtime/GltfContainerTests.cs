@@ -25,7 +25,7 @@ namespace VGltf.UnitTests
             {
                 var c = GltfContainer.FromGltf(fs);
 
-                var schema = VJson.Schema.JsonSchemaAttribute.CreateFromClass<Types.Gltf>(c.JsonSchemas);
+                var schema = VJson.Schema.JsonSchema.CreateFromType<Types.Gltf>(c.JsonSchemas);
                 var ex = schema.Validate(c.Gltf, c.JsonSchemas);
                 Assert.Null(ex);
 
@@ -47,7 +47,7 @@ namespace VGltf.UnitTests
             {
                 var c = GltfContainer.FromGlb(fs);
 
-                var schema = VJson.Schema.JsonSchemaAttribute.CreateFromClass<Types.Gltf>(c.JsonSchemas);
+                var schema = VJson.Schema.JsonSchema.CreateFromType<Types.Gltf>(c.JsonSchemas);
                 var ex = schema.Validate(c.Gltf, c.JsonSchemas);
                 Assert.Null(ex);
 
