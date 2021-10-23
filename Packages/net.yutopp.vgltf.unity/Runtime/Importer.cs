@@ -109,7 +109,8 @@ namespace VGltf.Unity
 
             foreach (var nodeIndex in gltfScene.Nodes)
             {
-                Context.Importers.Nodes.ImportGameObjects(nodeIndex);
+                await Context.Importers.Nodes.ImportGameObjects(nodeIndex, null, ct);
+                await _context.TimeSlicer.Slice(ct);
             }
             foreach (var nodeIndex in gltfScene.Nodes)
             {

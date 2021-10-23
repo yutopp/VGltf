@@ -30,15 +30,18 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public void ImportGameObjects(int nodeIndex, GameObject parentGo = null)
+        public async Task<IndexedResource<GameObject>> ImportGameObjects(int nodeIndex, GameObject parentGo, CancellationToken ct)
         {
-            Context.Resources.Nodes.GetOrCall(nodeIndex, () =>
+            return await Context.Resources.Nodes.GetOrCallAsync(nodeIndex, async () =>
             {
-                return ForceImportGameObjects(nodeIndex, parentGo);
+                using (Utils.MeasureAndPrintTime($"NodeImporter: {nodeIndex}"))
+                {
+                    return await ForceImportGameObjects(nodeIndex, parentGo, ct);
+                }
             });
         }
 
-        public IndexedResource<GameObject> ForceImportGameObjects(int nodeIndex, GameObject parentGo)
+        public async Task<IndexedResource<GameObject>> ForceImportGameObjects(int nodeIndex, GameObject parentGo, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfNode = gltf.Nodes[nodeIndex];
@@ -77,7 +80,8 @@ namespace VGltf.Unity
                     {
                         throw new NotImplementedException("Node duplication"); // TODO:
                     }
-                    ImportGameObjects(childIndex, go);
+                    await ImportGameObjects(childIndex, go, ct);
+                    await Context.TimeSlicer.Slice(ct);
                 }
             }
 

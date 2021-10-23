@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -7,9 +8,9 @@ namespace VGltf.Unity
 {
     public static class Utils
     {
-        public static void Destroy(Object go)
+        public static void Destroy(UnityEngine.Object o)
         {
-            if (go == null)
+            if (o == null)
             {
                 return;
             }
@@ -17,13 +18,40 @@ namespace VGltf.Unity
 #if UNITY_EDITOR
             if (!EditorApplication.isPlaying)
             {
-                GameObject.DestroyImmediate(go);
+                UnityEngine.Object.DestroyImmediate(o);
             }
             else
 #endif
             {
-                GameObject.Destroy(go);
+                UnityEngine.Object.Destroy(o);
             }
+        }
+
+        public struct DebugStopwatch : IDisposable
+        {
+            readonly System.Diagnostics.Stopwatch _stopwatch;
+            readonly string _name;
+
+            public DebugStopwatch(string name)
+            {
+                _name = name;
+                _stopwatch = new System.Diagnostics.Stopwatch();
+
+                _stopwatch.Start();
+            }
+
+            public void Dispose()
+            {
+                _stopwatch.Stop();
+
+                float elapsed = (float)_stopwatch.Elapsed.TotalMilliseconds;
+                Debug.Log($"Duration({_name}): {elapsed}ms");
+            }
+        }
+
+        public static DebugStopwatch MeasureAndPrintTime(string name)
+        {
+            return new DebugStopwatch(name);
         }
     }
 }
