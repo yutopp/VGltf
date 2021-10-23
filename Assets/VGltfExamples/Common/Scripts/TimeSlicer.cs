@@ -20,7 +20,7 @@ namespace VGltfExamples.Common
 
         public async Task Slice(CancellationToken ct)
         {
-            Debug.Log($"Slice check: {sw.ElapsedMilliseconds} >= {limitMillisecPerFrame}");
+            // Debug.Log($"Slice check: {sw.ElapsedMilliseconds} >= {limitMillisecPerFrame}");
             if (sw.ElapsedMilliseconds >= limitMillisecPerFrame)
             {
                 Debug.Log("Slice!");
