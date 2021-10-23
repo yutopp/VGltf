@@ -14,8 +14,9 @@ namespace VGltf.Unity
 {
     public abstract class ImporterHookBase
     {
-        public virtual async Task PostHook(IImporterContext context, CancellationToken ct)
+        public virtual Task PostHook(IImporterContext context, CancellationToken ct)
         {
+            return Task.CompletedTask;
         }
     }
 

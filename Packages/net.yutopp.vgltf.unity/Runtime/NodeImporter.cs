@@ -34,10 +34,7 @@ namespace VGltf.Unity
         {
             return await Context.Resources.Nodes.GetOrCallAsync(nodeIndex, async () =>
             {
-                using (Utils.MeasureAndPrintTime($"NodeImporter: {nodeIndex}"))
-                {
-                    return await ForceImportGameObjects(nodeIndex, parentGo, ct);
-                }
+                return await ForceImportGameObjects(nodeIndex, parentGo, ct);
             });
         }
 
@@ -97,7 +94,10 @@ namespace VGltf.Unity
 
             if (gltfNode.Mesh != null)
             {
-                var meshResource = await Context.Importers.Meshes.Import(gltfNode.Mesh.Value, go, ct);
+                using (Utils.MeasureAndPrintTime($"Meshes.Import: {go.name}"))
+                {
+                    var meshResource = await Context.Importers.Meshes.Import(gltfNode.Mesh.Value, go, ct);
+                }
 
                 if (gltfNode.Skin != null)
                 {

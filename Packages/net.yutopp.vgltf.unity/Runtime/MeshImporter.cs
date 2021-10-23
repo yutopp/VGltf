@@ -119,7 +119,16 @@ namespace VGltf.Unity
                 ValidateSubPrimitives(primsRaw[0], p, i);
             }
 
-            var prims = await Task.WhenAll(primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0, ct)));
+            var prims = await Task.WhenAll(primsRaw.Select(async (p, i) =>
+            {
+                var prim = default(PrimitiveResource);
+                using (Utils.MeasureAndPrintTime($"ImportPrimitive({i})"))
+                {
+                    prim = await ImportPrimitive(gltfMesh, p, i == 0, ct);
+                }
+                await Context.TimeSlicer.Slice(ct);
+                return prim;
+            }));
 
             var mesh = new Mesh();
             mesh.name = gltfMesh.Name;
@@ -358,12 +367,19 @@ namespace VGltf.Unity
 
             if (prim.Indices != null)
             {
-                res.Indices = ImportIndices(prim.Indices.Value);
+                using (Utils.MeasureAndPrintTime($"ImportIndices"))
+                {
+                    res.Indices = ImportIndices(prim.Indices.Value);
+                }
             }
 
             if (prim.Material != null)
             {
-                var materialRes = await Context.Importers.Materials.Import(prim.Material.Value, ct);
+                var materialRes = default(IndexedResource<Material>);
+                using (Utils.MeasureAndPrintTime($"Materials.Import"))
+                {
+                    materialRes = await Context.Importers.Materials.Import(prim.Material.Value, ct);
+                }
                 await Context.TimeSlicer.Slice(ct);
 
                 res.Material = materialRes.Value;

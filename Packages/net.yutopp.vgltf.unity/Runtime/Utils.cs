@@ -45,7 +45,7 @@ namespace VGltf.Unity
                 _stopwatch.Stop();
 
                 float elapsed = (float)_stopwatch.Elapsed.TotalMilliseconds;
-                Debug.Log($"Duration({_name}): {elapsed}ms");
+                Debug.Log($"D '{_name}': {elapsed}ms");
             }
         }
 
