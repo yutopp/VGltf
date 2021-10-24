@@ -183,7 +183,7 @@ namespace VGltf.Unity
             var primitives = new List<Types.Mesh.PrimitiveType>();
             for (var i = 0; i < mesh.subMeshCount; ++i)
             {
-                var indices = mesh.GetIndices(i);
+                var indices = mesh.GetIndices(i); // Owner ship will be taken
                 var positionindicesAccIndex = ExportIndices(indices);
 
                 var attrs = new Dictionary<string, int>();
@@ -253,7 +253,7 @@ namespace VGltf.Unity
         {
             // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#primitiveindices
 
-            indices = _coordUtils.FlipIndices(indices).ToArray();
+            _coordUtils.FlipIndices(indices); // NOTE: overwrite indices
 
             // Scalar | UNSIGNED_BYTE
             //        | UNSIGNED_SHORT

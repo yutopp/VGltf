@@ -55,7 +55,11 @@ namespace VGltf.Unity
             var gltf = Context.Container.Gltf;
             var gltfMat = gltf.Materials[matIndex];
 
-            var shader = Shader.Find("Standard");
+            var shader = default(Shader);
+            using (Utils.MeasureAndPrintTime($"Shader.Find"))
+            {
+                shader = Shader.Find("Standard");
+            }
             if (shader == null)
             {
                 throw new Exception($"Standard shader is not found");

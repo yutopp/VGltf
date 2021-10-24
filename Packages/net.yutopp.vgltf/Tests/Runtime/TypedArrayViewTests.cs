@@ -35,7 +35,7 @@ namespace VGltf.UnitTests
                 2,
                 Vec2<UInt32>.FromArray);
 
-            var compositedResult = view.GetEnumerable().ToArray();
+            var compositedResult = view.TypedBuffer;
             Assert.That(compositedResult.Length, Is.EqualTo(2));
             Assert.That(compositedResult[0], Is.EqualTo(new Vec2<UInt32>(0x03020100, 0x07060504)));
             Assert.That(compositedResult[1], Is.EqualTo(new Vec2<UInt32>(0x13121110, 0x17161514)));

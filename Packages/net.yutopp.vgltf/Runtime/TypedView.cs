@@ -18,11 +18,12 @@ namespace VGltf
         //IEnumerable<T> GetEnumerable();
     }
 
+    // TODO: Rename because this class is not view already.
     // T: primitive types (e.g. int, float...)
     // U: extracted types (e.g. int, Vector3...)
     public sealed class TypedArrayView<T, U> where T : struct where U : struct
     {
-        public U[] TypedBuffer { get; }
+        public readonly U[] TypedBuffer;
 
         public TypedArrayView(
             ArraySegment<byte> buffer,
@@ -50,6 +51,11 @@ namespace VGltf
             var gch = GCHandle.Alloc(origin, GCHandleType.Pinned);
             try
             {
+                var pinnedAddr = gch.AddrOfPinnedObject();
+
+                var baseArray = buffer.Array;
+                var baseOffset = buffer.Offset;
+
                 for (var i = 0; i < count; ++i)
                 {
                     var strideHeadOffset = i * stride;
@@ -60,7 +66,7 @@ namespace VGltf
                     // TODO: If you use this library on machines which have other endianness, need to implement supporting that.
                     //
 
-                    Marshal.Copy(buffer.Array, buffer.Offset + strideHeadOffset, gch.AddrOfPinnedObject(), componentSize * componentNum);
+                    Marshal.Copy(baseArray, baseOffset + strideHeadOffset, pinnedAddr, componentSize * componentNum);
                     TypedBuffer[i] = mapper(origin);
                 }
             }
@@ -68,11 +74,6 @@ namespace VGltf
             {
                 gch.Free();
             }
-        }
-
-        public IEnumerable<U> GetEnumerable()
-        {
-            return TypedBuffer;
         }
     }
 
@@ -109,18 +110,18 @@ namespace VGltf
 
         public IEnumerable<U> GetEnumerable()
         {
-            return _storage.GetEnumerable();
+            return _storage.TypedBuffer;
         }
     }
 
     public sealed class TypedArrayEntity<T, U> where T : struct where U : struct
     {
-        public TypedArrayStorageFromBufferView<T, U> DenseView { get; }
+        public readonly TypedArrayStorageFromBufferView<T, U> DenseView;
 
-        public uint[] SparseIndices { get; }
-        public TypedArrayStorageFromBufferView<T, U> SparseValues { get; }
+        public readonly uint[] SparseIndices;
+        public readonly TypedArrayStorageFromBufferView<T, U> SparseValues;
 
-        public int Length { get; }
+        public readonly int Length;
         readonly int _componentNum; // Number of primitives in compound values (e.g. VEC3 = 3)
 
         public TypedArrayEntity(ResourcesStore store, Accessor accessor, Func<T[], U> mapper)
@@ -241,8 +242,8 @@ namespace VGltf
 
     public sealed class TypedBuffer
     {
-        public ResourcesStore Store { get; }
-        public Types.Accessor Accessor { get; }
+        public readonly ResourcesStore Store;
+        public readonly Types.Accessor Accessor;
 
         public TypedBuffer(ResourcesStore store, Types.Accessor accessor)
         {
@@ -256,7 +257,7 @@ namespace VGltf
             return new TypedArrayEntity<T, U>(Store, Accessor, mapper);
         }
 
-        public IEnumerable<U> GetPrimitivesAsCasted<U>() where U : struct
+        public IEnumerable<int> GetPrimitivesAsInt()
         {
             if (Accessor.Type != Types.Accessor.TypeEnum.Scalar)
             {
@@ -266,22 +267,24 @@ namespace VGltf
             switch (Accessor.ComponentType)
             {
                 case Types.Accessor.ComponentTypeEnum.BYTE:
-                    return GetEntity<sbyte, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
+                    return GetEntity<sbyte, int>(xs => (int)xs[0]).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.UNSIGNED_BYTE:
-                    return GetEntity<byte, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
+                    return GetEntity<byte, int>(xs => (int)xs[0]).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.SHORT:
-                    return GetEntity<short, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
+                    return GetEntity<short, int>(xs => (int)xs[0]).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.UNSIGNED_SHORT:
-                    return GetEntity<ushort, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
+                    return GetEntity<ushort, int>(xs => (int)xs[0]).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.UNSIGNED_INT:
-                    return GetEntity<uint, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
+                    // May cause overflow...
+                    return GetEntity<uint, int>(xs => (int)xs[0]).GetEnumerable();
 
                 case Types.Accessor.ComponentTypeEnum.FLOAT:
-                    return GetEntity<float, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
+                    // return GetEntity<float, U>(xs => (U)Convert.ChangeType(xs[0], typeof(U))).GetEnumerable();
+                    throw new InvalidOperationException("Cannot convert from float to int");
 
                 default:
                     throw new InvalidOperationException("Unexpected ComponentType: Actual = " + Accessor.ComponentType);

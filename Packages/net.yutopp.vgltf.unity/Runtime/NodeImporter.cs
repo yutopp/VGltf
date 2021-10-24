@@ -94,10 +94,7 @@ namespace VGltf.Unity
 
             if (gltfNode.Mesh != null)
             {
-                using (Utils.MeasureAndPrintTime($"Meshes.Import: {go.name}"))
-                {
-                    var meshResource = await Context.Importers.Meshes.Import(gltfNode.Mesh.Value, go, ct);
-                }
+                await Context.Importers.Meshes.Import(gltfNode.Mesh.Value, go, ct);
 
                 if (gltfNode.Skin != null)
                 {

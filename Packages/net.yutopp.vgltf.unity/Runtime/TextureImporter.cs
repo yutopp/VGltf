@@ -35,7 +35,10 @@ namespace VGltf.Unity
 
             return await Context.Resources.Textures.GetOrCallAsync(texIndex, async () =>
             {
-                return await ForceImport(texIndex, isLinear, ct);
+                using (Utils.MeasureAndPrintTime($"Import.Texture"))
+                {
+                    return await ForceImport(texIndex, isLinear, ct);
+                }
             });
         }
 

@@ -69,7 +69,7 @@ namespace VGltf.UnitTests.ModelTester
 
             // index 0
             var indicies = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Indices.Value);
-            Assert.AreEqual(36, indicies.GetPrimitivesAsCasted<int>().Count());
+            Assert.AreEqual(36, indicies.GetPrimitivesAsInt().Count());
 
             // Materials
             // index0

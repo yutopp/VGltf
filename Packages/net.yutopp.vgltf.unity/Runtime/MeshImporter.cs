@@ -375,11 +375,7 @@ namespace VGltf.Unity
 
             if (prim.Material != null)
             {
-                var materialRes = default(IndexedResource<Material>);
-                using (Utils.MeasureAndPrintTime($"Materials.Import"))
-                {
-                    materialRes = await Context.Importers.Materials.Import(prim.Material.Value, ct);
-                }
+                var materialRes = await Context.Importers.Materials.Import(prim.Material.Value, ct);
                 await Context.TimeSlicer.Slice(ct);
 
                 res.Material = materialRes.Value;
@@ -493,7 +489,9 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType != Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return Context.CoordUtils.FlipIndices(buf.GetPrimitivesAsCasted<int>().ToArray()).ToArray();
+                    var indices = buf.GetPrimitivesAsInt().ToArray();
+                    Context.CoordUtils.FlipIndices(indices);
+                    return indices;
                 }
             }
 

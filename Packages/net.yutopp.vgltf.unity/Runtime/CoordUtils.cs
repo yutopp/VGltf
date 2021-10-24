@@ -33,7 +33,7 @@ namespace VGltf.Unity
             CoordinateSpaceAxisFlip = axis;
         }
 
-        public IEnumerable<int> FlipIndices(int[] xs)
+        public void FlipIndices(int[] xs)
         {
             if (xs.Length % 3 != 0)
             {
@@ -44,9 +44,9 @@ namespace VGltf.Unity
             {
                 // From : (0, 1, 2), (3, 4, 5), ...
                 // To   : (2, 1, 0), (5, 4, 3), ...
-                yield return xs[i * 3 + 2];
-                yield return xs[i * 3 + 1];
-                yield return xs[i * 3 + 0];
+                var x0 = xs[i * 3 + 0];
+                xs[i * 3 + 0] = xs[i * 3 + 2];
+                xs[i * 3 + 2] = x0;
             }
         }
 
