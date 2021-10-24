@@ -7,8 +7,8 @@ namespace VGltfExamples.Common
 {
     public sealed class TimeSlicer : VGltf.Unity.ITimeSlicer
     {
-        readonly int limitMillisecPerFrame = 20;
-        readonly int maxFrameCount = 30; // 30フレーム以内に読まれれば良い
+        readonly int limitMillisecPerFrame = 16;
+        readonly int maxFrameCount = 120; // 120フレーム以内に読まれれば良い
 
         readonly System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         int elapsedFrame = 0;
@@ -26,6 +26,7 @@ namespace VGltfExamples.Common
                 Debug.Log("Slice!");
 
                 await UniTask.DelayFrame(1, cancellationToken: ct);
+
                 elapsedFrame++;
                 sw.Stop();
                 sw.Reset();
