@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace VGltf.Unity
@@ -50,29 +51,34 @@ namespace VGltf.Unity
             }
         }
 
-        public Vector2 ConvertUV(Vector2 v)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 ConvertUV(Vector2 v)
         {
             // From : (u, v)
             // To   : (u, 1 - v)
             return new Vector2(v.x, 1 - v.y);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3 ConvertSpace(Vector3 v)
         {
             return new Vector3(v.x * CoordinateSpaceAxisFlip.x, v.y * CoordinateSpaceAxisFlip.y, v.z * CoordinateSpaceAxisFlip.z);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector4 ConvertSpace(Vector4 v)
         {
             return new Vector4(v.x * CoordinateSpaceAxisFlip.x, v.y * CoordinateSpaceAxisFlip.y, v.z * CoordinateSpaceAxisFlip.z, v.w * -1);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion ConvertSpace(Quaternion q)
         {
             // https://stackoverflow.com/questions/41816497/right-hand-camera-to-left-hand-opencv-to-unity
             return new Quaternion(q.x * -CoordinateSpaceAxisFlip.x, q.y * -CoordinateSpaceAxisFlip.y, q.z * -CoordinateSpaceAxisFlip.z, q.w * -(-1));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Matrix4x4 ConvertSpace(Matrix4x4 m)
         {
             //
@@ -96,11 +102,13 @@ namespace VGltf.Unity
 
         // https://answers.unity.com/questions/402280/how-to-decompose-a-trs-matrix.html
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 GetTranslate(Matrix4x4 m)
         {
             return m.GetColumn(3);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion GetRotation(Matrix4x4 m)
         {
             var r = Quaternion.LookRotation(
@@ -111,6 +119,7 @@ namespace VGltf.Unity
             return r;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 GetScale(Matrix4x4 m)
         {
             var s = new Vector3(
@@ -125,19 +134,22 @@ namespace VGltf.Unity
         // IMPORTANT: We assume that Linear workflow is used.
 
         // glTF world(sRGB) -> Shader(sRGB)|Unity(Linear)
-        public Color ColorFromSRGB(Vector4 v)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Color ColorFromSRGB(Vector4 v)
         {
             return v;
         }
 
         // glTF world(sRGB) -> Shader(sRGB)|Unity(Linear)
-        public Color ColorFromSRGB(Vector3 v)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Color ColorFromSRGB(Vector3 v)
         {
             return ColorFromLinear(new Vector4(v.x, v.y, v.z, 1.0f));
         }
 
         // glTF world(Linear) -> Shader(sRGB)|Unity(Linear)
-        public Color ColorFromLinear(Vector4 v)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Color ColorFromLinear(Vector4 v)
         {
             return ((Color)v).gamma;
         }

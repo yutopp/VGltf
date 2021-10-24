@@ -398,7 +398,7 @@ namespace VGltf.Unity
 
         int ExportUV(Vector2[] uv)
         {
-            uv = uv.Select(_coordUtils.ConvertUV).ToArray();
+            uv = uv.Select(CoordUtils.ConvertUV).ToArray();
 
             // VEC2! | FLOAT!
             //       | UNSIGNED_BYTE  (normalized) 

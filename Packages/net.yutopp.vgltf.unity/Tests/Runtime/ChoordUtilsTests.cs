@@ -22,10 +22,10 @@ namespace VGltf.Unity.UnitTests
             var coordUtils = new CoordUtils();
 
             var srcUV = new Vector2(0.2f, 0.8f);
-            var conv = coordUtils.ConvertUV(srcUV);
+            var conv = CoordUtils.ConvertUV(srcUV);
             Assert.That(Asserts.EqualsWithDelta(srcUV, conv), Is.EqualTo(false));
 
-            var dstUV = coordUtils.ConvertUV(conv);
+            var dstUV = CoordUtils.ConvertUV(conv);
             Assert.That(Asserts.EqualsWithDelta(srcUV, dstUV), Is.EqualTo(true));
         }
 

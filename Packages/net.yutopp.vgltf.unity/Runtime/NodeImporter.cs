@@ -139,7 +139,7 @@ namespace VGltf.Unity
             if (gltfSkin.InverseBindMatrices != null)
             {
                 var buf = Context.GltfResources.GetOrLoadTypedBufferByAccessorIndex(gltfSkin.InverseBindMatrices.Value);
-                var matrices = buf.GetEntity<float, Matrix4x4>(PrimitiveImporter.AsMatrix4x4).GetEnumerable().Select(Context.CoordUtils.ConvertSpace).ToArray();
+                var matrices = buf.GetEntity<float, Matrix4x4>((xs, i) => Context.CoordUtils.ConvertSpace(PrimitiveImporter.AsMatrix4x4(xs, i))).AsArray();
 
                 var mesh = smr.sharedMesh;
                 mesh.bindposes = matrices;
