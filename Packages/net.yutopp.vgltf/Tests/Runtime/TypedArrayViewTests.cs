@@ -27,7 +27,7 @@ namespace VGltf.UnitTests
                 /* [1]x */ 0x10, 0x11, 0x12, 0x13, /* [1]y */ 0x14, 0x15, 0x16, 0x17,
             };
 
-            var view = new TypedArrayView<UInt32, Vec2<UInt32>>(
+            var view = TypedArrayView<Vec2<UInt32>>.CreateFromPrimitive<UInt32>(
                 new ArraySegment<byte>(buffer),
                 8 /* stride */,
                 4 /* uint32 = 4 */,
