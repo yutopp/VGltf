@@ -127,6 +127,8 @@ namespace VGltf.Unity
             {
                 var textureResource = await Context.Importers.Textures.Import(gltfMat.EmissiveTexture.Index, false, ct);
                 mat.SetTexture("_EmissionMap", textureResource.Value);
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (gltfMat.PbrMetallicRoughness != null)
@@ -141,6 +143,8 @@ namespace VGltf.Unity
                 {
                     var textureResource = await Context.Importers.Textures.Import(pbrMR.BaseColorTexture.Index, false, ct);
                     mat.SetTexture("_MainTex", textureResource.Value);
+
+                    await Context.TimeSlicer.Slice(ct);
                 }
             }
         }

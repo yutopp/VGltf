@@ -121,11 +121,7 @@ namespace VGltf.Unity
 
             var prims = await Task.WhenAll(primsRaw.Select(async (p, i) =>
             {
-                var prim = default(PrimitiveResource);
-                using (Utils.MeasureAndPrintTime($"ImportPrimitive({i})"))
-                {
-                    prim = await ImportPrimitive(gltfMesh, p, i == 0, ct);
-                }
+                var prim = await ImportPrimitive(gltfMesh, p, i == 0, ct);
                 await Context.TimeSlicer.Slice(ct);
                 return prim;
             }));
@@ -367,48 +363,59 @@ namespace VGltf.Unity
 
             if (prim.Indices != null)
             {
-                using (Utils.MeasureAndPrintTime($"ImportIndices"))
-                {
-                    res.Indices = ImportIndices(prim.Indices.Value);
-                }
+                res.Indices = ImportIndices(prim.Indices.Value);
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (prim.Material != null)
             {
                 var materialRes = await Context.Importers.Materials.Import(prim.Material.Value, ct);
-                await Context.TimeSlicer.Slice(ct);
-
                 res.Material = materialRes.Value;
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.Position != null)
             {
                 res.Vertices = ImportPositions(prim.Position.Value);
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.Normal != null)
             {
                 res.Normals = ImportNormals(prim.Normal.Value);
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.Tangent != null)
             {
                 res.Tangents = ImportTangents(prim.Tangent.Value);
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.TexCoord0 != null)
             {
                 res.UV = ImportUV(prim.TexCoord0.Value);
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.TexCoord1 != null)
             {
                 res.UV2 = ImportUV(prim.TexCoord1.Value);
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.Color != null)
             {
                 res.Colors = ImportColors(prim.Color.Value);
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && (prim.Joint != null && prim.Weight != null))
@@ -422,7 +429,7 @@ namespace VGltf.Unity
 
                 // assert: joints.Length == weights.Length
                 var boneWeights = new BoneWeight[joints.Length];
-                for(var i=0; i<joints.Length; ++i)
+                for (var i = 0; i < joints.Length; ++i)
                 {
                     var j = joints[i];
                     var w = weights[i];
@@ -437,6 +444,8 @@ namespace VGltf.Unity
                     boneWeights[i].weight3 = w.w;
                 }
                 res.BoneWeights = boneWeights;
+
+                await Context.TimeSlicer.Slice(ct);
             }
 
             if (prim.Targets != null)
@@ -450,11 +459,13 @@ namespace VGltf.Unity
                 foreach (var t in prim.Targets)
                 {
                     var deltaVertices = ImportPositions(t.Position);
+                    await Context.TimeSlicer.Slice(ct);
 
                     var deltaNormals = default(Vector3[]);
                     if (t.Normal != null)
                     {
                         deltaNormals = ImportNormals(t.Normal.Value);
+                        await Context.TimeSlicer.Slice(ct);
                     }
 
                     var deltaTangents = default(Vector3[]);
@@ -598,7 +609,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.UNSIGNED_SHORT)
                 {
-                    return buf.GetEntity<ushort, Vec4<int>>((xs, i) => new Vec4<int>(xs[i+0], xs[i+1], xs[i+2], xs[i+3])).AsArray();
+                    return buf.GetEntity<ushort, Vec4<int>>((xs, i) => new Vec4<int>(xs[i + 0], xs[i + 1], xs[i + 2], xs[i + 3])).AsArray();
                 }
             }
 
