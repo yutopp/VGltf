@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using VGltf.Ext.Vrm0.Unity.Extensions;
 using VGltf.Unity;
 
 namespace VGltf.Ext.Vrm0.Unity
@@ -34,6 +35,16 @@ namespace VGltf.Ext.Vrm0.Unity
             meta.OtherPermissionUrl = vrmMeta.OtherPermissionUrl;
             meta.License = vrmMeta.License;
             meta.OtherLicenseUrl = vrmMeta.OtherLicenseUrl;
+        }
+
+        public void ImportFirstPerson(IImporterContext context, VGltf.Ext.Vrm0.Types.FirstPerson vrmFirstPerson, GameObject go)
+        {
+            var fp = go.AddComponent<VRM0FirstPerson>();
+
+            var fpBone = context.Resources.Nodes[vrmFirstPerson.FirstPersonBone];
+            fp.FirstPersonBone = fpBone.Value.transform;
+
+            fp.FirstPersonOffset = vrmFirstPerson.FirstPersonBoneOffset.ToUnity();
         }
 
         public void ImportBlendShapeMaster(IImporterContext context, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)

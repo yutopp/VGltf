@@ -15,6 +15,11 @@ namespace VGltfExamples.VRMExample
             _defaultBridge.ImportMeta(context, vrmMeta, go);
         }
 
+        public void ImportFirstPerson(IImporterContext context, VGltf.Ext.Vrm0.Types.FirstPerson vrmFirstPerson, GameObject go)
+        {
+            _defaultBridge.ImportFirstPerson(context, vrmFirstPerson, go);
+        }
+
         public void ImportBlendShapeMaster(IImporterContext context, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
         {
             _defaultBridge.ImportBlendShapeMaster(context, vrmBlendShape, go);
