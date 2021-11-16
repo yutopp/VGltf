@@ -69,20 +69,7 @@ namespace VGltf.Unity.Ext
             {
                 var sharedMesh = smr.sharedMesh;
 
-                var weights = sharedMesh.boneWeights.Select(w =>
-                {
-                    return new BoneWeight
-                    {
-                        weight0 = w.weight0,
-                        weight1 = w.weight1,
-                        weight2 = w.weight2,
-                        weight3 = w.weight3,
-                        boneIndex0 = w.boneIndex0,
-                        boneIndex1 = w.boneIndex1,
-                        boneIndex2 = w.boneIndex2,
-                        boneIndex3 = w.boneIndex3,
-                    };
-                }).ToArray();
+                var weights = sharedMesh.boneWeights;
 
                 // Initialize forms
                 go.transform.localPosition = Vector3.zero;
@@ -182,7 +169,22 @@ namespace VGltf.Unity.Ext
             var smr = go.GetComponent<SkinnedMeshRenderer>();
             if (smr != null)
             {
-                var bones = smr.bones;
+                var replaceMap = new Dictionary<int, int>();
+                var bonesList = new List<Transform>();
+                foreach (var (bone, boneIndexOrig) in smr.bones.Select((b, i) => (b, i)))
+                {
+                    if (bone == null)
+                    {
+                        continue;
+                    }
+
+                    var boneIndex = bonesList.Count;
+                    replaceMap.Add(boneIndexOrig, boneIndex);
+
+                    bonesList.Add(bone);
+                }
+
+                var bones = bonesList.ToArray();
                 var newBindPoses = bones.Select(t =>
                 {
                     // Ref: https://forum.unity.com/threads/runtime-model-import-wrong-bind-pose.276411/
@@ -192,9 +194,26 @@ namespace VGltf.Unity.Ext
                 Debug.Assert(newBindPoses.Count() == bones.Count());
 
                 var mesh = bakedMeshes[smr.sharedMesh];
+                mesh.boneWeights = mesh.boneWeights.Select(bwOrig =>
+                {
+                    var bw = new BoneWeight
+                    {
+                        weight0 = bwOrig.weight0,
+                        weight1 = bwOrig.weight1,
+                        weight2 = bwOrig.weight2,
+                        weight3 = bwOrig.weight3,
+                        // NOTE: Raise exceptions if nodes which expected to be removed have any bone weights.
+                        boneIndex0 = replaceMap[bwOrig.boneIndex0],
+                        boneIndex1 = replaceMap[bwOrig.boneIndex1],
+                        boneIndex2 = replaceMap[bwOrig.boneIndex2],
+                        boneIndex3 = replaceMap[bwOrig.boneIndex3]
+                    };
+                    return bw;
+                }).ToArray();
                 mesh.bindposes = newBindPoses;
                 mesh.RecalculateBounds();
 
+                smr.bones = bones;
                 smr.sharedMesh = mesh;
             }
 
