@@ -94,6 +94,58 @@ namespace VGltf.Ext.Vrm0.Unity
             }
         }
 
+        public void ImportSecondaryAnimation(IImporterContext context, VGltf.Ext.Vrm0.Types.SecondaryAnimation vrmSecondaryAnimation, GameObject go)
+        {
+            // if the node named "secondary" exists, attach VRM0SecondaryAnimation to this. Otherwise, ignore that.
+            var secondaryNode = go.transform.Find("secondary");
+            if (secondaryNode == null)
+            {
+                return;
+            }
+
+            var sa = secondaryNode.gameObject.AddComponent<VRM0SecondaryAnimation>();
+
+            sa.Springs = vrmSecondaryAnimation.BoneGroups.Select(vrmBg =>
+            {
+                var sp = new VRM0SecondaryAnimation.Spring();
+                sp.Comment = vrmBg.comment;
+                sp.Stiffiness = vrmBg.stiffiness;
+                sp.GravityDir = vrmBg.gravityDir.ToUnity();
+                sp.DragForce = vrmBg.dragForce;
+                if (vrmBg.center != -1)
+                {
+                    sp.Center = context.Resources.Nodes[vrmBg.center].Value.transform;
+                }
+                sp.HitRadius = vrmBg.hitRadius;
+                sp.Bones = vrmBg.Bones.Select(vrmBIndex =>
+                {
+                    return context.Resources.Nodes[vrmBIndex].Value.transform;
+                }).ToArray();
+                sp.ColliderGroups = vrmBg.ColliderGroups.Select(vrmCgIndex =>
+                {
+                    return context.Resources.Nodes[vrmCgIndex].Value.transform;
+                }).ToArray();
+
+                return sp;
+            }).ToArray();
+
+            sa.ColliderGroups = vrmSecondaryAnimation.ColliderGroups.Select(vrmCg =>
+            {
+                var cg = new VRM0SecondaryAnimation.ColliderGroup();
+                cg.Node = context.Resources.Nodes[vrmCg.Node].Value.transform;
+                cg.Colliders = vrmCg.Colliders.Select(vrmC =>
+                {
+                    var c = new VRM0SecondaryAnimation.Collider();
+                    c.Offset = vrmC.Offset.ToUnity();
+                    c.Radius = vrmC.Radius;
+
+                    return c;
+                }).ToArray();
+
+                return cg;
+            }).ToArray();
+        }
+
         public Task ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat, CancellationToken ct)
         {
             throw new NotImplementedException();

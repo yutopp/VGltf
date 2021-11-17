@@ -46,7 +46,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
             ImportHumanoid(context, vrm);
             ImportFirstPerson(context, vrm, _rootGo);
             ImportBlendShapeMaster(context, vrm, _rootGo);
-            // secondaryAnimation
+            ImportSecondaryAnimation(context, vrm, _rootGo);
             await ImportMaterial(context, vrm, ct);
         }
 
@@ -147,6 +147,11 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
         void ImportBlendShapeMaster(IImporterContext context, Types.Vrm vrm, GameObject go)
         {
             _bridge.ImportBlendShapeMaster(context, vrm.BlendShapeMaster, go);
+        }
+
+        void ImportSecondaryAnimation(IImporterContext context, Types.Vrm vrm, GameObject go)
+        {
+            _bridge.ImportSecondaryAnimation(context, vrm.SecondaryAnimation, go);
         }
 
         async Task ImportMaterial(IImporterContext context, Types.Vrm vrm, CancellationToken ct)

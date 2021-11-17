@@ -25,6 +25,11 @@ namespace VGltfExamples.VRMExample
             _defaultBridge.ImportBlendShapeMaster(context, vrmBlendShape, go);
         }
 
+        public void ImportSecondaryAnimation(IImporterContext context, VGltf.Ext.Vrm0.Types.SecondaryAnimation vrmSecondaryAnimation, GameObject go)
+        {
+            _defaultBridge.ImportSecondaryAnimation(context, vrmSecondaryAnimation, go);
+        }
+
         public async Task ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat, CancellationToken ct)
         {
             if (matProp.Shader == VGltf.Ext.Vrm0.Types.Material.VRM_USE_GLTFSHADER)
