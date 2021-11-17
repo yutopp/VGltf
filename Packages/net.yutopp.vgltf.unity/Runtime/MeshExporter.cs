@@ -237,7 +237,7 @@ namespace VGltf.Unity
             if (targets != null)
             {
                 var targetNames = targets.Select(t => t.Name).ToArray();
-                // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
+                // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#morph-targets
                 gltfMesh.AddExtra("targetNames", targetNames);
             }
 

@@ -53,6 +53,7 @@ namespace VGltf
         {
             RepairUniGLTFInvalidNamesForImages(node);
             RepairUniGLTFInvalidTargets(node);
+            RepairUniGLTFInvalidTargets2(node);
             RepairUniGLTFInvalidIndexValues(node);
             RepairUniGLTFInvalidScene(node);
         }
@@ -94,8 +95,9 @@ namespace VGltf
 
         public static void RepairUniGLTFInvalidTargets(INode node)
         {
+            // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#morph-targets
             // If (Root)["meshes"][i]["primitives"][j]["targets"][k]["extra"]["name"] exists,
-            // re-assign them to (Root)["meshes"][i]["primitives"]["extras"]["targetNames"].
+            // re-assign them to (Root)["meshes"][i]["extras"]["targetNames"] when unique.
             var meshes = node["meshes"] as ArrayNode;
             if (meshes == null)
             {
@@ -104,12 +106,21 @@ namespace VGltf
 
             foreach (var mesh in meshes)
             {
+                // take the placeholder of 'meshes[i].extras'
+                var meshExtrasRaw = mesh["extras"];
+                if (meshExtrasRaw is UndefinedNode)
+                {
+                    meshExtrasRaw = new ObjectNode();
+                    ((ObjectNode)mesh).AddElement("extras", meshExtrasRaw);
+                }
+
                 var primitives = mesh["primitives"] as ArrayNode;
                 if (primitives == null)
                 {
                     continue;
                 }
 
+                var meshTargetNames = default(List<string>);
                 foreach (var primitive in primitives)
                 {
                     var targets = primitive["targets"] as ArrayNode;
@@ -118,33 +129,7 @@ namespace VGltf
                         continue;
                     }
 
-                    var extrasRaw = primitive["extras"];
-                    if (extrasRaw is UndefinedNode)
-                    {
-                        extrasRaw = new ObjectNode();
-                        ((ObjectNode)primitive).AddElement("extras", extrasRaw);
-                    }
-
-                    ArrayNode targetNames = null;
-                    var extras = extrasRaw as ObjectNode;
-                    if (extras != null)
-                    {
-                        var targetNamesRaw = extras["targetNames"];
-                        if (targetNamesRaw is UndefinedNode)
-                        {
-                            targetNamesRaw = new ArrayNode();
-                            extras.AddElement("targetNames", targetNamesRaw);
-                        }
-
-                        targetNames = targetNamesRaw as ArrayNode;
-                    }
-
-                    if (targetNames == null)
-                    {
-                        continue;
-                    }
-
-
+                    var primTargetNames = new List<string>();
                     foreach (var target in targets)
                     {
                         var tValue = target as ObjectNode;
@@ -158,7 +143,7 @@ namespace VGltf
                         {
                             var key = kv.Key;
 
-                            // Invalid extension
+                            // Invalid key
                             if (key == "extra")
                             {
                                 deletionKeys.Add(key);
@@ -169,13 +154,12 @@ namespace VGltf
                                     continue;
                                 }
 
-                                // Re-assign to primitive.extras.targetName
-                                targetNames.AddElement(name);
+                                primTargetNames.Add(name.Value);
                             }
 
                             // https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/schema/mesh.primitive.schema.json#L72
                             // Only `POSITION`, `NORMAL`, and `TANGENT` supported
-                            if (key != "POSITION" && key != "NORMAL" && key != "TANGENT")
+                            if (!IsValidMorphTargetProperty(key))
                             {
                                 deletionKeys.Add(key);
                             }
@@ -185,6 +169,133 @@ namespace VGltf
                         {
                             tValue.RemoveElement(key);
                         }
+                    }
+
+                    if (meshTargetNames == null || meshTargetNames.Count == primTargetNames.Count)
+                    {
+                        meshTargetNames = primTargetNames;
+                    }
+                }
+
+                if (meshTargetNames != null)
+                {
+                    ArrayNode meshExtraTargetNames = null;
+                    var extras = meshExtrasRaw as ObjectNode;
+                    if (extras != null)
+                    {
+                        var targetNamesRaw = extras["targetNames"];
+                        if (targetNamesRaw is UndefinedNode)
+                        {
+                            targetNamesRaw = new ArrayNode();
+                            extras.AddElement("targetNames", targetNamesRaw);
+                        }
+
+                        meshExtraTargetNames = targetNamesRaw as ArrayNode;
+                    }
+
+                    if (meshExtraTargetNames == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var name in meshTargetNames)
+                    {
+                        meshExtraTargetNames.AddElement(new StringNode(name));
+                    }
+                }
+            }
+        }
+
+        public static void RepairUniGLTFInvalidTargets2(INode node)
+        {
+            // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#morph-targets
+            // If (Root)["meshes"][i]["primitives"][j]["extras"]["targetNames"] exists,
+            // re-assign them to (Root)["meshes"][i]["extras"]["targetNames"] when unique.
+            var meshes = node["meshes"] as ArrayNode;
+            if (meshes == null)
+            {
+                return;
+            }
+
+            foreach (var mesh in meshes)
+            {
+                // take the placeholder of 'meshes[i].extras'
+                var meshExtrasRaw = mesh["extras"];
+                if (meshExtrasRaw is UndefinedNode)
+                {
+                    meshExtrasRaw = new ObjectNode();
+                    ((ObjectNode)mesh).AddElement("extras", meshExtrasRaw);
+                }
+
+                var primitives = mesh["primitives"] as ArrayNode;
+                if (primitives == null)
+                {
+                    continue;
+                }
+
+                var meshTargetNames = default(List<string>);
+                foreach (var primitive in primitives)
+                {
+                    var primitiveExtrasRaw = primitive["extras"];
+                    if (primitiveExtrasRaw is UndefinedNode)
+                    {
+                        continue;
+                    }
+
+                    var primitiveTargetNames = primitiveExtrasRaw["targetNames"];
+                    if (primitiveTargetNames is UndefinedNode)
+                    {
+                        continue;
+                    }
+
+                    var primitiveTargetNamesArray = primitiveTargetNames as ArrayNode;
+                    if (primitiveTargetNamesArray == null)
+                    {
+                        continue;
+                    }
+
+                    var primTargetNames = new List<string>();
+                    foreach (var elem in primitiveTargetNamesArray.Elems)
+                    {
+                        var tElem = elem as StringNode;
+                        if (tElem == null)
+                        {
+                            continue;
+                        }
+
+                        primTargetNames.Add(tElem.Value);
+                    }
+
+                    if (meshTargetNames == null || meshTargetNames.Count == primTargetNames.Count)
+                    {
+                        meshTargetNames = primTargetNames;
+                    }
+                }
+
+                if (meshTargetNames != null)
+                {
+                    ArrayNode meshExtraTargetNames = null;
+                    var extras = meshExtrasRaw as ObjectNode;
+                    if (extras != null)
+                    {
+                        var targetNamesRaw = extras["targetNames"];
+                        if (targetNamesRaw is UndefinedNode)
+                        {
+                            targetNamesRaw = new ArrayNode();
+                            extras.AddElement("targetNames", targetNamesRaw);
+                        }
+
+                        meshExtraTargetNames = targetNamesRaw as ArrayNode;
+                    }
+
+                    if (meshExtraTargetNames == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var name in meshTargetNames)
+                    {
+                        meshExtraTargetNames.AddElement(new StringNode(name));
                     }
                 }
             }
@@ -296,6 +407,22 @@ namespace VGltf
             {
                 tNode.AddElement("scene", new IntegerNode(0));
             }
+        }
+
+        // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#morph-targets
+        static bool IsValidMorphTargetProperty(string name)
+        {
+            if (name.StartsWith("_"))
+            {
+                return true;
+            }
+
+            if (name == "POSITION" || name == "NORMAL" || name == "TANGENT")
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
