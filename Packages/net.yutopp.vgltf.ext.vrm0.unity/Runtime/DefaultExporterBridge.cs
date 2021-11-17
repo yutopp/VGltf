@@ -6,7 +6,9 @@
 //
 
 using System;
+using System.Linq;
 using UnityEngine;
+using VGltf.Ext.Vrm0.Unity.Extensions;
 using VGltf.Unity;
 
 namespace VGltf.Ext.Vrm0.Unity
@@ -91,7 +93,85 @@ namespace VGltf.Ext.Vrm0.Unity
 
         public void ExportSecondaryAnimation(IExporterContext context, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go)
         {
-            // Not supported
+            // if the node named "secondary" exists, attach VRM0SecondaryAnimation to this. Otherwise, ignore that.
+            var secondaryNode = go.transform.Find("secondary");
+            if (secondaryNode == null)
+            {
+                return;
+            }
+
+            var sa = secondaryNode.gameObject.GetComponent<VRM0SecondaryAnimation>();
+            if (sa == null)
+            {
+                // secondary animation is optional
+                return;
+            }
+
+            var vrmSecondaryAnimation = new Types.SecondaryAnimation();
+
+            vrmSecondaryAnimation.BoneGroups = sa.Springs.Select(sp =>
+            {
+                var vrmBg = new Types.SecondaryAnimation.Spring();
+                vrmBg.comment = sp.Comment;
+                vrmBg.stiffiness = sp.Stiffiness;
+                vrmBg.gravityDir = sp.GravityDir.ToVrm();
+                vrmBg.dragForce = sp.DragForce;
+                if (sp.Center != null)
+                {
+                    if (!context.Resources.Nodes.TryGetValue(sp.Center.gameObject, out var res))
+                    {
+                        throw new Exception($"center object is not found: name={sp.Center.name}");
+                    }
+                    vrmBg.center = res.Index;
+                }
+                else
+                {
+                    vrmBg.center = -1; // For compatibility...
+                }
+                vrmBg.hitRadius = sp.HitRadius;
+                vrmBg.Bones = sp.Bones.Select(vrmBTrans =>
+                {
+                    if (!context.Resources.Nodes.TryGetValue(vrmBTrans.gameObject, out var res))
+                    {
+                        throw new Exception($"bone object is not found: name={vrmBTrans.name}");
+                    }
+                    return res.Index;
+                }).ToArray();
+                vrmBg.ColliderGroups = sp.ColliderGroups.Select(vrmCgTrans =>
+                {
+                    if (!context.Resources.Nodes.TryGetValue(vrmCgTrans.gameObject, out var res))
+                    {
+                        throw new Exception($"collider group object is not found: name={vrmCgTrans.name}");
+                    }
+                    return res.Index;
+                }).ToArray();
+
+                return vrmBg;
+            }).ToList();
+
+            vrmSecondaryAnimation.ColliderGroups = sa.ColliderGroups.Select(cg =>
+            {
+                var vrmCg = new Types.SecondaryAnimation.ColliderGroup();
+
+                if (!context.Resources.Nodes.TryGetValue(cg.Node.gameObject, out var res))
+                {
+                    throw new Exception($"collider group node is not found: name={cg.Node.name}");
+                }
+                vrmCg.Node = res.Index;
+
+                vrmCg.Colliders = cg.Colliders.Select(c =>
+                {
+                    var vrmC = new Types.SecondaryAnimation.Collider();
+                    vrmC.Offset = c.Offset.ToVrm();
+                    vrmC.Radius = c.Radius;
+
+                    return vrmC;
+                }).ToList();
+
+                return vrmCg;
+            }).ToList();
+
+            vrm.SecondaryAnimation = vrmSecondaryAnimation;
         }
 
         public Types.Material CreateMaterialProp(IExporterContext context, Material mat)
