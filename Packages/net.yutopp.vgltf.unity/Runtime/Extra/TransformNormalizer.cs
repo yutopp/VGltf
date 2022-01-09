@@ -15,7 +15,7 @@ namespace VGltf.Unity.Ext
     public sealed class TransformNormalizer : IDisposable
     {
         public GameObject Go;
-        private Dictionary<Mesh, Mesh> bakedMeshes = new Dictionary<Mesh, Mesh>();
+        readonly HashSet<Mesh> bakedMeshes = new HashSet<Mesh>();
 
         void IDisposable.Dispose()
         {
@@ -28,7 +28,7 @@ namespace VGltf.Unity.Ext
             // Destroy baked meshes
             foreach (var kv in bakedMeshes)
             {
-                Utils.Destroy(kv.Value);
+                Utils.Destroy(kv);
             }
             bakedMeshes.Clear();
         }
@@ -64,14 +64,12 @@ namespace VGltf.Unity.Ext
 
         public void BakeMeshes(GameObject go)
         {
+            // Fix TRS to origin ans bake meshes because skined meshes will be transformed by bindposes.
             var smr = go.GetComponent<SkinnedMeshRenderer>();
             if (smr != null)
             {
                 var sharedMesh = smr.sharedMesh;
 
-                var weights = sharedMesh.boneWeights;
-
-                // Initialize forms
                 go.transform.localPosition = Vector3.zero;
                 go.transform.localRotation = Quaternion.identity;
                 go.transform.localScale = Vector3.one;
@@ -88,12 +86,12 @@ namespace VGltf.Unity.Ext
 
                 // Bake
                 var mesh = new Mesh();
-                bakedMeshes.Add(sharedMesh, mesh);
+                bakedMeshes.Add(mesh);
 
                 smr.BakeMesh(mesh);
 
                 mesh.name = sharedMesh.name;
-                mesh.boneWeights = weights;
+                mesh.boneWeights = sharedMesh.boneWeights;
 
                 var vertices = mesh.vertices;
                 var normals = mesh.normals;
@@ -139,6 +137,32 @@ namespace VGltf.Unity.Ext
                         smr.SetBlendShapeWeight(i, 0.0f);
                     }
                 }
+
+                smr.sharedMesh = mesh;
+            }
+
+            var mf = go.GetComponent<MeshFilter>();
+            if (mf != null)
+            {
+                var sharedMesh = mf.sharedMesh;
+
+                var ot = go.transform.localPosition;
+
+                go.transform.position = Vector3.zero;
+
+                // Bake
+                var mesh = UnityEngine.Object.Instantiate(sharedMesh);
+                bakedMeshes.Add(mesh);
+
+                mesh.name = sharedMesh.name;
+
+                mesh.vertices = mesh.vertices.Select(go.transform.TransformPoint).ToArray();
+                mesh.normals = mesh.normals.Select(go.transform.TransformDirection).ToArray();
+                // mesh.tangents = mesh.tangents.Select(go.transform.TransformVector).ToArray();
+
+                mf.sharedMesh = mesh;
+
+                go.transform.localPosition = ot;
             }
 
             for (var i = 0; i < go.transform.childCount; ++i)
@@ -193,7 +217,7 @@ namespace VGltf.Unity.Ext
                 }).ToArray();
                 Debug.Assert(newBindPoses.Count() == bones.Count());
 
-                var mesh = bakedMeshes[smr.sharedMesh];
+                var mesh = smr.sharedMesh;
                 mesh.boneWeights = mesh.boneWeights.Select(bwOrig =>
                 {
                     var bw = new BoneWeight
@@ -214,7 +238,6 @@ namespace VGltf.Unity.Ext
                 mesh.RecalculateBounds();
 
                 smr.bones = bones;
-                smr.sharedMesh = mesh;
             }
 
             for (var i = 0; i < go.transform.childCount; ++i)
