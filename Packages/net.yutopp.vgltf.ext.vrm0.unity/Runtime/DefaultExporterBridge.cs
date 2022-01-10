@@ -93,18 +93,22 @@ namespace VGltf.Ext.Vrm0.Unity
 
         public void ExportSecondaryAnimation(IExporterContext context, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go)
         {
-            // if the node named "secondary" exists, attach VRM0SecondaryAnimation to this. Otherwise, ignore that.
-            var secondaryNode = go.transform.Find("secondary");
-            if (secondaryNode == null)
-            {
-                return;
-            }
-
-            var sa = secondaryNode.gameObject.GetComponent<VRM0SecondaryAnimation>();
+            var sa = go.GetComponent<VRM0SecondaryAnimation>();
             if (sa == null)
             {
-                // secondary animation is optional
-                return;
+                // If the node named "secondary" exists, attach VRM0SecondaryAnimation might be attached to this. Thus check that.
+                var secondaryNode = go.transform.Find("secondary");
+                if (secondaryNode == null)
+                {
+                    return;
+                }
+
+                sa = secondaryNode.gameObject.GetComponent<VRM0SecondaryAnimation>();
+                if (sa == null)
+                {
+                    // secondary animation is optional
+                    return;
+                }
             }
 
             var vrmSecondaryAnimation = new Types.SecondaryAnimation();
