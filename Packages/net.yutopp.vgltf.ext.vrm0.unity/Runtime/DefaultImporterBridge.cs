@@ -45,6 +45,8 @@ namespace VGltf.Ext.Vrm0.Unity
             fp.FirstPersonBone = fpBone.Value.transform;
 
             fp.FirstPersonOffset = vrmFirstPerson.FirstPersonBoneOffset.ToUnity();
+
+            // TODO: support lookAt* and meshAnnotations
         }
 
         public void ImportBlendShapeMaster(IImporterContext context, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
