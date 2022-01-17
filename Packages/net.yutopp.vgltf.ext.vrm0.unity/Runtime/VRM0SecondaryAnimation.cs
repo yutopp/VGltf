@@ -23,7 +23,7 @@ namespace VGltf.Ext.Vrm0.Unity
             [SerializeField] public Transform Center;
             [SerializeField] public float HitRadius;
             [SerializeField] public Transform[] Bones;
-            [SerializeField] public Transform[] ColliderGroups;
+            [SerializeField] public int[] ColliderGroups;
         }
 
         [Serializable]

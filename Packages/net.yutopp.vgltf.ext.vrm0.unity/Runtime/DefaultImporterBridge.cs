@@ -123,10 +123,7 @@ namespace VGltf.Ext.Vrm0.Unity
                 {
                     return context.Resources.Nodes[vrmBIndex].Value.transform;
                 }).ToArray();
-                sp.ColliderGroups = vrmBg.ColliderGroups.Select(vrmCgIndex =>
-                {
-                    return context.Resources.Nodes[vrmCgIndex].Value.transform;
-                }).ToArray();
+                sp.ColliderGroups = vrmBg.ColliderGroups;
 
                 return sp;
             }).ToArray();

@@ -44,7 +44,26 @@ namespace VGltf.Ext.Vrm0.Unity
 
         public void ExportFirstPerson(IExporterContext context, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go)
         {
-            // Not supported
+            var fp = go.GetComponent<VRM0FirstPerson>();
+            if (fp == null)
+            {
+                // firstperson is optional
+                return;
+            }
+
+            var vrmFirstPerson = new Types.FirstPerson();
+
+            if (!context.Resources.Nodes.TryGetValue(fp.FirstPersonBone.gameObject, out var res))
+            {
+                throw new Exception($"first person bone is not found");
+            }
+            vrmFirstPerson.FirstPersonBone = res.Index;
+
+            vrmFirstPerson.FirstPersonBoneOffset = fp.FirstPersonOffset.ToVrm();
+
+            vrm.FirstPerson = vrmFirstPerson;
+
+            // TODO: support lookAt* and meshAnnotations
         }
 
         public void ExportBlendShapeMaster(Exporter exporter, VGltf.Ext.Vrm0.Types.Vrm vrm, GameObject go)
@@ -141,13 +160,13 @@ namespace VGltf.Ext.Vrm0.Unity
                     }
                     return res.Index;
                 }).ToArray();
-                vrmBg.ColliderGroups = sp.ColliderGroups.Select(vrmCgTrans =>
+                vrmBg.ColliderGroups = sp.ColliderGroups.Select((vrmCgTrans, i) =>
                 {
-                    if (!context.Resources.Nodes.TryGetValue(vrmCgTrans.gameObject, out var res))
+                    if (vrmCgTrans < 0 || vrmCgTrans >= sa.ColliderGroups.Length)
                     {
-                        throw new Exception($"collider group object is not found: name={vrmCgTrans.name}");
+                        throw new Exception($"collider group[{i}] is out of range: [0, {sa.ColliderGroups.Length}]");
                     }
-                    return res.Index;
+                    return vrmCgTrans;
                 }).ToArray();
 
                 return vrmBg;
