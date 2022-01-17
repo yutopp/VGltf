@@ -20,12 +20,9 @@ namespace VGltf.Unity
     {
         public override IExporterContext Context { get; }
 
-        CoordUtils _coordUtils;
-
-        public MeshExporter(IExporterContext context, CoordUtils coordUtils)
+        public MeshExporter(IExporterContext context)
         {
             Context = context;
-            _coordUtils = coordUtils;
         }
 
         public IndexedResource<Mesh> Export(Renderer r, Mesh mesh)
@@ -253,7 +250,7 @@ namespace VGltf.Unity
         {
             // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#primitiveindices
 
-            indices = _coordUtils.FlipIndices(indices).ToArray();
+            indices = Context.CoordUtils.FlipIndices(indices).ToArray();
 
             // Scalar | UNSIGNED_BYTE
             //        | UNSIGNED_SHORT
@@ -347,7 +344,7 @@ namespace VGltf.Unity
 
         int ExportPositionsBuffer(ref Vector3[] vec3, out Types.Accessor.ComponentTypeEnum componentType)
         {
-            vec3 = vec3.Select(_coordUtils.ConvertSpace).ToArray();
+            vec3 = vec3.Select(Context.CoordUtils.ConvertSpace).ToArray();
 
             // VEC3! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(vec3);
@@ -360,7 +357,7 @@ namespace VGltf.Unity
 
         int ExportNormals(Vector3[] vec3)
         {
-            vec3 = vec3.Select(_coordUtils.ConvertSpace).ToArray();
+            vec3 = vec3.Select(Context.CoordUtils.ConvertSpace).ToArray();
 
             // VEC3! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(vec3);
@@ -379,7 +376,7 @@ namespace VGltf.Unity
 
         int ExportTangents(Vector4[] vec4)
         {
-            vec4 = vec4.Select(_coordUtils.ConvertSpace).ToArray();
+            vec4 = vec4.Select(Context.CoordUtils.ConvertSpace).ToArray();
 
             // VEC4! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(vec4);
@@ -398,7 +395,7 @@ namespace VGltf.Unity
 
         int ExportUV(Vector2[] uv)
         {
-            uv = uv.Select(_coordUtils.ConvertUV).ToArray();
+            uv = uv.Select(Context.CoordUtils.ConvertUV).ToArray();
 
             // VEC2! | FLOAT!
             //       | UNSIGNED_BYTE  (normalized) 

@@ -15,6 +15,7 @@ namespace VGltf.Unity
         BufferBuilder BufferBuilder { get; }
 
         ExporterRuntimeResources Resources { get; }
+        CoordUtils CoordUtils { get; }
 
         ResourceExporters Exporters { get; }
     }

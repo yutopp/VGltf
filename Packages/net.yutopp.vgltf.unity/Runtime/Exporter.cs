@@ -35,6 +35,7 @@ namespace VGltf.Unity
             public BufferBuilder BufferBuilder { get; }
 
             public ExporterRuntimeResources Resources { get; }
+            public CoordUtils CoordUtils { get; }
 
             public ResourceExporters Exporters { get; }
 
@@ -44,11 +45,12 @@ namespace VGltf.Unity
                 BufferBuilder = new BufferBuilder();
 
                 Resources = new ExporterRuntimeResources();
+                CoordUtils = coordUtils;
 
                 Exporters = new ResourceExporters
                 {
-                    Nodes = new NodeExporter(this, coordUtils),
-                    Meshes = new MeshExporter(this, coordUtils),
+                    Nodes = new NodeExporter(this),
+                    Meshes = new MeshExporter(this),
                     Materials = new MaterialExporter(this),
                     Textures = new TextureExporter(this),
                     Images = new ImageExporter(this),
