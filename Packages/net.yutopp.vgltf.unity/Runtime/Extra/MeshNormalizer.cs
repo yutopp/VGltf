@@ -13,12 +13,6 @@ using UnityEngine;
 namespace VGltf.Unity.Ext
 {
     // Normalize transform/scale of mesh nodes (rotation will not be affacted).
-    //
-    // Known issues:
-    //  Normalize will be failed if processing nodes which structureg like below.
-    //  - GameObject (mesh)
-    //    - GameObject (empty)
-    //      - GameObject (mesh)
     public sealed class MeshNormalizer : IDisposable
     {
         public GameObject Go { get; private set; }
