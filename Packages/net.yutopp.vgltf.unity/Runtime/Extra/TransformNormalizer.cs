@@ -141,30 +141,6 @@ namespace VGltf.Unity.Ext
                 smr.sharedMesh = mesh;
             }
 
-            var mf = go.GetComponent<MeshFilter>();
-            if (mf != null)
-            {
-                var sharedMesh = mf.sharedMesh;
-
-                var ot = go.transform.localPosition;
-
-                go.transform.position = Vector3.zero;
-
-                // Bake
-                var mesh = UnityEngine.Object.Instantiate(sharedMesh);
-                bakedMeshes.Add(mesh);
-
-                mesh.name = sharedMesh.name;
-
-                mesh.vertices = mesh.vertices.Select(go.transform.TransformPoint).ToArray();
-                mesh.normals = mesh.normals.Select(go.transform.TransformDirection).ToArray();
-                // mesh.tangents = mesh.tangents.Select(go.transform.TransformVector).ToArray();
-
-                mf.sharedMesh = mesh;
-
-                go.transform.localPosition = ot;
-            }
-
             for (var i = 0; i < go.transform.childCount; ++i)
             {
                 var ct = go.transform.GetChild(i);
