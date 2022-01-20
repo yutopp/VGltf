@@ -14,7 +14,7 @@ namespace VGltf.Unity.Ext
 {
     public sealed class TransformNormalizer : IDisposable
     {
-        public GameObject Go;
+        public GameObject Go { get; private set; }
         readonly HashSet<Mesh> bakedMeshes = new HashSet<Mesh>();
 
         void IDisposable.Dispose()
@@ -53,9 +53,11 @@ namespace VGltf.Unity.Ext
         {
             nGo.name = go.name;
 
-            nGo.transform.localPosition = Vector3.zero;
-            nGo.transform.localRotation = Quaternion.identity;
-            nGo.transform.localScale = Vector3.one;
+            var anim = go.GetComponent<Animator>();
+            if (anim == null)
+            {
+                return;
+            }
 
             BakeMeshes(nGo);
             NormalizeTransforms(nGo.transform, Matrix4x4.identity);
