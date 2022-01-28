@@ -116,12 +116,23 @@ namespace VGltf.Unity
                     MetallicFactor = 0.0f,  // TODO: fix
                     RoughnessFactor = 1.0f, // TODO: fix
                 },
+
+                AlphaMode = GetAlphaMode(mat),
             };
 
             var matIndex = Context.Gltf.AddMaterial(gltfMaterial);
             var resource = Context.Resources.Materials.Add(mat, matIndex, mat.name, mat);
 
             return resource;
+        }
+
+        Types.Material.AlphaModeEnum GetAlphaMode(Material mat)
+        {
+            var modeValue = mat.GetFloat("_Mode");
+            if (modeValue == 0) return Types.Material.AlphaModeEnum.Opaque;
+            else if (modeValue == 1) return Types.Material.AlphaModeEnum.Mask;
+            else if (modeValue == 2 || modeValue == 3) return Types.Material.AlphaModeEnum.Blend; // TODO: Fade support
+            else return Types.Material.AlphaModeEnum.Opaque; // fallback
         }
     }
 }
