@@ -98,6 +98,12 @@ namespace VGltf.Unity
 
             var mainColor = mat.GetColor("_Color");
             var mainTex = ExportTextureIfExist(mat, "_MainTex");
+            // _Metallic: 0 -> 1 (metal)
+            var metallic = mat.GetFloat("_Metallic");
+            // https://blog.unity.com/ja/technology/ggx-in-unity-5-3
+            // _Glossiness: 0 -> 1 (gloss)
+            // roughness: 0 -> 1 (rough)
+            var roughness = Mathf.Pow(1.0f - mat.GetFloat("_Glossiness"), 2);
 
             var emissionColor = mat.GetColor("_EmissionColor");
             var emissionTex = ExportTextureIfExist(mat, "_EmissionMap");
@@ -114,9 +120,13 @@ namespace VGltf.Unity
                         Index = mainTex.Index,
                         TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
                     } : null, // TODO: fix
-                    MetallicFactor = 0.0f,  // TODO: fix
-                    RoughnessFactor = 1.0f, // TODO: fix
+                    MetallicFactor = metallic,
+                    RoughnessFactor = roughness,
+                    // MetallicRoughnessTexture
                 },
+
+                // NormalTexture
+                // OcclusionTexture
 
                 EmissiveFactor = emissionColor != Color.black
                    ? PrimitiveExporter.AsArray(Context.CoordUtils.ColorToLinearRGB(emissionColor))

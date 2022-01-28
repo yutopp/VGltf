@@ -102,7 +102,7 @@ namespace VGltf.Unity
                     mat.DisableKeyword("_ALPHATEST_ON");
                     mat.DisableKeyword("_ALPHABLEND_ON");
                     mat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-                    mat.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
+                    mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
                     break;
 
                 case Types.Material.AlphaModeEnum.Mask:
@@ -114,7 +114,7 @@ namespace VGltf.Unity
                     mat.EnableKeyword("_ALPHATEST_ON");
                     mat.DisableKeyword("_ALPHABLEND_ON");
                     mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    mat.renderQueue = (int) UnityEngine.Rendering.RenderQueue.AlphaTest;
+                    mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
 
                     mat.SetFloat("_Cutoff", gltfMat.AlphaCutoff);
                     break;
@@ -147,6 +147,18 @@ namespace VGltf.Unity
                     var textureResource = await Context.Importers.Textures.Import(pbrMR.BaseColorTexture.Index, false, ct);
                     mat.SetTexture("_MainTex", textureResource.Value);
                 }
+
+                // MetallicRoughnessTexture: not supported...
+
+                // _Metallic: 0 -> 1 (metal)
+                var metallic = pbrMR.MetallicFactor;
+                mat.SetFloat("_Metallic", metallic);
+
+                // https://blog.unity.com/ja/technology/ggx-in-unity-5-3
+                // roughness: 0 -> 1 (rough)
+                // _Glossiness: 0 -> 1 (gloss)
+                var glossiness = 1.0f - Mathf.Sqrt(pbrMR.RoughnessFactor);
+                mat.SetFloat("_Glossiness", glossiness);
             }
         }
     }
