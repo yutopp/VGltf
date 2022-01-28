@@ -94,7 +94,15 @@ namespace VGltf.Unity
                     break;
 
                 case Types.Material.AlphaModeEnum.Blend:
-                    // Not implemented
+                    mat.SetFloat("_Mode", (float)3);
+                    mat.SetOverrideTag("RenderType", "Transparent");
+                    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    mat.SetInt("_ZWrite", 0);
+                    mat.DisableKeyword("_ALPHATEST_ON");
+                    mat.DisableKeyword("_ALPHABLEND_ON");
+                    mat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                    mat.renderQueue = (int) UnityEngine.Rendering.RenderQueue.Transparent;
                     break;
 
                 case Types.Material.AlphaModeEnum.Mask:
@@ -106,7 +114,7 @@ namespace VGltf.Unity
                     mat.EnableKeyword("_ALPHATEST_ON");
                     mat.DisableKeyword("_ALPHABLEND_ON");
                     mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    mat.renderQueue = 2450;
+                    mat.renderQueue = (int) UnityEngine.Rendering.RenderQueue.AlphaTest;
 
                     mat.SetFloat("_Cutoff", gltfMat.AlphaCutoff);
                     break;
