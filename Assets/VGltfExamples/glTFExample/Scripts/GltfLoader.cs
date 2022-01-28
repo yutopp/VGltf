@@ -16,6 +16,7 @@ namespace VGltfExamples.GltfExamples
 
         [SerializeField] Button loadButton;
         [SerializeField] Button unloadButton;
+        [SerializeField] Button exportButton;
 
         sealed class GltfResource : IDisposable
         {
@@ -43,6 +44,7 @@ namespace VGltfExamples.GltfExamples
 
             loadButton.onClick.AddListener(UIOnLoadButtonClick);
             unloadButton.onClick.AddListener(UIOnUnloadButtonClick);
+            exportButton.onClick.AddListener(UIOnExportButtonClick);
         }
 
         // Update is called once per frame
@@ -72,7 +74,7 @@ namespace VGltfExamples.GltfExamples
             var res = new GltfResource();
             try
             {
-                // Create a GameObject that points to the glTF scene.
+                // Create a GameObject that points to root nodes in the glTF scene.
                 // The GameObject of the glTF's child Node will be created under this object.
                 var go = new GameObject();
                 go.name = name;
@@ -88,6 +90,12 @@ namespace VGltfExamples.GltfExamples
                     // Load the Scene.
                     res.Context = await gltfImporter.ImportSceneNodes(System.Threading.CancellationToken.None);
                 }
+
+                foreach (var rootNodeIndex in gltfContainer.Gltf.RootNodesIndices)
+                {
+                    var rootNode = res.Context.Resources.Nodes[rootNodeIndex];
+                    rootNode.Value.transform.SetParent(go.transform, false);
+                }
             }
             catch (Exception)
             {
@@ -96,6 +104,29 @@ namespace VGltfExamples.GltfExamples
             }
 
             return res;
+        }
+
+        async UniTask ExportGltf(string filePath, GameObject go)
+        {
+            // Write the glTF container (unity-independent)
+            var gltfContainer = default(GltfContainer);
+
+            using (var gltfExporter = new Exporter(new Exporter.Config
+            {
+                IncludeRootObject = false,
+            }))
+            {
+                gltfExporter.ExportGameObjectAsScene(go);
+
+                gltfContainer = gltfExporter.IntoGlbContainer();
+            }
+
+            using (var fs = new FileStream(filePath, FileMode.Create))
+            {
+                GltfContainer.ToGlb(fs, gltfContainer);
+            }
+
+            Debug.Log($"Exported!: {filePath}");
         }
 
         // UI
@@ -135,6 +166,17 @@ namespace VGltfExamples.GltfExamples
 
             var p1 = Common.MemoryProfile.Now;
             DebugLogProfile(p1, p0);
+        }
+
+        public void UIOnExportButtonClick()
+        {
+            if (_modelResources.Count == 0)
+            {
+                return;
+            }
+
+            var res = _modelResources[0];
+            ExportGltf("out.glb", res.Go).Forget();
         }
 
         void DebugLogProfile(Common.MemoryProfile now, Common.MemoryProfile prev = null)
