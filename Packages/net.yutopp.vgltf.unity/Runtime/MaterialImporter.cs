@@ -120,7 +120,8 @@ namespace VGltf.Unity
                     break;
             }
 
-            var emissionColor = Context.CoordUtils.ColorFromSRGB(PrimitiveImporter.AsVector3(gltfMat.EmissiveFactor));
+            // RGB component and NOT [HDR]
+            var emissionColor = Context.CoordUtils.ColorFromLinear(PrimitiveImporter.AsVector3(gltfMat.EmissiveFactor));
             if (emissionColor != Color.black)
             {
                 mat.EnableKeyword("_EMISSION");

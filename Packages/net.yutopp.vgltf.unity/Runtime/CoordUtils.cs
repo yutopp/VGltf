@@ -123,23 +123,38 @@ namespace VGltf.Unity
         }
 
         // IMPORTANT: We assume that Linear workflow is used.
+        // Unity(Color[sRGB]) | Shader(sRGB->Linear)
+        // Unity(HDR Color[Linear]) | Shader(Linear)
 
-        // glTF world(sRGB) -> Shader(sRGB)|Unity(Linear)
+        // glTF world(sRGB) -> as is
         public Color ColorFromSRGB(Vector4 v)
         {
             return v;
         }
 
-        // glTF world(sRGB) -> Shader(sRGB)|Unity(Linear)
-        public Color ColorFromSRGB(Vector3 v)
+        // glTF world(sRGB) -> sRGB
+        public Color ColorFromLinear(Vector3 v)
         {
             return ColorFromLinear(new Vector4(v.x, v.y, v.z, 1.0f));
         }
 
-        // glTF world(Linear) -> Shader(sRGB)|Unity(Linear)
+        // glTF world(Linear) -> sRGB
         public Color ColorFromLinear(Vector4 v)
         {
             return ((Color)v).gamma;
+        }
+
+        // Unity(Color[sRGB]) -> Linear
+        public Color ColorToLinear(Color c)
+        {
+            return c.linear;
+        }
+
+        // Unity(Color[sRGB]) -> Linear
+        public Vector3 ColorToLinearRGB(Color c)
+        {
+            var l = ColorToLinear(c);
+            return new Vector3(l.r, l.g, l.b);
         }
     }
 }

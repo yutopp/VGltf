@@ -95,12 +95,12 @@ namespace VGltf.Unity
         {
             // Maybe, Standard shader...
             // TODO: Support various shaders
-            var tex = mat.GetTexture("_MainTex");
-            IndexedResource<Texture> textureResource = null;
-            if (tex != null)
-            {
-                textureResource = Context.Exporters.Textures.Export(tex);
-            }
+
+            var mainColor = mat.GetColor("_Color");
+            var mainTex = ExportTextureIfExist(mat, "_MainTex");
+
+            var emissionColor = mat.GetColor("_EmissionColor");
+            var emissionTex = ExportTextureIfExist(mat, "_EmissionMap");
 
             var gltfMaterial = new Types.Material
             {
@@ -108,16 +108,27 @@ namespace VGltf.Unity
 
                 PbrMetallicRoughness = new Types.Material.PbrMetallicRoughnessType
                 {
-                    BaseColorTexture = textureResource != null ? new Types.Material.BaseColorTextureInfoType
+                    BaseColorFactor = PrimitiveExporter.AsArray(Context.CoordUtils.ColorToLinear(mainColor)),
+                    BaseColorTexture = mainTex != null ? new Types.Material.BaseColorTextureInfoType
                     {
-                        Index = textureResource.Index,
+                        Index = mainTex.Index,
                         TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
                     } : null, // TODO: fix
                     MetallicFactor = 0.0f,  // TODO: fix
                     RoughnessFactor = 1.0f, // TODO: fix
                 },
 
+                EmissiveFactor = emissionColor != Color.black
+                   ? PrimitiveExporter.AsArray(Context.CoordUtils.ColorToLinearRGB(emissionColor))
+                   : null,
+                EmissiveTexture = emissionTex != null ? new Types.Material.EmissiveTextureInfoType
+                {
+                    Index = emissionTex.Index,
+                    TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
+                } : null, // TODO: fix
+
                 AlphaMode = GetAlphaMode(mat),
+                // DoubleSided = // Not supported
             };
 
             var matIndex = Context.Gltf.AddMaterial(gltfMaterial);
@@ -133,6 +144,18 @@ namespace VGltf.Unity
             else if (modeValue == 1) return Types.Material.AlphaModeEnum.Mask;
             else if (modeValue == 2 || modeValue == 3) return Types.Material.AlphaModeEnum.Blend; // TODO: Fade support
             else return Types.Material.AlphaModeEnum.Opaque; // fallback
+        }
+
+        IndexedResource<Texture> ExportTextureIfExist(Material mat, string name)
+        {
+            var res = default(IndexedResource<Texture>);
+            var tex = mat.GetTexture(name);
+            if (tex != null)
+            {
+                res = Context.Exporters.Textures.Export(tex);
+            }
+
+            return res;
         }
     }
 }
