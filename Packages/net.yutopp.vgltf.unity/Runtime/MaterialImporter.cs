@@ -134,6 +134,15 @@ namespace VGltf.Unity
                 mat.SetTexture("_EmissionMap", textureResource.Value);
             }
 
+            if (gltfMat.NormalTexture != null)
+            {
+                mat.EnableKeyword("_NORMALMAP");
+
+                // normal map should treat as linear (because not RGB tex)
+                var textureResource = await Context.Importers.Textures.Import(gltfMat.NormalTexture.Index, true, ct);
+                mat.SetTexture("_BumpMap", textureResource.Value);
+            }
+
             if (gltfMat.PbrMetallicRoughness != null)
             {
                 var pbrMR = gltfMat.PbrMetallicRoughness;

@@ -19,16 +19,16 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public IndexedResource<Texture> Export(Texture tex)
+        public IndexedResource<Texture> Export(Texture tex, bool isLinear = false)
         {
             return Context.Resources.Textures.GetOrCall(tex, () => {
-                return ForceExport(tex);
+                return ForceExport(tex, isLinear);
             });
         }
 
-        public IndexedResource<Texture> ForceExport(Texture tex)
+        public IndexedResource<Texture> ForceExport(Texture tex, bool isLinear = false)
         {
-            var imageIndex = Context.Exporters.Images.Export(tex);
+            var imageIndex = Context.Exporters.Images.Export(tex, isLinear);
 
             var gltfImage = new Types.Texture
             {

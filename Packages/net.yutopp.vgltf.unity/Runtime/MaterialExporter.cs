@@ -105,6 +105,8 @@ namespace VGltf.Unity
             // roughness: 0 -> 1 (rough)
             var roughness = Mathf.Pow(1.0f - mat.GetFloat("_Glossiness"), 2);
 
+            var normalMap = ExportTextureIfExist(mat, "_BumpMap", true);
+
             var emissionColor = mat.GetColor("_EmissionColor");
             var emissionTex = ExportTextureIfExist(mat, "_EmissionMap");
 
@@ -125,7 +127,12 @@ namespace VGltf.Unity
                     // MetallicRoughnessTexture
                 },
 
-                // NormalTexture
+                NormalTexture = normalMap != null ? new Types.Material.NormalTextureInfoType
+                {
+                    Index = normalMap.Index,
+                    TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
+                } : null,
+
                 // OcclusionTexture
 
                 EmissiveFactor = emissionColor != Color.black
@@ -156,13 +163,13 @@ namespace VGltf.Unity
             else return Types.Material.AlphaModeEnum.Opaque; // fallback
         }
 
-        IndexedResource<Texture> ExportTextureIfExist(Material mat, string name)
+        IndexedResource<Texture> ExportTextureIfExist(Material mat, string name, bool isLinear = false)
         {
             var res = default(IndexedResource<Texture>);
             var tex = mat.GetTexture(name);
             if (tex != null)
             {
-                res = Context.Exporters.Textures.Export(tex);
+                res = Context.Exporters.Textures.Export(tex, isLinear);
             }
 
             return res;
