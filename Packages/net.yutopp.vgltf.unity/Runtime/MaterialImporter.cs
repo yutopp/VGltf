@@ -195,7 +195,7 @@ namespace VGltf.Unity
                 else
                 {
                     mat.SetFloat("_Metallic", pbrMR.MetallicFactor);
-                    mat.SetFloat("_Glossiness", RoughnessToSmoothness(pbrMR.RoughnessFactor));
+                    mat.SetFloat("_Glossiness", ValueConv.RoughnessToSmoothness(pbrMR.RoughnessFactor));
                 }
             }
         }
@@ -225,49 +225,19 @@ namespace VGltf.Unity
             }
         }
 
-        // glTF:  roughness : 0 -> 1 (rough)
-        // Unity: smoothness: 0 -> 1 (smooth)
-        // https://blog.unity.com/ja/technology/ggx-in-unity-5-3
-        // roughness = (1 - smoothness) ^ 2
-        float SmoothnessToRoughness(float glossiness)
-        {
-            return Mathf.Pow(1.0f - glossiness, 2);
-        }
-
-        float RoughnessToSmoothness(float roughness)
-        {
-            return 1.0f - Mathf.Sqrt(roughness);
-        }
-
         // TODO: non-blocking version
         void OverwriteGltfOcclusionTexToUnity(Texture2D tex)
         {
             var pixels = tex.GetPixels();
             for (var i = 0; i < pixels.Length; ++i)
             {
-                pixels[i] = ConvertGltfOcclusionPixelToUnity(pixels[i]);
+                pixels[i] = ValueConv.ConvertGltfOcclusionPixelToUnity(pixels[i]);
             }
             tex.SetPixels(pixels);
             tex.Apply();
         }
 
-        // https://github.com/KhronosGroup/glTF/issues/1593
-        // glTF (sRGB)
-        //  R: AO is always sampled from the red channel
-        //  G: [unused]
-        //  B: [unused]
-        //  A: [ignored]
 
-        // https://catlikecoding.com/unity/tutorials/rendering/part-10/
-        // Unity (sRGB)
-        //  R: [unused]
-        //  G: Unity's standard shader uses the G color channel of the occlusion map
-        //  B: [unused]
-        //  A: [ignored]
-        Color ConvertGltfOcclusionPixelToUnity(Color c)
-        {
-            return new Color(0.0f, c.r, 0.0f, 1.0f);
-        }
 
         // TODO: non-blocking version
         void OverriteRoughnessMapToGlossMap(Texture2D tex, float metallic, float roughness)
@@ -275,33 +245,10 @@ namespace VGltf.Unity
             var pixels = tex.GetPixels();
             for (var i = 0; i < pixels.Length; ++i)
             {
-                pixels[i] = RoughnessPixelToGlossPixel(pixels[i], metallic, roughness);
+                pixels[i] = ValueConv.RoughnessPixelToGlossPixel(pixels[i], metallic, roughness);
             }
             tex.SetPixels(pixels);
             tex.Apply();
-        }
-
-        // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material
-        // glTF (linear)
-        //  R: [unused]
-        //  G: roughness
-        //  B: metalness
-        //  A: [unused]
-
-        // https://docs.unity3d.com/Manual/StandardShaderMaterialParameterMetallic.html
-        // Unity (linear)
-        //  R: Metalic
-        //  G: [unused]
-        //  B: [unused]
-        //  A: Smoothness (Gloss)
-        Color RoughnessPixelToGlossPixel(Color c, float metallic, float roughness)
-        {
-            return new Color(
-                c.b * metallic,
-                0.0f,
-                0.0f,
-                RoughnessToSmoothness(c.g * roughness)
-                );
         }
     }
 }

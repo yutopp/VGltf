@@ -47,5 +47,66 @@ namespace VGltf.Unity
             var l = ColorToLinear(c);
             return new Vector3(l.r, l.g, l.b);
         }
+
+        // ---
+
+        // glTF:  roughness : 0 -> 1 (rough)
+        // Unity: smoothness: 0 -> 1 (smooth)
+        // https://blog.unity.com/ja/technology/ggx-in-unity-5-3
+        // roughness = (1 - smoothness) ^ 2
+        public static float SmoothnessToRoughness(float glossiness)
+        {
+            return Mathf.Pow(1.0f - glossiness, 2);
+        }
+
+        public static float RoughnessToSmoothness(float roughness)
+        {
+            return 1.0f - Mathf.Sqrt(roughness);
+        }
+
+        // ---
+
+        // https://github.com/KhronosGroup/glTF/issues/1593
+        // glTF (sRGB)
+        //  R: AO is always sampled from the red channel
+        //  G: [unused]
+        //  B: [unused]
+        //  A: [ignored]
+
+        // https://catlikecoding.com/unity/tutorials/rendering/part-10/
+        // Unity (sRGB)
+        //  R: [unused]
+        //  G: Unity's standard shader uses the G color channel of the occlusion map
+        //  B: [unused]
+        //  A: [ignored]
+        public static Color ConvertGltfOcclusionPixelToUnity(Color c)
+        {
+            return new Color(0.0f, c.r, 0.0f, 1.0f);
+        }
+
+        // ---
+
+        // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material
+        // glTF (linear)
+        //  R: [unused]
+        //  G: roughness
+        //  B: metalness
+        //  A: [unused]
+
+        // https://docs.unity3d.com/Manual/StandardShaderMaterialParameterMetallic.html
+        // Unity (linear)
+        //  R: Metalic
+        //  G: [unused]
+        //  B: [unused]
+        //  A: Smoothness (Gloss)
+        public static Color RoughnessPixelToGlossPixel(Color c, float metallic, float roughness)
+        {
+            return new Color(
+                c.b * metallic,
+                0.0f,
+                0.0f,
+                RoughnessToSmoothness(c.g * roughness)
+                );
+        }
     }
 }

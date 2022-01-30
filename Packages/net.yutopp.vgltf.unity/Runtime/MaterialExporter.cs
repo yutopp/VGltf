@@ -98,12 +98,9 @@ namespace VGltf.Unity
 
             var mainColor = mat.GetColor("_Color");
             var mainTex = ExportTextureIfExist(mat, "_MainTex");
-            // _Metallic: 0 -> 1 (metal)
+
             var metallic = mat.GetFloat("_Metallic");
-            // https://blog.unity.com/ja/technology/ggx-in-unity-5-3
-            // _Glossiness: 0 -> 1 (gloss)
-            // roughness: 0 -> 1 (rough)
-            var roughness = Mathf.Pow(1.0f - mat.GetFloat("_Glossiness"), 2);
+            var roughness = ValueConv.SmoothnessToRoughness(mat.GetFloat("_Glossiness"));
 
             var normalMap = ExportTextureIfExist(mat, "_BumpMap", true);
 
