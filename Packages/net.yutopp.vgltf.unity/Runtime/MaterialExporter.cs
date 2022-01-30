@@ -96,11 +96,11 @@ namespace VGltf.Unity
             // Maybe, Standard shader...
             // TODO: Support various shaders
 
-            var mainColor = mat.GetColor("_Color");
+            mat.TryGetColorOrDefault("_Color", Color.white, out var mainColor);
             var mainTexIndex = ExportTextureIfExist(mat, "_MainTex");
 
-            var metallic = mat.GetFloat("_Metallic");
-            var smoothness = mat.GetFloat("_Glossiness");
+            mat.TryGetFloatOrDefault("_Metallic", 1.0f, out var metallic);
+            mat.TryGetFloatOrDefault("_Glossiness", 0.0f, out var smoothness);
             var metallicRoughnessTexIndex = ExportMetallicRoughnessTextureIfExist(mat, "_MetallicGlossMap", metallic, smoothness);
 
             var roughness = ValueConv.SmoothnessToRoughness(smoothness);
@@ -114,10 +114,17 @@ namespace VGltf.Unity
             var normalMapIndex = ExportTextureIfExist(mat, "_BumpMap", true);
 
             var occlusionTexIndex = ExportOcclusionTextureIfExist(mat, "_OcclusionMap");
-            var occlutionStrength = mat.GetFloat("_OcclusionStrength");
+            mat.TryGetFloatOrDefault("_OcclusionStrength", 1.0f, out var occlutionStrength);
 
-            var emissionColor = mat.GetColor("_EmissionColor");
+            mat.TryGetColorOrDefault("_EmissionColor", Color.black, out var emissionColor);
             var emissionTexIndex = ExportTextureIfExist(mat, "_EmissionMap");
+
+            var alphaMode = GetAlphaMode(mat);
+            mat.TryGetFloatOrDefault("_Cutoff", 0.0f, out var alphaCutoff);
+            if (alphaMode != Types.Material.AlphaModeEnum.Mask)
+            {
+                alphaCutoff = 0.0f;
+            }
 
             var gltfMaterial = new Types.Material
             {
@@ -162,7 +169,9 @@ namespace VGltf.Unity
                     TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
                 } : null,
 
-                AlphaMode = GetAlphaMode(mat),
+                AlphaMode = alphaMode,
+                AlphaCutoff = alphaCutoff,
+
                 // DoubleSided = // Not supported
             };
 
@@ -172,13 +181,24 @@ namespace VGltf.Unity
             return resource;
         }
 
-        Types.Material.AlphaModeEnum GetAlphaMode(Material mat)
+        static Types.Material.AlphaModeEnum GetAlphaMode(Material mat)
         {
-            var modeValue = mat.GetFloat("_Mode");
-            if (modeValue == 0) return Types.Material.AlphaModeEnum.Opaque;
-            else if (modeValue == 1) return Types.Material.AlphaModeEnum.Mask;
-            else if (modeValue == 2 || modeValue == 3) return Types.Material.AlphaModeEnum.Blend; // TODO: Fade support
-            else return Types.Material.AlphaModeEnum.Opaque; // fallback
+            mat.TryGetFloatOrDefault("_Mode", 0, out var modeValue);
+
+            if (modeValue == 0)
+            {
+                return Types.Material.AlphaModeEnum.Opaque;
+            }
+            else if (modeValue == 1)
+            {
+                return Types.Material.AlphaModeEnum.Mask;
+            }
+            else if (modeValue == 2 || modeValue == 3)
+            {
+                return Types.Material.AlphaModeEnum.Blend; // TODO: Fade support
+            }
+
+            return Types.Material.AlphaModeEnum.Opaque; // fallback
         }
 
         int? ExportTextureIfExist(Material mat, string name, bool isLinear = false)
@@ -214,7 +234,8 @@ namespace VGltf.Unity
             if (tex != null)
             {
                 // Linear
-                index = Context.Exporters.Textures.RawExport(tex, true, (t) => {
+                index = Context.Exporters.Textures.RawExport(tex, true, (t) =>
+                {
                     OverriteToGlossMapToRoughnessMap(t, metallic, smoothness);
                 });
             }
@@ -237,7 +258,7 @@ namespace VGltf.Unity
 
         // TODO: non-blocking version
         // Unity -> glTF
-        void OverriteToGlossMapToRoughnessMap(Texture2D tex, float metallic, float smoothness)
+        static void OverriteToGlossMapToRoughnessMap(Texture2D tex, float metallic, float smoothness)
         {
             var pixels = tex.GetPixels();
             for (var i = 0; i < pixels.Length; ++i)
