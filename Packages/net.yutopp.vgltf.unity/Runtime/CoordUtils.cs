@@ -88,7 +88,7 @@ namespace VGltf.Unity
             var s = GetScale(m);
             if (s != Vector3.one)
             {
-                Debug.LogWarningFormat("Scale should be identity: Actual = {0}", s.ToString("G7"));
+                Debug.LogWarningFormat("Scale or Rotation should be identity: Actual = {0}", s.ToString("G7"));
             }
 
             return Matrix4x4.TRS(ConvertSpace(t), ConvertSpace(r), s);
