@@ -562,7 +562,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<float, Vector4>(PrimitiveImporter.AsVector4).GetEnumerable().Select(Context.CoordUtils.ColorFromSRGB).ToArray();
+                    return buf.GetEntity<float, Vector4>(PrimitiveImporter.AsVector4).GetEnumerable().Select(ValueConv.ColorFromSRGB).ToArray();
                 }
             }
 

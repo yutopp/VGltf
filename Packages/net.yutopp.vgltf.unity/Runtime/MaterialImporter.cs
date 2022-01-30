@@ -121,7 +121,7 @@ namespace VGltf.Unity
             }
 
             // RGB component and NOT [HDR]
-            var emissionColor = Context.CoordUtils.ColorFromLinear(PrimitiveImporter.AsVector3(gltfMat.EmissiveFactor));
+            var emissionColor = ValueConv.ColorFromLinear(PrimitiveImporter.AsVector3(gltfMat.EmissiveFactor));
             if (emissionColor != Color.black)
             {
                 mat.EnableKeyword("_EMISSION");
@@ -163,7 +163,7 @@ namespace VGltf.Unity
                 var pbrMR = gltfMat.PbrMetallicRoughness;
 
                 // baseColorFactor is linear. See: https://github.com/KhronosGroup/glTF/issues/1638
-                var baseColor = Context.CoordUtils.ColorFromLinear(PrimitiveImporter.AsVector4(pbrMR.BaseColorFactor));
+                var baseColor = ValueConv.ColorFromLinear(PrimitiveImporter.AsVector4(pbrMR.BaseColorFactor));
                 mat.SetColor("_Color", baseColor);
 
                 if (pbrMR.BaseColorTexture != null)

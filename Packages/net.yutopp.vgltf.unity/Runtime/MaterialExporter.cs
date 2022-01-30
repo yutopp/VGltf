@@ -116,7 +116,7 @@ namespace VGltf.Unity
 
                 PbrMetallicRoughness = new Types.Material.PbrMetallicRoughnessType
                 {
-                    BaseColorFactor = PrimitiveExporter.AsArray(Context.CoordUtils.ColorToLinear(mainColor)),
+                    BaseColorFactor = PrimitiveExporter.AsArray(ValueConv.ColorToLinear(mainColor)),
                     BaseColorTexture = mainTex != null ? new Types.Material.BaseColorTextureInfoType
                     {
                         Index = mainTex.Index,
@@ -136,7 +136,7 @@ namespace VGltf.Unity
                 // OcclusionTexture
 
                 EmissiveFactor = emissionColor != Color.black
-                   ? PrimitiveExporter.AsArray(Context.CoordUtils.ColorToLinearRGB(emissionColor))
+                   ? PrimitiveExporter.AsArray(ValueConv.ColorToLinearRGB(emissionColor))
                    : null,
                 EmissiveTexture = emissionTex != null ? new Types.Material.EmissiveTextureInfoType
                 {
