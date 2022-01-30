@@ -221,7 +221,7 @@ namespace VGltf.Unity
             if (tex != null)
             {
                 // OcclusionMap is sRGB
-                index = Context.Exporters.Textures.RawExport(tex, false, OverwriteUnityOcclusionTexToGltf);
+                index = Context.Exporters.Textures.RawExport(tex, false, TextureModifier.OverwriteUnityOcclusionTexToGltf);
             }
 
             return index;
@@ -236,37 +236,11 @@ namespace VGltf.Unity
                 // Linear
                 index = Context.Exporters.Textures.RawExport(tex, true, (t) =>
                 {
-                    OverriteToGlossMapToRoughnessMap(t, metallic, smoothness);
+                    TextureModifier.OverriteToGlossMapToRoughnessMap(t, metallic, smoothness);
                 });
             }
 
             return index;
-        }
-
-        // TODO: non-blocking version
-        // Unity -> glTF
-        static void OverwriteUnityOcclusionTexToGltf(Texture2D tex)
-        {
-            var pixels = tex.GetPixels();
-            for (var i = 0; i < pixels.Length; ++i)
-            {
-                pixels[i] = ValueConv.ConvertUnityOcclusionPixelToGltf(pixels[i]);
-            }
-            tex.SetPixels(pixels);
-            tex.Apply();
-        }
-
-        // TODO: non-blocking version
-        // Unity -> glTF
-        static void OverriteToGlossMapToRoughnessMap(Texture2D tex, float metallic, float smoothness)
-        {
-            var pixels = tex.GetPixels();
-            for (var i = 0; i < pixels.Length; ++i)
-            {
-                pixels[i] = ValueConv.GlossPixelToRoughnessPixel(pixels[i], metallic, smoothness);
-            }
-            tex.SetPixels(pixels);
-            tex.Apply();
         }
     }
 }

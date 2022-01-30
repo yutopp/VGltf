@@ -152,7 +152,7 @@ namespace VGltf.Unity
                     Index = gltfMat.OcclusionTexture.Index,
                 }, new OverwroteTexDisposable(texture));
 
-                OverwriteGltfOcclusionTexToUnity(texture);
+                TextureModifier.OverwriteGltfOcclusionTexToUnity(texture);
                 mat.SetTexture("_OcclusionMap", texture);
 
                 mat.SetFloat("_OcclusionStrength", gltfMat.OcclusionTexture.Strength);
@@ -185,7 +185,7 @@ namespace VGltf.Unity
                         Index = pbrMR.MetallicRoughnessTexture.Index,
                     }, new OverwroteTexDisposable(texture));
 
-                    OverriteRoughnessMapToGlossMap(texture, pbrMR.MetallicFactor, pbrMR.RoughnessFactor);
+                    TextureModifier.OverriteRoughnessMapToGlossMap(texture, pbrMR.MetallicFactor, pbrMR.RoughnessFactor);
                     mat.SetTexture("_MetallicGlossMap", texture);
 
                     // Values are already baked into textures, thus set 1.0 to make no effects.
@@ -223,34 +223,6 @@ namespace VGltf.Unity
             {
                 Utils.Destroy(_tex);
             }
-        }
-
-        // TODO: non-blocking version
-        // glTF -> Unity
-        void OverwriteGltfOcclusionTexToUnity(Texture2D tex)
-        {
-            var pixels = tex.GetPixels();
-            for (var i = 0; i < pixels.Length; ++i)
-            {
-                pixels[i] = ValueConv.ConvertGltfOcclusionPixelToUnity(pixels[i]);
-            }
-            tex.SetPixels(pixels);
-            tex.Apply();
-        }
-
-
-
-        // TODO: non-blocking version
-        // glTF -> Unity
-        void OverriteRoughnessMapToGlossMap(Texture2D tex, float metallic, float roughness)
-        {
-            var pixels = tex.GetPixels();
-            for (var i = 0; i < pixels.Length; ++i)
-            {
-                pixels[i] = ValueConv.RoughnessPixelToGlossPixel(pixels[i], metallic, roughness);
-            }
-            tex.SetPixels(pixels);
-            tex.Apply();
         }
     }
 }
