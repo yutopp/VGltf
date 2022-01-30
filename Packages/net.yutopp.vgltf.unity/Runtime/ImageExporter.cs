@@ -20,7 +20,11 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public int Export(Texture tex, bool isLinear = false)
+        public int RawExport(
+            Texture tex,
+            bool isLinear = false,
+            Action<Texture2D> texOverwriter = null
+            )
         {
             byte[] pngBytes;
 
@@ -42,6 +46,8 @@ namespace VGltf.Unity
                 readableTex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, true, isLinear);
                 readableTex.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
                 readableTex.Apply();
+
+                texOverwriter?.Invoke(readableTex);
 
                 pngBytes = readableTex.EncodeToPNG();
             }

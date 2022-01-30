@@ -226,6 +226,7 @@ namespace VGltf.Unity
         }
 
         // TODO: non-blocking version
+        // glTF -> Unity
         void OverwriteGltfOcclusionTexToUnity(Texture2D tex)
         {
             var pixels = tex.GetPixels();
@@ -240,6 +241,7 @@ namespace VGltf.Unity
 
 
         // TODO: non-blocking version
+        // glTF -> Unity
         void OverriteRoughnessMapToGlossMap(Texture2D tex, float metallic, float roughness)
         {
             var pixels = tex.GetPixels();

@@ -5,6 +5,7 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System;
 using UnityEngine;
 using VGltf.Types.Extensions;
 
@@ -22,13 +23,20 @@ namespace VGltf.Unity
         public IndexedResource<Texture> Export(Texture tex, bool isLinear = false)
         {
             return Context.Resources.Textures.GetOrCall(tex, () => {
-                return ForceExport(tex, isLinear);
+                var texIndex = RawExport(tex, isLinear);
+
+                var res = Context.Resources.Textures.Add(tex, texIndex, tex.name, tex);
+                return res;
             });
         }
 
-        public IndexedResource<Texture> ForceExport(Texture tex, bool isLinear = false)
+        public int RawExport(
+            Texture tex,
+            bool isLinear = false,
+            Action<Texture2D> texOverwriter = null
+            )
         {
-            var imageIndex = Context.Exporters.Images.Export(tex, isLinear);
+            var imageIndex = Context.Exporters.Images.RawExport(tex, isLinear, texOverwriter);
 
             var gltfImage = new Types.Texture
             {
@@ -38,9 +46,8 @@ namespace VGltf.Unity
                 Source = imageIndex,
             };
             var texIndex = Context.Gltf.AddTexture(gltfImage);
-            var resource = Context.Resources.Textures.Add(tex, texIndex, tex.name, tex);
 
-            return resource;
+            return texIndex;
         }
     }
 }

@@ -84,6 +84,11 @@ namespace VGltf.Unity
             return new Color(0.0f, c.r, 0.0f, 1.0f);
         }
 
+        public static Color ConvertUnityOcclusionPixelToGltf(Color c)
+        {
+            return new Color(c.g, 0.0f, 0.0f, 1.0f);
+        }
+
         // ---
 
         // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material
@@ -106,6 +111,16 @@ namespace VGltf.Unity
                 0.0f,
                 0.0f,
                 RoughnessToSmoothness(c.g * roughness)
+                );
+        }
+
+        public static Color GlossPixelToRoughnessPixel(Color c, float metallic, float smoothness)
+        {
+            return new Color(
+                0.0f,
+                SmoothnessToRoughness(c.a * smoothness),
+                c.r * metallic,
+                1.0f
                 );
         }
     }

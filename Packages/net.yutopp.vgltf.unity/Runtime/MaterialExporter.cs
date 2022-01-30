@@ -97,15 +97,27 @@ namespace VGltf.Unity
             // TODO: Support various shaders
 
             var mainColor = mat.GetColor("_Color");
-            var mainTex = ExportTextureIfExist(mat, "_MainTex");
+            var mainTexIndex = ExportTextureIfExist(mat, "_MainTex");
 
             var metallic = mat.GetFloat("_Metallic");
-            var roughness = ValueConv.SmoothnessToRoughness(mat.GetFloat("_Glossiness"));
+            var smoothness = mat.GetFloat("_Glossiness");
+            var metallicRoughnessTexIndex = ExportMetallicRoughnessTextureIfExist(mat, "_MetallicGlossMap", metallic, smoothness);
 
-            var normalMap = ExportTextureIfExist(mat, "_BumpMap", true);
+            var roughness = ValueConv.SmoothnessToRoughness(smoothness);
+            if (metallicRoughnessTexIndex != null)
+            {
+                // Values are already baked into metallicRoughnessTexIndex
+                metallic = 1.0f;
+                roughness = 1.0f;
+            }
+
+            var normalMapIndex = ExportTextureIfExist(mat, "_BumpMap", true);
+
+            var occlusionTexIndex = ExportOcclusionTextureIfExist(mat, "_OcclusionMap");
+            var occlutionStrength = mat.GetFloat("_OcclusionStrength");
 
             var emissionColor = mat.GetColor("_EmissionColor");
-            var emissionTex = ExportTextureIfExist(mat, "_EmissionMap");
+            var emissionTexIndex = ExportTextureIfExist(mat, "_EmissionMap");
 
             var gltfMaterial = new Types.Material
             {
@@ -114,32 +126,41 @@ namespace VGltf.Unity
                 PbrMetallicRoughness = new Types.Material.PbrMetallicRoughnessType
                 {
                     BaseColorFactor = PrimitiveExporter.AsArray(ValueConv.ColorToLinear(mainColor)),
-                    BaseColorTexture = mainTex != null ? new Types.Material.BaseColorTextureInfoType
+                    BaseColorTexture = mainTexIndex != null ? new Types.Material.BaseColorTextureInfoType
                     {
-                        Index = mainTex.Index,
+                        Index = mainTexIndex.Value,
                         TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
-                    } : null, // TODO: fix
+                    } : null,
                     MetallicFactor = metallic,
                     RoughnessFactor = roughness,
-                    // MetallicRoughnessTexture
+                    MetallicRoughnessTexture = metallicRoughnessTexIndex != null ? new Types.Material.MetallicRoughnessTextureInfoType
+                    {
+                        Index = metallicRoughnessTexIndex.Value,
+                        TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
+                    } : null,
                 },
 
-                NormalTexture = normalMap != null ? new Types.Material.NormalTextureInfoType
+                NormalTexture = normalMapIndex != null ? new Types.Material.NormalTextureInfoType
                 {
-                    Index = normalMap.Index,
+                    Index = normalMapIndex.Value,
                     TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
                 } : null,
 
-                // OcclusionTexture
+                OcclusionTexture = occlusionTexIndex != null ? new Types.Material.OcclusionTextureInfoType
+                {
+                    Index = occlusionTexIndex.Value,
+                    TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
+                    Strength = occlutionStrength,
+                } : null,
 
                 EmissiveFactor = emissionColor != Color.black
                    ? PrimitiveExporter.AsArray(ValueConv.ColorToLinearRGB(emissionColor))
                    : null,
-                EmissiveTexture = emissionTex != null ? new Types.Material.EmissiveTextureInfoType
+                EmissiveTexture = emissionTexIndex != null ? new Types.Material.EmissiveTextureInfoType
                 {
-                    Index = emissionTex.Index,
+                    Index = emissionTexIndex.Value,
                     TexCoord = 0, // NOTE: mesh.primitive must have TEXCOORD_<TexCoord>.
-                } : null, // TODO: fix
+                } : null,
 
                 AlphaMode = GetAlphaMode(mat),
                 // DoubleSided = // Not supported
@@ -160,16 +181,71 @@ namespace VGltf.Unity
             else return Types.Material.AlphaModeEnum.Opaque; // fallback
         }
 
-        IndexedResource<Texture> ExportTextureIfExist(Material mat, string name, bool isLinear = false)
+        int? ExportTextureIfExist(Material mat, string name, bool isLinear = false)
         {
-            var res = default(IndexedResource<Texture>);
+            var index = default(int?);
             var tex = mat.GetTexture(name);
             if (tex != null)
             {
-                res = Context.Exporters.Textures.Export(tex, isLinear);
+                var res = Context.Exporters.Textures.Export(tex, isLinear);
+                index = res.Index;
             }
 
-            return res;
+            return index;
+        }
+
+        int? ExportOcclusionTextureIfExist(Material mat, string name)
+        {
+            var index = default(int?);
+            var tex = mat.GetTexture(name);
+            if (tex != null)
+            {
+                // OcclusionMap is sRGB
+                index = Context.Exporters.Textures.RawExport(tex, false, OverwriteUnityOcclusionTexToGltf);
+            }
+
+            return index;
+        }
+
+        int? ExportMetallicRoughnessTextureIfExist(Material mat, string name, float metallic, float smoothness)
+        {
+            var index = default(int?);
+            var tex = mat.GetTexture(name);
+            if (tex != null)
+            {
+                // Linear
+                index = Context.Exporters.Textures.RawExport(tex, true, (t) => {
+                    OverriteToGlossMapToRoughnessMap(t, metallic, smoothness);
+                });
+            }
+
+            return index;
+        }
+
+        // TODO: non-blocking version
+        // Unity -> glTF
+        static void OverwriteUnityOcclusionTexToGltf(Texture2D tex)
+        {
+            var pixels = tex.GetPixels();
+            for (var i = 0; i < pixels.Length; ++i)
+            {
+                pixels[i] = ValueConv.ConvertUnityOcclusionPixelToGltf(pixels[i]);
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
+        }
+
+        // TODO: non-blocking version
+        // Unity -> glTF
+        void OverriteToGlossMapToRoughnessMap(Texture2D tex, float metallic, float smoothness)
+        {
+            var pixels = tex.GetPixels();
+            for (var i = 0; i < pixels.Length; ++i)
+            {
+                pixels[i] = ValueConv.GlossPixelToRoughnessPixel(pixels[i], metallic, smoothness);
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
         }
     }
 }
