@@ -40,6 +40,10 @@ namespace VGltfExamples.GltfExamples
             filePathInput.AddOptions(new List<Dropdown.OptionData>{
                 new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\TextureLinearInterpolationTest\\glTF-Binary\\TextureLinearInterpolationTest.glb"),
                 new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\TextureEncodingTest\\glTF-Binary\\TextureEncodingTest.glb"),
+                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\NormalTangentTest\\glTF-Binary\\NormalTangentTest.glb"),
+                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\MetalRoughSpheres\\glTF-Binary\\MetalRoughSpheres.glb"),
+                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\AlphaBlendModeTest\\glTF-Binary\\AlphaBlendModeTest.glb"),
+                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\BoomBox\\glTF-Binary\\BoomBox.glb"),
             });
 
             loadButton.onClick.AddListener(UIOnLoadButtonClick);
