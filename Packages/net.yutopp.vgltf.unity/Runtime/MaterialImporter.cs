@@ -143,6 +143,21 @@ namespace VGltf.Unity
                 mat.SetTexture("_BumpMap", textureResource.Value);
             }
 
+            if (gltfMat.OcclusionTexture != null)
+            {
+                var texture = await Context.Importers.Textures.RawImport(gltfMat.OcclusionTexture.Index, false, ct);
+                // TODO: support multi-set
+                Context.Resources.AuxResources.Add(new OcclusionTexKey
+                {
+                    Index = gltfMat.OcclusionTexture.Index,
+                }, new OverwroteTexDisposable(texture));
+
+                OverwriteGltfOcclusionTexToUnity(texture);
+                mat.SetTexture("_OcclusionMap", texture);
+
+                mat.SetFloat("_OcclusionStrength", gltfMat.OcclusionTexture.Strength);
+            }
+
             if (gltfMat.PbrMetallicRoughness != null)
             {
                 var pbrMR = gltfMat.PbrMetallicRoughness;
@@ -157,18 +172,136 @@ namespace VGltf.Unity
                     mat.SetTexture("_MainTex", textureResource.Value);
                 }
 
-                // MetallicRoughnessTexture: not supported...
+                if (pbrMR.MetallicRoughnessTexture != null)
+                {
+                    mat.EnableKeyword("_METALLICGLOSSMAP");
 
-                // _Metallic: 0 -> 1 (metal)
-                var metallic = pbrMR.MetallicFactor;
-                mat.SetFloat("_Metallic", metallic);
+                    // Unity uses glossiness instead of roughness...
+                    // So, baking values into textures is needed to invert values
+                    var texture = await Context.Importers.Textures.RawImport(pbrMR.MetallicRoughnessTexture.Index, true, ct);
+                    // TODO: support multi-set
+                    Context.Resources.AuxResources.Add(new MetallicRoughnessTexKey
+                    {
+                        Index = pbrMR.MetallicRoughnessTexture.Index,
+                    }, new OverwroteTexDisposable(texture));
 
-                // https://blog.unity.com/ja/technology/ggx-in-unity-5-3
-                // roughness: 0 -> 1 (rough)
-                // _Glossiness: 0 -> 1 (gloss)
-                var glossiness = 1.0f - Mathf.Sqrt(pbrMR.RoughnessFactor);
-                mat.SetFloat("_Glossiness", glossiness);
+                    OverriteRoughnessMapToGlossMap(texture, pbrMR.MetallicFactor, pbrMR.RoughnessFactor);
+                    mat.SetTexture("_MetallicGlossMap", texture);
+
+                    // Values are already baked into textures, thus set 1.0 to make no effects.
+                    mat.SetFloat("_Metallic", 1.0f);
+                    mat.SetFloat("_Glossiness", 1.0f);
+                }
+                else
+                {
+                    mat.SetFloat("_Metallic", pbrMR.MetallicFactor);
+                    mat.SetFloat("_Glossiness", RoughnessToSmoothness(pbrMR.RoughnessFactor));
+                }
             }
+        }
+
+        struct OcclusionTexKey
+        {
+            public int Index;
+        }
+
+        struct MetallicRoughnessTexKey
+        {
+            public int Index;
+        }
+
+        sealed class OverwroteTexDisposable : IDisposable
+        {
+            readonly Texture2D _tex;
+
+            public OverwroteTexDisposable(Texture2D tex)
+            {
+                _tex = tex;
+            }
+
+            public void Dispose()
+            {
+                Utils.Destroy(_tex);
+            }
+        }
+
+        // glTF:  roughness : 0 -> 1 (rough)
+        // Unity: smoothness: 0 -> 1 (smooth)
+        // https://blog.unity.com/ja/technology/ggx-in-unity-5-3
+        // roughness = (1 - smoothness) ^ 2
+        float SmoothnessToRoughness(float glossiness)
+        {
+            return Mathf.Pow(1.0f - glossiness, 2);
+        }
+
+        float RoughnessToSmoothness(float roughness)
+        {
+            return 1.0f - Mathf.Sqrt(roughness);
+        }
+
+        // TODO: non-blocking version
+        void OverwriteGltfOcclusionTexToUnity(Texture2D tex)
+        {
+            var pixels = tex.GetPixels();
+            for (var i = 0; i < pixels.Length; ++i)
+            {
+                pixels[i] = ConvertGltfOcclusionPixelToUnity(pixels[i]);
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
+        }
+
+        // https://github.com/KhronosGroup/glTF/issues/1593
+        // glTF (sRGB)
+        //  R: AO is always sampled from the red channel
+        //  G: [unused]
+        //  B: [unused]
+        //  A: [ignored]
+
+        // https://catlikecoding.com/unity/tutorials/rendering/part-10/
+        // Unity (sRGB)
+        //  R: [unused]
+        //  G: Unity's standard shader uses the G color channel of the occlusion map
+        //  B: [unused]
+        //  A: [ignored]
+        Color ConvertGltfOcclusionPixelToUnity(Color c)
+        {
+            return new Color(0.0f, c.r, 0.0f, 1.0f);
+        }
+
+        // TODO: non-blocking version
+        void OverriteRoughnessMapToGlossMap(Texture2D tex, float metallic, float roughness)
+        {
+            var pixels = tex.GetPixels();
+            for (var i = 0; i < pixels.Length; ++i)
+            {
+                pixels[i] = RoughnessPixelToGlossPixel(pixels[i], metallic, roughness);
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
+        }
+
+        // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#metallic-roughness-material
+        // glTF (linear)
+        //  R: [unused]
+        //  G: roughness
+        //  B: metalness
+        //  A: [unused]
+
+        // https://docs.unity3d.com/Manual/StandardShaderMaterialParameterMetallic.html
+        // Unity (linear)
+        //  R: Metalic
+        //  G: [unused]
+        //  B: [unused]
+        //  A: Smoothness (Gloss)
+        Color RoughnessPixelToGlossPixel(Color c, float metallic, float roughness)
+        {
+            return new Color(
+                c.b * metallic,
+                0.0f,
+                0.0f,
+                RoughnessToSmoothness(c.g * roughness)
+                );
         }
     }
 }
