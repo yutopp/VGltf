@@ -203,44 +203,56 @@ namespace VGltf.Unity
 
         int? ExportTextureIfExist(Material mat, string name, bool isLinear = false)
         {
-            var index = default(int?);
-            var tex = mat.GetTexture(name);
-            if (tex != null)
+            if (!mat.HasProperty(name))
             {
-                var res = Context.Exporters.Textures.Export(tex, isLinear);
-                index = res.Index;
+                return null;
             }
 
-            return index;
+            var tex = mat.GetTexture(name);
+            if (tex == null)
+            {
+                return null;
+            }
+
+            var res = Context.Exporters.Textures.Export(tex, isLinear);
+            return res.Index;
         }
 
         int? ExportOcclusionTextureIfExist(Material mat, string name)
         {
-            var index = default(int?);
-            var tex = mat.GetTexture(name);
-            if (tex != null)
+            if (!mat.HasProperty(name))
             {
-                // OcclusionMap is sRGB
-                index = Context.Exporters.Textures.RawExport(tex, false, TextureModifier.OverwriteUnityOcclusionTexToGltf);
+                return null;
             }
 
-            return index;
+            var tex = mat.GetTexture(name);
+            if (tex == null)
+            {
+                return null;
+            }
+
+            // OcclusionMap is sRGB
+            return Context.Exporters.Textures.RawExport(tex, false, TextureModifier.OverwriteUnityOcclusionTexToGltf);
         }
 
         int? ExportMetallicRoughnessTextureIfExist(Material mat, string name, float metallic, float smoothness)
         {
-            var index = default(int?);
-            var tex = mat.GetTexture(name);
-            if (tex != null)
+            if (!mat.HasProperty(name))
             {
-                // Linear
-                index = Context.Exporters.Textures.RawExport(tex, true, (t) =>
-                {
-                    TextureModifier.OverriteToGlossMapToRoughnessMap(t, metallic, smoothness);
-                });
+                return null;
             }
 
-            return index;
+            var tex = mat.GetTexture(name);
+            if (tex == null)
+            {
+                return null;
+            }
+
+            // Linear
+            return Context.Exporters.Textures.RawExport(tex, true, (t) =>
+            {
+                TextureModifier.OverriteToGlossMapToRoughnessMap(t, metallic, smoothness);
+            });
         }
     }
 }
