@@ -85,54 +85,51 @@ namespace VGltf.Unity.Ext
                 // o Sphere
                 // x Terrain
                 // x Wheel
-
-                // BoxCollider can be scaled by non-uniformed vec3.
+                foreach (var c in go.GetComponents<Collider>())
                 {
-                    var c = go.GetComponent<BoxCollider>();
-                    if (c != null)
+                    switch (c)
                     {
-                        c.size = Vector3.Scale(c.size, go.transform.lossyScale);
-                        c.center = go.transform.TransformPoint(c.center);
-                    }
-                }
-
-                // MeshCollider can be scaled by non-uniformed vec3.
-                {
-                    var c = go.GetComponent<MeshCollider>();
-                    if (c != null)
-                    {
-                        c.sharedMesh = BakeMeshAndMemoize(c.sharedMesh, go.transform);
-                    }
-                }
-
-                {
-                    var c = go.GetComponent<SphereCollider>();
-                    if (c != null)
-                    {
-                        if (!isUniform)
+                        // BoxCollider can be scaled by non-uniformed vec3.
+                        case BoxCollider bc:
                         {
-                            throw new Exception($"{go.name} has both of SphereCollider and non-uniformed scale");
+                            bc.size = Vector3.Scale(bc.size, go.transform.lossyScale);
+                            bc.center = go.transform.TransformPoint(bc.center);
+                            break;
                         }
 
-                        var scale = go.transform.lossyScale.x; // NOTE: all elements are same values
-                        c.radius = scale * c.radius;
-                        c.center = go.transform.TransformPoint(c.center);
-                    }
-                }
-
-                {
-                    var c = go.GetComponent<CapsuleCollider>();
-                    if (c != null)
-                    {
-                        if (!isUniform)
+                        // MeshCollider can be scaled by non-uniformed vec3.
+                        case MeshCollider mc:
                         {
-                            throw new Exception($"{go.name} has both of CapsuleCollider and non-uniformed scale");
+                            mc.sharedMesh = BakeMeshAndMemoize(mc.sharedMesh, go.transform);
+                            break;
                         }
 
-                        var scale = go.transform.lossyScale.x; // NOTE: all elements are same values
-                        c.radius = scale * c.radius;
-                        c.height = scale * c.height;
-                        c.center = go.transform.TransformPoint(c.center);
+                        case SphereCollider sc:
+                        {
+                            if (!isUniform)
+                            {
+                                throw new Exception($"{go.name} has both of SphereCollider and non-uniformed scale");
+                            }
+
+                            var scale = go.transform.lossyScale.x; // NOTE: all elements are same values
+                            sc.radius = scale * sc.radius;
+                            sc.center = go.transform.TransformPoint(sc.center);
+                            break;
+                        }
+
+                        case CapsuleCollider cc:
+                        {
+                            if (!isUniform)
+                            {
+                                throw new Exception($"{go.name} has both of CapsuleCollider and non-uniformed scale");
+                            }
+
+                            var scale = go.transform.lossyScale.x; // NOTE: all elements are same values
+                            cc.radius = scale * cc.radius;
+                            cc.height = scale * cc.height;
+                            cc.center = go.transform.TransformPoint(cc.center);
+                            break;
+                        }
                     }
                 }
 
