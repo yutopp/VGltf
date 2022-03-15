@@ -36,8 +36,7 @@ namespace VGltf.Unity
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
 
-            var mesh = await Context.Resources.Meshes.GetOrCallAsync(meshIndex,
-                async () => await ForceImport(meshIndex, ct));
+            var mesh = Context.Resources.Meshes.GetOrCall(meshIndex, () => ForceImport(meshIndex));
 
             var renderer = AddRenderer(go, mesh.Value, gltfMesh);
             renderer.sharedMaterials = await ImportMaterials(gltfMesh, ct);
@@ -72,7 +71,6 @@ namespace VGltf.Unity
         sealed class Primitive
         {
             public int? Indices;
-            public int? Material;
             public int? Position;
             public int? Normal;
             public int? Tangent;
@@ -87,7 +85,6 @@ namespace VGltf.Unity
         sealed class PrimitiveResource
         {
             public int[] Indices;
-            public Material Material;
             public Vector3[] Vertices;
             public Vector3[] Normals;
             public Vector4[] Tangents;
@@ -106,7 +103,7 @@ namespace VGltf.Unity
             public Vector3[] Tangents;
         }
 
-        public async Task<IndexedResource<Mesh>> ForceImport(int meshIndex, CancellationToken ct)
+        public IndexedResource<Mesh> ForceImport(int meshIndex)
         {
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
@@ -120,7 +117,7 @@ namespace VGltf.Unity
                 ValidateSubPrimitives(primsRaw[0], p, i);
             }
 
-            var prims = await Task.WhenAll(primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0, ct)));
+            var prims = primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0));
 
             var mesh = new Mesh();
             mesh.name = gltfMesh.Name;
@@ -226,7 +223,6 @@ namespace VGltf.Unity
             var res = new Primitive();
 
             res.Indices = gltfPrim.Indices;
-            res.Material = gltfPrim.Material;
 
             {
                 if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.POSITION, out var index))
@@ -375,21 +371,13 @@ namespace VGltf.Unity
             }
         }
 
-        async Task<PrimitiveResource> ImportPrimitive(Types.Mesh gltfMesh, Primitive prim, bool isPrimary, CancellationToken ct)
+        PrimitiveResource ImportPrimitive(Types.Mesh gltfMesh, Primitive prim, bool isPrimary)
         {
             var res = new PrimitiveResource();
 
             if (prim.Indices != null)
             {
                 res.Indices = ImportIndices(prim.Indices.Value);
-            }
-
-            if (prim.Material != null)
-            {
-                var materialRes = await Context.Importers.Materials.Import(prim.Material.Value, ct);
-                await Context.TimeSlicer.Slice(ct);
-
-                res.Material = materialRes.Value;
             }
 
             if (isPrimary && prim.Position != null)
