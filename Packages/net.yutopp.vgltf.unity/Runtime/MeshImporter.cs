@@ -39,7 +39,8 @@ namespace VGltf.Unity
             var mesh = await Context.Resources.Meshes.GetOrCallAsync(meshIndex,
                 async () => await ForceImport(meshIndex, ct));
 
-            await AddRenderer(go, mesh.Value, gltfMesh, ct);
+            var renderer = AddRenderer(go, mesh.Value, gltfMesh);
+            renderer.sharedMaterials = await ImportMaterials(gltfMesh, ct);
             return mesh;
         }
 
@@ -167,9 +168,8 @@ namespace VGltf.Unity
                    primaryAttributes.ContainsKey(Types.Mesh.PrimitiveType.AttributeName.JOINTS_0);
         }
 
-        async Task AddRenderer(GameObject go, Mesh mesh, Types.Mesh gltfMesh, CancellationToken ct)
+        Renderer AddRenderer(GameObject go, Mesh mesh, Types.Mesh gltfMesh)
         {
-            Renderer r = null;
             if (IsSkinnedMesh(gltfMesh))
             {
                 var smr = go.AddComponent<SkinnedMeshRenderer>();
@@ -186,7 +186,7 @@ namespace VGltf.Unity
                     }
                 }
 
-                r = smr;
+                return smr;
             }
             else
             {
@@ -195,9 +195,12 @@ namespace VGltf.Unity
 
                 var mr = go.AddComponent<MeshRenderer>();
                 mr.enabled = false; // Do not render by default until explicitly enabled
-                r = mr;
+                return mr;
             }
+        }
 
+        async Task<Material[]> ImportMaterials(Types.Mesh gltfMesh, CancellationToken ct)
+        {
             var materials = new Material[gltfMesh.Primitives.Count];
 
             var index = 0;
@@ -209,9 +212,11 @@ namespace VGltf.Unity
                     await Context.TimeSlicer.Slice(ct);
                     materials[index] = mat.Value;
                 }
+
                 ++index;
             }
-            r.sharedMaterials = materials;
+
+            return materials;
         }
 
         Primitive ExtractPrimitive(Types.Mesh.PrimitiveType gltfPrim)
