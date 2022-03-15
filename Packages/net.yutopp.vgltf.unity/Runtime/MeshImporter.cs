@@ -36,10 +36,11 @@ namespace VGltf.Unity
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
 
-            return await Context.Resources.Meshes.GetOrCallAsync(meshIndex, async () =>
-            {
-                return await ForceImport(meshIndex, go, ct);
-            });
+            var mesh = Context.Resources.Meshes.GetOrCall(meshIndex, () => ForceImport(meshIndex));
+
+            var renderer = AddRenderer(go, mesh.Value, gltfMesh);
+            renderer.sharedMaterials = await ImportMaterials(gltfMesh, ct);
+            return mesh;
         }
 
         sealed class Target : IEquatable<Target>
@@ -70,7 +71,6 @@ namespace VGltf.Unity
         sealed class Primitive
         {
             public int? Indices;
-            public int? Material;
             public int? Position;
             public int? Normal;
             public int? Tangent;
@@ -85,7 +85,6 @@ namespace VGltf.Unity
         sealed class PrimitiveResource
         {
             public int[] Indices;
-            public Material Material;
             public Vector3[] Vertices;
             public Vector3[] Normals;
             public Vector4[] Tangents;
@@ -104,7 +103,7 @@ namespace VGltf.Unity
             public Vector3[] Tangents;
         }
 
-        public async Task<IndexedResource<Mesh>> ForceImport(int meshIndex, GameObject go, CancellationToken ct)
+        public IndexedResource<Mesh> ForceImport(int meshIndex)
         {
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
@@ -113,13 +112,12 @@ namespace VGltf.Unity
                 .Select(p => ExtractPrimitive(p))
                 .ToArray();
 
-            ;
             foreach (var (p, i) in primsRaw.Skip(1).Select((p, i) => (p, i)))
             {
                 ValidateSubPrimitives(primsRaw[0], p, i);
             }
 
-            var prims = await Task.WhenAll(primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0, ct)));
+            var prims = primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0));
 
             var mesh = new Mesh();
             mesh.name = gltfMesh.Name;
@@ -128,15 +126,11 @@ namespace VGltf.Unity
 
             mesh.subMeshCount = gltfMesh.Primitives.Count;
 
-            var materials = new List<Material>();
-            var skinedMesh = false;
             var submeshIndex = 0;
             foreach (var prim in prims)
             {
                 if (submeshIndex == 0)
                 {
-                    skinedMesh = prim.BoneWeights != null;
-
                     mesh.vertices = prim.Vertices;
                     mesh.normals = prim.Normals;
                     mesh.tangents = prim.Tangents;
@@ -155,15 +149,25 @@ namespace VGltf.Unity
 
                 mesh.SetIndices(prim.Indices, MeshTopology.Triangles, submeshIndex);
                 submeshIndex++;
-
-                materials.Add(prim.Material);
             }
 
             mesh.RecalculateBounds();
             mesh.RecalculateTangents();
 
-            Renderer r = null;
-            if (skinedMesh)
+            return resource;
+        }
+
+        static bool IsSkinnedMesh(Types.Mesh gltfMesh)
+        {
+            if (gltfMesh.Primitives.Count == 0) return false;
+            var primaryAttributes = gltfMesh.Primitives[0].Attributes;
+            return primaryAttributes.ContainsKey(Types.Mesh.PrimitiveType.AttributeName.WEIGHTS_0) &&
+                   primaryAttributes.ContainsKey(Types.Mesh.PrimitiveType.AttributeName.JOINTS_0);
+        }
+
+        Renderer AddRenderer(GameObject go, Mesh mesh, Types.Mesh gltfMesh)
+        {
+            if (IsSkinnedMesh(gltfMesh))
             {
                 var smr = go.AddComponent<SkinnedMeshRenderer>();
                 smr.sharedMesh = mesh;
@@ -179,7 +183,7 @@ namespace VGltf.Unity
                     }
                 }
 
-                r = smr;
+                return smr;
             }
             else
             {
@@ -188,12 +192,28 @@ namespace VGltf.Unity
 
                 var mr = go.AddComponent<MeshRenderer>();
                 mr.enabled = false; // Do not render by default until explicitly enabled
-                r = mr;
+                return mr;
+            }
+        }
+
+        async Task<Material[]> ImportMaterials(Types.Mesh gltfMesh, CancellationToken ct)
+        {
+            var materials = new Material[gltfMesh.Primitives.Count];
+
+            var index = 0;
+            foreach (var prim in gltfMesh.Primitives)
+            {
+                if (prim.Material.HasValue)
+                {
+                    var mat = await Context.Importers.Materials.Import(prim.Material.Value, ct);
+                    await Context.TimeSlicer.Slice(ct);
+                    materials[index] = mat.Value;
+                }
+
+                ++index;
             }
 
-            r.sharedMaterials = materials.ToArray();
-
-            return resource;
+            return materials;
         }
 
         Primitive ExtractPrimitive(Types.Mesh.PrimitiveType gltfPrim)
@@ -203,7 +223,6 @@ namespace VGltf.Unity
             var res = new Primitive();
 
             res.Indices = gltfPrim.Indices;
-            res.Material = gltfPrim.Material;
 
             {
                 if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.POSITION, out var index))
@@ -352,21 +371,13 @@ namespace VGltf.Unity
             }
         }
 
-        async Task<PrimitiveResource> ImportPrimitive(Types.Mesh gltfMesh, Primitive prim, bool isPrimary, CancellationToken ct)
+        PrimitiveResource ImportPrimitive(Types.Mesh gltfMesh, Primitive prim, bool isPrimary)
         {
             var res = new PrimitiveResource();
 
             if (prim.Indices != null)
             {
                 res.Indices = ImportIndices(prim.Indices.Value);
-            }
-
-            if (prim.Material != null)
-            {
-                var materialRes = await Context.Importers.Materials.Import(prim.Material.Value, ct);
-                await Context.TimeSlicer.Slice(ct);
-
-                res.Material = materialRes.Value;
             }
 
             if (isPrimary && prim.Position != null)
