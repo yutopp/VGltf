@@ -36,10 +36,11 @@ namespace VGltf.Unity
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
 
-            return await Context.Resources.Meshes.GetOrCallAsync(meshIndex, async () =>
-            {
-                return await ForceImport(meshIndex, go, ct);
-            });
+            var mesh = await Context.Resources.Meshes.GetOrCallAsync(meshIndex,
+                async () => await ForceImport(meshIndex, ct));
+
+            await AddRenderer(go, mesh.Value, gltfMesh, ct);
+            return mesh;
         }
 
         sealed class Target : IEquatable<Target>
@@ -104,7 +105,7 @@ namespace VGltf.Unity
             public Vector3[] Tangents;
         }
 
-        public async Task<IndexedResource<Mesh>> ForceImport(int meshIndex, GameObject go, CancellationToken ct)
+        public async Task<IndexedResource<Mesh>> ForceImport(int meshIndex, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
@@ -113,7 +114,6 @@ namespace VGltf.Unity
                 .Select(p => ExtractPrimitive(p))
                 .ToArray();
 
-            ;
             foreach (var (p, i) in primsRaw.Skip(1).Select((p, i) => (p, i)))
             {
                 ValidateSubPrimitives(primsRaw[0], p, i);
@@ -162,8 +162,21 @@ namespace VGltf.Unity
             mesh.RecalculateBounds();
             mesh.RecalculateTangents();
 
+            return resource;
+        }
+
+        static bool IsSkinnedMesh(Types.Mesh gltfMesh)
+        {
+            if (gltfMesh.Primitives.Count == 0) return false;
+            var primaryAttributes = gltfMesh.Primitives[0].Attributes;
+            return primaryAttributes.ContainsKey(Types.Mesh.PrimitiveType.AttributeName.WEIGHTS_0) &&
+                   primaryAttributes.ContainsKey(Types.Mesh.PrimitiveType.AttributeName.JOINTS_0);
+        }
+
+        async Task AddRenderer(GameObject go, Mesh mesh, Types.Mesh gltfMesh, CancellationToken ct)
+        {
             Renderer r = null;
-            if (skinedMesh)
+            if (IsSkinnedMesh(gltfMesh))
             {
                 var smr = go.AddComponent<SkinnedMeshRenderer>();
                 smr.sharedMesh = mesh;
@@ -191,9 +204,20 @@ namespace VGltf.Unity
                 r = mr;
             }
 
-            r.sharedMaterials = materials.ToArray();
+            var materials = new Material[gltfMesh.Primitives.Count];
 
-            return resource;
+            var index = 0;
+            foreach (var prim in gltfMesh.Primitives)
+            {
+                if (prim.Material.HasValue)
+                {
+                    var mat = await Context.Importers.Materials.Import(prim.Material.Value, ct);
+                    await Context.TimeSlicer.Slice(ct);
+                    materials[index] = mat.Value;
+                }
+                ++index;
+            }
+            r.sharedMaterials = materials;
         }
 
         Primitive ExtractPrimitive(Types.Mesh.PrimitiveType gltfPrim)
