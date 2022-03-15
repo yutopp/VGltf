@@ -128,15 +128,11 @@ namespace VGltf.Unity
 
             mesh.subMeshCount = gltfMesh.Primitives.Count;
 
-            var materials = new List<Material>();
-            var skinedMesh = false;
             var submeshIndex = 0;
             foreach (var prim in prims)
             {
                 if (submeshIndex == 0)
                 {
-                    skinedMesh = prim.BoneWeights != null;
-
                     mesh.vertices = prim.Vertices;
                     mesh.normals = prim.Normals;
                     mesh.tangents = prim.Tangents;
@@ -155,8 +151,6 @@ namespace VGltf.Unity
 
                 mesh.SetIndices(prim.Indices, MeshTopology.Triangles, submeshIndex);
                 submeshIndex++;
-
-                materials.Add(prim.Material);
             }
 
             mesh.RecalculateBounds();
