@@ -112,6 +112,7 @@ namespace VGltf.Ext.Vrm0.Unity
                 var sp = new VRM0SecondaryAnimation.Spring();
                 sp.Comment = vrmBg.comment;
                 sp.Stiffiness = vrmBg.stiffiness;
+                sp.GravityPower = vrmBg.gravityPower;
                 sp.GravityDir = vrmBg.gravityDir.ToUnity();
                 sp.DragForce = vrmBg.dragForce;
                 if (vrmBg.center != -1)
