@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -35,16 +36,19 @@ namespace VGltfExamples.GltfExamples
 
         readonly List<GltfResource> _modelResources = new List<GltfResource>();
 
+        readonly List<string[]> _modelLocs = new List<string[]>
+        {
+            new string[]{"TextureLinearInterpolationTest", "glTF-Binary", "TextureLinearInterpolationTest.glb"},
+            new string[]{"TextureEncodingTest", "glTF-Binary", "TextureEncodingTest.glb"},
+            new string[]{"NormalTangentTest", "glTF-Binary", "NormalTangentTest.glb"},
+            new string[]{"MetalRoughSpheres", "glTF-Binary", "MetalRoughSpheres.glb"},
+            new string[]{"AlphaBlendModeTest", "glTF-Binary", "AlphaBlendModeTest.glb"},
+            new string[]{"BoomBox", "glTF-Binary", "BoomBox.glb"},
+        };
+
         void Start()
         {
-            filePathInput.AddOptions(new List<Dropdown.OptionData>{
-                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\TextureLinearInterpolationTest\\glTF-Binary\\TextureLinearInterpolationTest.glb"),
-                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\TextureEncodingTest\\glTF-Binary\\TextureEncodingTest.glb"),
-                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\NormalTangentTest\\glTF-Binary\\NormalTangentTest.glb"),
-                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\MetalRoughSpheres\\glTF-Binary\\MetalRoughSpheres.glb"),
-                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\AlphaBlendModeTest\\glTF-Binary\\AlphaBlendModeTest.glb"),
-                new Dropdown.OptionData("Assets\\StreamingAssets\\SampleModels\\BoomBox\\glTF-Binary\\BoomBox.glb"),
-            });
+            filePathInput.AddOptions(_modelLocs.Select(xs => new Dropdown.OptionData(xs.Last())).ToList());
 
             loadButton.onClick.AddListener(UIOnLoadButtonClick);
             unloadButton.onClick.AddListener(UIOnUnloadButtonClick);
@@ -145,7 +149,9 @@ namespace VGltfExamples.GltfExamples
             var p0 = Common.MemoryProfile.Now;
             DebugLogProfile(p0);
 
-            var filePath = filePathInput.options[filePathInput.value].text;
+            var loc = _modelLocs[filePathInput.value];
+            var filePath = SampleAssetPath(loc); // TODO: Support Android
+
             var res = await LoadGltf(filePath, "glTF");
             _modelResources.Insert(0, res);
 
@@ -193,6 +199,14 @@ namespace VGltfExamples.GltfExamples
             {
                 Debug.Log($"delta ({now.TotalReservedMB - prev.TotalReservedMB}MB, {now.TotalAllocatedMB - prev.TotalAllocatedMB}MB, {now.TotalUnusedReservedMB - prev.TotalUnusedReservedMB}MB)");
             }
+        }
+
+        static string SampleAssetPath(params string[] names)
+        {
+            var a = new List<string>{Application.streamingAssetsPath, "SampleModels"};
+            a.AddRange(names);
+
+            return Path.Combine(a.ToArray());
         }
     }
 }
