@@ -15,7 +15,13 @@ namespace VGltf.Unity
         // glTF -> Unity
         public static void OverwriteGltfNormalTexToUnityDXT5nm(Texture2D tex)
         {
-            throw new System.NotImplementedException();
+            var pixels = tex.GetPixels();
+            for (var i = 0; i < pixels.Length; ++i)
+            {
+                pixels[i] = ValueConv.ConvertGltfNormalTexToUnityDXT5nm(pixels[i]);
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
         }
 
         // TODO: non-blocking version

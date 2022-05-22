@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace VGltf.Unity
 {
@@ -138,9 +139,8 @@ namespace VGltf.Unity
             {
                 mat.EnableKeyword("_NORMALMAP");
 
-                // normal map should treat as linear (because not RGB tex)
-                var textureResource = await Context.Importers.Textures.Import(gltfMat.NormalTexture.Index, true, ct);
-                mat.SetTexture("_BumpMap", textureResource.Value);
+                var texture = await ImportNormalTexture(gltfMat.NormalTexture.Index, ct);
+                mat.SetTexture("_BumpMap", texture);
             }
 
             if (gltfMat.OcclusionTexture != null)
@@ -186,6 +186,35 @@ namespace VGltf.Unity
                     mat.SetFloat("_Metallic", pbrMR.MetallicFactor);
                     mat.SetFloat("_Glossiness", ValueConv.RoughnessToSmoothness(pbrMR.RoughnessFactor));
                 }
+            }
+        }
+
+        struct NormalTexKey
+        {
+            public int Index;
+        }
+
+        async Task<Texture2D> ImportNormalTexture(int index, CancellationToken ct)
+        {
+            // NormalMap is not color (= as is (linear))
+            // NOTE: If UNITY_NO_DXT5nm is enabled, NO modification is required
+            if (GraphicsSettings.HasShaderDefine(BuiltinShaderDefine.UNITY_NO_DXT5nm))
+            {
+                var res = await Context.Importers.Textures.Import(index, true, ct);
+                return res.Value;
+            }
+            else
+            {
+                var texture = await Context.Importers.Textures.RawImport(index, true, ct);
+                // TODO: support multi-set
+                Context.Resources.AuxResources.Add(new NormalTexKey
+                {
+                    Index = index,
+                }, new OverwroteTexDisposable(texture));
+
+                TextureModifier.OverwriteGltfNormalTexToUnityDXT5nm(texture);
+
+                return texture;
             }
         }
 
