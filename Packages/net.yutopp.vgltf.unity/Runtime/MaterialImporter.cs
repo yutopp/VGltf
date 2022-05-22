@@ -145,14 +145,7 @@ namespace VGltf.Unity
 
             if (gltfMat.OcclusionTexture != null)
             {
-                var texture = await Context.Importers.Textures.RawImport(gltfMat.OcclusionTexture.Index, false, ct);
-                // TODO: support multi-set
-                Context.Resources.AuxResources.Add(new OcclusionTexKey
-                {
-                    Index = gltfMat.OcclusionTexture.Index,
-                }, new OverwroteTexDisposable(texture));
-
-                TextureModifier.OverwriteGltfOcclusionTexToUnity(texture);
+                var texture = await ImportOcclusionTexture(gltfMat.OcclusionTexture.Index, ct);
                 mat.SetTexture("_OcclusionMap", texture);
 
                 mat.SetFloat("_OcclusionStrength", gltfMat.OcclusionTexture.Strength);
@@ -176,16 +169,12 @@ namespace VGltf.Unity
                 {
                     mat.EnableKeyword("_METALLICGLOSSMAP");
 
-                    // Unity uses glossiness instead of roughness...
-                    // So, baking values into textures is needed to invert values
-                    var texture = await Context.Importers.Textures.RawImport(pbrMR.MetallicRoughnessTexture.Index, true, ct);
-                    // TODO: support multi-set
-                    Context.Resources.AuxResources.Add(new MetallicRoughnessTexKey
-                    {
-                        Index = pbrMR.MetallicRoughnessTexture.Index,
-                    }, new OverwroteTexDisposable(texture));
-
-                    TextureModifier.OverriteRoughnessMapToGlossMap(texture, pbrMR.MetallicFactor, pbrMR.RoughnessFactor);
+                    var texture = await ImportMetallicRoughnessTexture(
+                        pbrMR.MetallicRoughnessTexture.Index,
+                        pbrMR.MetallicFactor,
+                        pbrMR.RoughnessFactor,
+                        ct
+                        );
                     mat.SetTexture("_MetallicGlossMap", texture);
 
                     // Values are already baked into textures, thus set 1.0 to make no effects.
@@ -205,9 +194,39 @@ namespace VGltf.Unity
             public int Index;
         }
 
+        async Task<Texture2D> ImportOcclusionTexture(int index, CancellationToken ct)
+        {
+            var texture = await Context.Importers.Textures.RawImport(index, false, ct);
+            // TODO: support multi-set
+            Context.Resources.AuxResources.Add(new OcclusionTexKey
+            {
+                Index = index,
+            }, new OverwroteTexDisposable(texture));
+
+            TextureModifier.OverwriteGltfOcclusionTexToUnity(texture);
+
+            return texture;
+        }
+
         struct MetallicRoughnessTexKey
         {
             public int Index;
+        }
+
+        async Task<Texture2D> ImportMetallicRoughnessTexture(int index, float metallic, float roughness, CancellationToken ct)
+        {
+            // Unity uses glossiness instead of roughness...
+            // So, baking values into textures is needed to invert values
+            var texture = await Context.Importers.Textures.RawImport(index, true, ct);
+            // TODO: support multi-set
+            Context.Resources.AuxResources.Add(new MetallicRoughnessTexKey
+            {
+                Index = index,
+            }, new OverwroteTexDisposable(texture));
+
+            TextureModifier.OverriteRoughnessMapToGlossMap(texture, metallic, roughness);
+
+            return texture;
         }
 
         sealed class OverwroteTexDisposable : IDisposable
