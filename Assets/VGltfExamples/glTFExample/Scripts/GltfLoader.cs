@@ -114,27 +114,36 @@ namespace VGltfExamples.GltfExamples
             return res;
         }
 
-        async UniTask ExportGltf(string filePath, GameObject go)
+        UniTask ExportGltf(string filePath, GameObject go)
         {
-            // Write the glTF container (unity-independent)
-            var gltfContainer = default(GltfContainer);
-
-            using (var gltfExporter = new Exporter(new Exporter.Config
+            try
             {
-                IncludeRootObject = false,
-            }))
-            {
-                gltfExporter.ExportGameObjectAsScene(go);
+                // Write the glTF container (unity-independent)
+                var gltfContainer = default(GltfContainer);
 
-                gltfContainer = gltfExporter.IntoGlbContainer();
+                using (var gltfExporter = new Exporter(new Exporter.Config
+                {
+                    IncludeRootObject = false,
+                }))
+                {
+                    gltfExporter.ExportGameObjectAsScene(go);
+
+                    gltfContainer = gltfExporter.IntoGlbContainer();
+                }
+
+                using (var fs = new FileStream(filePath, FileMode.Create))
+                {
+                    GltfContainer.ToGlb(fs, gltfContainer);
+                }
+
+                Debug.Log($"Exported!: {filePath}");
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
 
-            using (var fs = new FileStream(filePath, FileMode.Create))
-            {
-                GltfContainer.ToGlb(fs, gltfContainer);
-            }
-
-            Debug.Log($"Exported!: {filePath}");
+            return UniTask.CompletedTask;
         }
 
         // UI
@@ -203,7 +212,7 @@ namespace VGltfExamples.GltfExamples
 
         static string SampleAssetPath(params string[] names)
         {
-            var a = new List<string>{Application.streamingAssetsPath, "SampleModels"};
+            var a = new List<string> { Application.streamingAssetsPath, "SampleModels" };
             a.AddRange(names);
 
             return Path.Combine(a.ToArray());
