@@ -79,7 +79,7 @@ namespace VGltf.Unity
         //  DXT5nm (R=1, G=y, B=1, A=x) or BC5 (R=x, G=y, B=0, A=1)
         public static Color ConvertGltfNormalTexToUnityDXT5nm(Color c)
         {
-            return new Color(1, c.g, 1, c.r);
+            return new Color(c.r, c.g, 0, 1); // BC5, compatible to RGBA
         }
 
         public static Color ConvertUnityDXT5nmNormalTexToGltf(Color c)
