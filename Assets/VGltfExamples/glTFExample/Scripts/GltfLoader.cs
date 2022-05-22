@@ -44,7 +44,9 @@ namespace VGltfExamples.GltfExamples
             new string[]{"NormalTangentMirrorTest", "glTF-Binary", "NormalTangentMirrorTest.glb"},
             new string[]{"MetalRoughSpheres", "glTF-Binary", "MetalRoughSpheres.glb"},
             new string[]{"AlphaBlendModeTest", "glTF-Binary", "AlphaBlendModeTest.glb"},
+            new string[]{"WaterBottle", "glTF-Binary", "WaterBottle.glb"},
             new string[]{"BoomBox", "glTF-Binary", "BoomBox.glb"},
+            new string[]{"NormalTest02", "normal_test_02.glb"},
         };
 
         void Start()
