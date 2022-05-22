@@ -13,7 +13,7 @@ jobs:
       - name: setup env
         run: sudo apt-get update -yy && sudo apt-get install -yy make git python3
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-dotnet@v1
         with:
@@ -30,7 +30,7 @@ jobs:
       - name: setup env
         run: sudo apt-get update -yy && sudo apt-get install -yy make git python3
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-dotnet@v1
         with:
@@ -75,7 +75,7 @@ jobs:
         env:
           UNITY_ULF: ${{ secrets[matrix.ulf_secrets_key] }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - run: make setup
 
