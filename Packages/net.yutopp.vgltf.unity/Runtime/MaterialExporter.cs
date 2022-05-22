@@ -7,6 +7,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
@@ -111,7 +112,7 @@ namespace VGltf.Unity
                 roughness = 1.0f;
             }
 
-            var normalMapIndex = ExportTextureIfExist(mat, "_BumpMap", true);
+            var normalMapIndex = ExportNormalTextureIfExist(mat, "_BumpMap");
 
             var occlusionTexIndex = ExportOcclusionTextureIfExist(mat, "_OcclusionMap");
             mat.TryGetFloatOrDefault("_OcclusionStrength", 1.0f, out var occlutionStrength);
@@ -216,6 +217,31 @@ namespace VGltf.Unity
 
             var res = Context.Exporters.Textures.Export(tex, isLinear);
             return res.Index;
+        }
+
+        int? ExportNormalTextureIfExist(Material mat, string name)
+        {
+            if (!mat.HasProperty(name))
+            {
+                return null;
+            }
+
+            var tex = mat.GetTexture(name);
+            if (tex == null)
+            {
+                return null;
+            }
+
+            // NormalMap is not color (= as is (linear))
+            // NOTE: If UNITY_NO_DXT5nm is enabled, NO modification is required
+            if (GraphicsSettings.HasShaderDefine(BuiltinShaderDefine.UNITY_NO_DXT5nm))
+            {
+                return Context.Exporters.Textures.RawExport(tex, true);
+            }
+            else
+            {
+                return Context.Exporters.Textures.RawExport(tex, true, TextureModifier.OverwriteUnityDXT5nmNormalTexToGltf);
+            }
         }
 
         int? ExportOcclusionTextureIfExist(Material mat, string name)

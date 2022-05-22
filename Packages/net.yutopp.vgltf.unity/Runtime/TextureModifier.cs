@@ -13,6 +13,28 @@ namespace VGltf.Unity
     {
         // TODO: non-blocking version
         // glTF -> Unity
+        public static void OverwriteGltfNormalTexToUnityDXT5nm(Texture2D tex)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        // TODO: non-blocking version
+        // Unity -> glTF
+        public static void OverwriteUnityDXT5nmNormalTexToGltf(Texture2D tex)
+        {
+            var pixels = tex.GetPixels();
+            for (var i = 0; i < pixels.Length; ++i)
+            {
+                pixels[i] = ValueConv.ConvertUnityDXT5nmNormalTexToGltf(pixels[i]);
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
+        }
+
+        // --
+
+        // TODO: non-blocking version
+        // glTF -> Unity
         public static void OverwriteGltfOcclusionTexToUnity(Texture2D tex)
         {
             var pixels = tex.GetPixels();
