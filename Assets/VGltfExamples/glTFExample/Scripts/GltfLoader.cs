@@ -41,6 +41,7 @@ namespace VGltfExamples.GltfExamples
             new string[]{"TextureLinearInterpolationTest", "glTF-Binary", "TextureLinearInterpolationTest.glb"},
             new string[]{"TextureEncodingTest", "glTF-Binary", "TextureEncodingTest.glb"},
             new string[]{"NormalTangentTest", "glTF-Binary", "NormalTangentTest.glb"},
+            new string[]{"NormalTangentMirrorTest", "glTF-Binary", "NormalTangentMirrorTest.glb"},
             new string[]{"MetalRoughSpheres", "glTF-Binary", "MetalRoughSpheres.glb"},
             new string[]{"AlphaBlendModeTest", "glTF-Binary", "AlphaBlendModeTest.glb"},
             new string[]{"BoomBox", "glTF-Binary", "BoomBox.glb"},
