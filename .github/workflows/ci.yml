@@ -14,7 +14,8 @@ jobs:
         run: sudo apt-get update -yy && sudo apt-get install -yy make git python3
 
       - uses: actions/checkout@v3
-        submodule: recursive
+        with:
+          submodules: recursive
 
       - uses: actions/setup-dotnet@v1
         with:
@@ -30,7 +31,8 @@ jobs:
         run: sudo apt-get update -yy && sudo apt-get install -yy make git python3
 
       - uses: actions/checkout@v3
-        submodule: recursive
+        with:
+          submodules: recursive
 
       - uses: actions/setup-dotnet@v1
         with:
@@ -74,7 +76,8 @@ jobs:
           UNITY_ULF: ${{ secrets[matrix.ulf_secrets_key] }}
 
       - uses: actions/checkout@v3
-        submodule: recursive
+        with:
+          submodules: recursive
 
       - name: download RuntimeUnitTestToolkit
         run: |
