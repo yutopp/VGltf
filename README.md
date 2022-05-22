@@ -28,6 +28,8 @@ As for importing and exporting resources, you can use it in the following situat
 - [ ] Editor import
 - [x] Editor export
 
+We have checked that it works with IL2CPP builds on Windows, Linux, MacOS (Intel and ARM), iOS, and Android.
+
 ## Installation
 
 ### For standard C# projects
@@ -40,7 +42,7 @@ dotnet add package VGltf
 
 ### For Unity projects
 
-#### Nightly version
+#### By using git
 
 Add a url for VGltf git repository to your `Packages/manifest.json` like below.
 
@@ -53,7 +55,9 @@ Add a url for VGltf git repository to your `Packages/manifest.json` like below.
 }
 ```
 
-#### Stable version
+**We recommend to use the [stable version](https://github.com/yutopp/VGltf/tags) by [specifying the tag](https://docs.unity3d.com/2019.4/Documentation/Manual/upm-git.html#revision).**
+
+#### By using npm repository
 
 Add scoped registry information shown below to your `Packages/manifest.json` if not exists.
 
