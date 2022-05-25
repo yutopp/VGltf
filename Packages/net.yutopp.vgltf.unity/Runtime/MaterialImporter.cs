@@ -6,9 +6,6 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -27,10 +24,15 @@ namespace VGltf.Unity
         {
             public bool SkipConvertingNormalTex;
             public string ConvertingNormalTexShaderName;
+            public bool? CompressNormalTexHighQual;
+
             public bool SkipConvertingOcclusionTex;
             public string ConvertingOcclusionTexShaderName;
+            public bool? CompressOcclusionTexHighQual;
+
             public bool SkipConvertingMetallicRoughness;
             public string ConvertingMetallicRoughnessTexShaderName;
+            public bool? CompressMetallicRoughnessTexHighQual;
         }
 
         public override IImporterContext Context { get; }
@@ -163,6 +165,7 @@ namespace VGltf.Unity
                     Context,
                     _config.SkipConvertingNormalTex,
                     _convertingNormalTexShader,
+                    _config.CompressNormalTexHighQual,
                     gltfMat.NormalTexture.Index,
                     ct);
                 mat.SetTexture("_BumpMap", texture);
@@ -174,6 +177,7 @@ namespace VGltf.Unity
                     Context,
                     _config.SkipConvertingOcclusionTex,
                     _convertingOcclusionTexShader,
+                    _config.CompressOcclusionTexHighQual,
                     gltfMat.OcclusionTexture.Index,
                     ct);
                 mat.SetTexture("_OcclusionMap", texture);
@@ -203,6 +207,7 @@ namespace VGltf.Unity
                         Context,
                         _config.SkipConvertingMetallicRoughness,
                         _convertingMetallicRoughnessTexShader,
+                        _config.CompressMetallicRoughnessTexHighQual,
                         pbrMR.MetallicRoughnessTexture.Index,
                         pbrMR.MetallicFactor,
                         pbrMR.RoughnessFactor,
@@ -233,6 +238,7 @@ namespace VGltf.Unity
                 IImporterContext context,
                 bool skipConverting,
                 Shader convertingShader,
+                bool? compressHighQual,
                 int index,
                 CancellationToken ct)
             {
@@ -260,7 +266,7 @@ namespace VGltf.Unity
 
                     using (var srcRes = new Utils.DestroyOnDispose<Texture2D>(src))
                     {
-                        var texture = await GenerateUnityDXT5nmFromGltfNormal(src, convertingShader);
+                        var texture = await GenerateUnityDXT5nmFromGltfNormal(src, convertingShader, compressHighQual);
                         await context.TimeSlicer.Slice(ct);
 
                         // TODO: support multi-set
@@ -274,7 +280,10 @@ namespace VGltf.Unity
                 }
             }
 
-            public static Task<Texture2D> GenerateUnityDXT5nmFromGltfNormal(Texture2D src, Shader convertingShader)
+            public static Task<Texture2D> GenerateUnityDXT5nmFromGltfNormal(
+                Texture2D src,
+                Shader convertingShader,
+                bool? compressHighQual = null)
             {
                 var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32, 0, true);
                 try
@@ -283,7 +292,10 @@ namespace VGltf.Unity
                     {
                         ImageUtils.BlitTex(src, dst, true, mat.Value);
                     }
-                    dst.Compress(false);
+                    if (compressHighQual != null)
+                    {
+                        dst.Compress(compressHighQual.Value);
+                    }
                     dst.Apply();
                 }
                 catch
@@ -307,6 +319,7 @@ namespace VGltf.Unity
                 IImporterContext context,
                 bool skipConverting,
                 Shader convertingShader,
+                bool? compressHighQual,
                 int index,
                 CancellationToken ct)
             {
@@ -323,7 +336,7 @@ namespace VGltf.Unity
 
                 using (var srcRes = new Utils.DestroyOnDispose<Texture2D>(src))
                 {
-                    var texture = await GenerateOcclusionFromGltf(src, convertingShader);
+                    var texture = await GenerateOcclusionFromGltf(src, convertingShader, compressHighQual);
                     await context.TimeSlicer.Slice(ct);
 
                     // TODO: support multi-set
@@ -336,7 +349,10 @@ namespace VGltf.Unity
                 }
             }
 
-            public static Task<Texture2D> GenerateOcclusionFromGltf(Texture2D src, Shader convertingShader)
+            public static Task<Texture2D> GenerateOcclusionFromGltf(
+                Texture2D src,
+                Shader convertingShader,
+                bool? compressHighQual = null)
             {
                 // OcclusionMap uses G
                 var fmt = SystemInfo.SupportsTextureFormat(TextureFormat.RG16) ? TextureFormat.RG16 : TextureFormat.RGBA32;
@@ -347,7 +363,10 @@ namespace VGltf.Unity
                     {
                         ImageUtils.BlitTex(src, dst, false, mat.Value);
                     }
-                    dst.Compress(false);
+                    if (compressHighQual != null)
+                    {
+                        dst.Compress(compressHighQual.Value);
+                    }
                     dst.Apply();
                 }
                 catch
@@ -374,6 +393,7 @@ namespace VGltf.Unity
                 IImporterContext context,
                 bool skipConverting,
                 Shader convertingShader,
+                bool? compressHighQual,
                 int index,
                 float metallic,
                 float roughness,
@@ -392,7 +412,7 @@ namespace VGltf.Unity
 
                 using (var srcRes = new Utils.DestroyOnDispose<Texture2D>(src))
                 {
-                    var texture = await GenerateGlossMapFromGltfRoughnessMap(src, convertingShader, metallic, roughness);
+                    var texture = await GenerateGlossMapFromGltfRoughnessMap(src, convertingShader, metallic, roughness, compressHighQual);
                     await context.TimeSlicer.Slice(ct);
 
                     // TODO: support multi-set
@@ -409,7 +429,8 @@ namespace VGltf.Unity
                 Texture2D src,
                 Shader convertingShader,
                 float metallic,
-                float roughness)
+                float roughness,
+                bool? compressHighQual = null)
             {
                 // GlossMap uses R, A
                 var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32, 0, true);
@@ -422,7 +443,10 @@ namespace VGltf.Unity
 
                         ImageUtils.BlitTex(src, dst, true, mat.Value);
                     }
-                    dst.Compress(false);
+                    if (compressHighQual != null)
+                    {
+                        dst.Compress(compressHighQual.Value);
+                    }
                     dst.Apply();
                 }
                 catch
