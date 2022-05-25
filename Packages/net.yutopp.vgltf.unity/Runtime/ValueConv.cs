@@ -86,9 +86,10 @@ namespace VGltf.Unity
         {
             var r = c.r * c.a; // DXT5nm (R=1, A=x) or BC5 (R=x, A=1), so R*A means r in gltf space
             var g = c.g;
-            var xy = new Vector2(r * 2 - 1, g * 2 - 1);
-            var b = Mathf.Sqrt(1 - Mathf.Clamp01(Vector2.Dot(xy, xy)));
-            return new Color(r, g, b, 1.0f);
+            var xy = new Vector2(r * 2 - 1, g * 2 - 1); // [0, 1] -> [-1, 1]
+            var z = Mathf.Sqrt(1 - Mathf.Clamp01(Vector2.Dot(xy, xy)));
+            var b = (z + 1.0f) * 0.5f;
+            return new Color(r, g, b, 1);
         }
 
         // ---
