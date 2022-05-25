@@ -224,6 +224,8 @@ namespace VGltf.Unity
                 if (skipConverting)
                 {
                     var res = await context.Importers.Textures.Import(index, true, ct);
+                    await context.TimeSlicer.Slice(ct);
+
                     return res.Value;
                 }
 
@@ -232,14 +234,19 @@ namespace VGltf.Unity
                 if (GraphicsSettings.HasShaderDefine(BuiltinShaderDefine.UNITY_NO_DXT5nm))
                 {
                     var res = await context.Importers.Textures.Import(index, true, ct);
+                    await context.TimeSlicer.Slice(ct);
+
                     return res.Value;
                 }
                 else
                 {
                     var src = await context.Importers.Textures.RawImport(index, true, ct);
+                    await context.TimeSlicer.Slice(ct);
+
                     using (var srcRes = new OverwroteTexDisposable(src))
                     {
                         var texture = await GenerateUnityDXT5nmFromGltfNormal(src);
+                        await context.TimeSlicer.Slice(ct);
 
                         // TODO: support multi-set
                         context.Resources.AuxResources.Add(new NormalTexKey
@@ -287,13 +294,18 @@ namespace VGltf.Unity
                 if (skipConverting)
                 {
                     var res = await context.Importers.Textures.Import(index, false, ct);
+                    await context.TimeSlicer.Slice(ct);
+
                     return res.Value;
                 }
 
                 var src = await context.Importers.Textures.RawImport(index, false, ct);
+                await context.TimeSlicer.Slice(ct);
+
                 using (var srcRes = new OverwroteTexDisposable(src))
                 {
                     var texture = await GenerateOcclusionFromGltf(src);
+                    await context.TimeSlicer.Slice(ct);
 
                     // TODO: support multi-set
                     context.Resources.AuxResources.Add(new OcclusionTexKey
@@ -343,13 +355,18 @@ namespace VGltf.Unity
                 if (skipConverting)
                 {
                     var res = await context.Importers.Textures.Import(index, true, ct);
+                    await context.TimeSlicer.Slice(ct);
+
                     return res.Value;
                 }
 
                 var src = await context.Importers.Textures.RawImport(index, true, ct);
+                await context.TimeSlicer.Slice(ct);
+
                 using (var srcRes = new OverwroteTexDisposable(src))
                 {
                     var texture = await GenerateGlossMapFromGltfRoughnessMap(src, metallic, roughness);
+                    await context.TimeSlicer.Slice(ct);
 
                     // TODO: support multi-set
                     context.Resources.AuxResources.Add(new MetallicRoughnessTexKey
