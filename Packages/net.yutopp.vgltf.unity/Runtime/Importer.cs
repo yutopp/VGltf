@@ -38,14 +38,14 @@ namespace VGltf.Unity
 
             public ResourceImporters Importers { get; }
 
-            public InnerContext(GltfContainer container, IResourceLoader loader, ITimeSlicer timeSlicer, CoordUtils coordUtils)
+            public InnerContext(GltfContainer container, IResourceLoader loader, ITimeSlicer timeSlicer, Config config)
             {
                 Container = container;
                 GltfResources = new ResourcesStore(container, loader);
 
                 Resources = new ImporterRuntimeResources();
                 TimeSlicer = timeSlicer;
-                CoordUtils = coordUtils;
+                CoordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
 
                 Importers = new ResourceImporters
                 {
@@ -94,8 +94,7 @@ namespace VGltf.Unity
                 config = new Config();
             }
 
-            var coordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
-            _context = new InnerContext(container, loader, timeSlicer, coordUtils);
+            _context = new InnerContext(container, loader, timeSlicer, config);
         }
 
         public Importer(GltfContainer container, ITimeSlicer timeSlicer, Config config = null)
