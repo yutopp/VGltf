@@ -23,7 +23,7 @@ namespace VGltf.Unity
         public int RawExport(
             Texture2D tex,
             bool isLinear = false,
-            Action<Texture2D> texOverwriter = null
+            Material mat = null
             )
         {
             byte[] pngBytes;
@@ -31,8 +31,7 @@ namespace VGltf.Unity
             var readableTex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, true, isLinear);
             try
             {
-                ImageUtils.BlitTex(tex, readableTex, isLinear);
-                texOverwriter?.Invoke(readableTex);
+                ImageUtils.BlitTex(tex, readableTex, isLinear, mat);
                 readableTex.Apply();
 
                 pngBytes = readableTex.EncodeToPNG();

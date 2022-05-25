@@ -27,6 +27,12 @@ namespace VGltf.Unity
             public bool IncludeRootObject = true;
             public bool UseNormalizedTransforms = true;
             public bool FlipZAxisInsteadOfXAsix = false;
+
+            public string ConvertingNormalTexShaderName = "Hidden/VGltfUnity/UnityDXT5nmNormalTexToGltf";
+
+            public string ConvertingOcclusionTexShaderName = "Hidden/VGltfUnity/UnityOcclusionTexToGltf";
+
+            public string ConvertingMetallicRoughnessTexShaderName = "Hidden/VGltfUnity/UnityGlossMapToGltfRoughnessMap";
         }
 
         sealed class InnerContext : IExporterContext
@@ -39,19 +45,28 @@ namespace VGltf.Unity
 
             public ResourceExporters Exporters { get; }
 
-            public InnerContext(CoordUtils coordUtils)
+            public InnerContext(Config config)
             {
                 Gltf = new Types.Gltf();
                 BufferBuilder = new BufferBuilder();
 
                 Resources = new ExporterRuntimeResources();
-                CoordUtils = coordUtils;
+                CoordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
+
+                var materialExporterConfig = new MaterialExporter.Config
+                {
+                    ConvertingNormalTexShaderName = config.ConvertingNormalTexShaderName,
+
+                    ConvertingOcclusionTexShaderName = config.ConvertingOcclusionTexShaderName,
+
+                    ConvertingMetallicRoughnessTexShaderName = config.ConvertingMetallicRoughnessTexShaderName,
+                };
 
                 Exporters = new ResourceExporters
                 {
                     Nodes = new NodeExporter(this),
                     Meshes = new MeshExporter(this),
-                    Materials = new MaterialExporter(this),
+                    Materials = new MaterialExporter(this, materialExporterConfig),
                     Textures = new TextureExporter(this),
                     Images = new ImageExporter(this),
                 };
@@ -77,8 +92,7 @@ namespace VGltf.Unity
             }
             _config = config;
 
-            var coordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
-            context_ = new InnerContext(coordUtils);
+            context_ = new InnerContext(_config);
 
             // Asset
             context_.Gltf.Asset = new Types.Asset

@@ -33,10 +33,10 @@ namespace VGltf.Unity
         public int RawExport(
             Texture2D tex,
             bool isLinear = false,
-            Action<Texture2D> texOverwriter = null
+            Material mat = null
             )
         {
-            var imageIndex = Context.Exporters.Images.RawExport(tex, isLinear, texOverwriter);
+            var imageIndex = Context.Exporters.Images.RawExport(tex, isLinear, mat);
 
             var gltfImage = new Types.Texture
             {

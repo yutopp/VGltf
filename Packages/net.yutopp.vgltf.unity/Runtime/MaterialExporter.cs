@@ -17,13 +17,30 @@ namespace VGltf.Unity
         public abstract IndexedResource<Material> Export(IExporterContext context, Material mat);
     }
 
-    public class MaterialExporter : ExporterRefHookable<MaterialExporterHook>
+    public sealed class MaterialExporter : ExporterRefHookable<MaterialExporterHook>
     {
+        public sealed class Config
+        {
+            public string ConvertingNormalTexShaderName;
+
+            public string ConvertingOcclusionTexShaderName;
+
+            public string ConvertingMetallicRoughnessTexShaderName;
+        }
+
         public override IExporterContext Context { get; }
 
-        public MaterialExporter(IExporterContext context)
+        readonly Shader _convertingNormalTexShader;
+        readonly Shader _convertingOcclusionTexShader;
+        readonly Shader _convertingMetallicRoughnessTexShader;
+
+        public MaterialExporter(IExporterContext context, Config config)
         {
             Context = context;
+
+            _convertingNormalTexShader = Shader.Find(config.ConvertingNormalTexShaderName);
+            _convertingOcclusionTexShader = Shader.Find(config.ConvertingOcclusionTexShaderName);
+            _convertingMetallicRoughnessTexShader = Shader.Find(config.ConvertingMetallicRoughnessTexShaderName);
         }
 
         public IndexedResource<Material> Export(Material mat)
@@ -204,12 +221,7 @@ namespace VGltf.Unity
 
         int? ExportTextureIfExist(Material mat, string name, bool isLinear = false)
         {
-            if (!mat.HasProperty(name))
-            {
-                return null;
-            }
-
-            var tex = mat.GetTexture(name) as Texture2D;
+            var tex = FindTex(mat, name);
             if (tex == null)
             {
                 return null;
@@ -219,14 +231,9 @@ namespace VGltf.Unity
             return res.Index;
         }
 
-        int? ExportNormalTextureIfExist(Material mat, string name)
+        int? ExportNormalTextureIfExist(Material texMat, string name)
         {
-            if (!mat.HasProperty(name))
-            {
-                return null;
-            }
-
-            var tex = mat.GetTexture(name) as Texture2D;
+            var tex = FindTex(texMat, name);
             if (tex == null)
             {
                 return null;
@@ -240,28 +247,50 @@ namespace VGltf.Unity
             }
             else
             {
-                return Context.Exporters.Textures.RawExport(tex, true, TextureModifier.OverwriteUnityDXT5nmNormalTexToGltf);
+                using (var mat = new Utils.DestroyOnDispose<Material>(new Material(_convertingNormalTexShader)))
+                {
+                    return Context.Exporters.Textures.RawExport(tex, true, mat.Value);
+                }
             }
         }
 
-        int? ExportOcclusionTextureIfExist(Material mat, string name)
+        int? ExportOcclusionTextureIfExist(Material texMat, string name)
         {
-            if (!mat.HasProperty(name))
-            {
-                return null;
-            }
-
-            var tex = mat.GetTexture(name) as Texture2D;
+            var tex = FindTex(texMat, name);
             if (tex == null)
             {
                 return null;
             }
 
             // OcclusionMap is sRGB
-            return Context.Exporters.Textures.RawExport(tex, false, TextureModifier.OverwriteUnityOcclusionTexToGltf);
+            using (var mat = new Utils.DestroyOnDispose<Material>(new Material(_convertingOcclusionTexShader)))
+            {
+                return Context.Exporters.Textures.RawExport(tex, false, mat.Value);
+            }
         }
 
-        int? ExportMetallicRoughnessTextureIfExist(Material mat, string name, float metallic, float smoothness)
+        static readonly int MetallicProp = Shader.PropertyToID("_Metallic");
+        static readonly int SmoothnessProp = Shader.PropertyToID("_Smoothness");
+
+        int? ExportMetallicRoughnessTextureIfExist(Material texMat, string name, float metallic, float smoothness)
+        {
+            var tex = FindTex(texMat, name);
+            if (tex == null)
+            {
+                return null;
+            }
+
+            // Linear
+            using (var mat = new Utils.DestroyOnDispose<Material>(new Material(_convertingMetallicRoughnessTexShader)))
+            {
+                mat.Value.SetFloat(MetallicProp, metallic);
+                mat.Value.SetFloat(SmoothnessProp, smoothness);
+
+                return Context.Exporters.Textures.RawExport(tex, true, mat.Value);
+            }
+        }
+
+        static Texture2D FindTex(Material mat, string name)
         {
             if (!mat.HasProperty(name))
             {
@@ -269,16 +298,7 @@ namespace VGltf.Unity
             }
 
             var tex = mat.GetTexture(name) as Texture2D;
-            if (tex == null)
-            {
-                return null;
-            }
-
-            // Linear
-            return Context.Exporters.Textures.RawExport(tex, true, (t) =>
-            {
-                TextureModifier.OverriteToGlossMapToRoughnessMap(t, metallic, smoothness);
-            });
+            return tex;
         }
     }
 }
