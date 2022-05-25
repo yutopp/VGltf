@@ -28,10 +28,15 @@ namespace VGltf.Unity
 
             public bool SkipConvertingNormalTex = false;
             public string ConvertingNormalTexShaderName = "Hidden/VGltfUnity/GltfNormalTexToUnityDXT5nm";
+            public bool? CompressNormalTexHighQual;
+
             public bool SkipConvertingOcclusionTex = false;
             public string ConvertingOcclusionTexShaderName = "Hidden/VGltfUnity/GltfOcclusionTexToUnity";
+            public bool? CompressOcclusionTexHighQual;
+
             public bool SkipConvertingMetallicRoughness = false;
             public string ConvertingMetallicRoughnessTexShaderName = "Hidden/VGltfUnity/GltfRoughnessMapToUnityGlossMap";
+            public bool? CompressMetallicRoughnessTexHighQual;
         }
 
         sealed class InnerContext : IImporterContext
@@ -58,10 +63,15 @@ namespace VGltf.Unity
                 {
                     SkipConvertingNormalTex = config.SkipConvertingNormalTex,
                     ConvertingNormalTexShaderName = config.ConvertingNormalTexShaderName,
+                    CompressNormalTexHighQual = config.CompressNormalTexHighQual,
+
                     SkipConvertingOcclusionTex = config.SkipConvertingOcclusionTex,
                     ConvertingOcclusionTexShaderName = config.ConvertingOcclusionTexShaderName,
+                    CompressOcclusionTexHighQual = config.CompressOcclusionTexHighQual,
+
                     SkipConvertingMetallicRoughness = config.SkipConvertingMetallicRoughness,
                     ConvertingMetallicRoughnessTexShaderName = config.ConvertingMetallicRoughnessTexShaderName,
+                    CompressMetallicRoughnessTexHighQual = config.CompressMetallicRoughnessTexHighQual,
                 };
 
                 Importers = new ResourceImporters
