@@ -148,13 +148,21 @@ namespace VGltf.Unity
             {
                 mat.EnableKeyword("_NORMALMAP");
 
-                var texture = await ImportNormalTexture(gltfMat.NormalTexture.Index, ct);
+                var texture = await NormalTextureImporter.Import(
+                    Context,
+                    _config.SkipConvertingNormalTex,
+                    gltfMat.NormalTexture.Index,
+                    ct);
                 mat.SetTexture("_BumpMap", texture);
             }
 
             if (gltfMat.OcclusionTexture != null)
             {
-                var texture = await ImportOcclusionTexture(gltfMat.OcclusionTexture.Index, ct);
+                var texture = await OcclusionTextureImporter.Import(
+                    Context,
+                    _config.SkipConvertingOcclusionTex,
+                    gltfMat.OcclusionTexture.Index,
+                    ct);
                 mat.SetTexture("_OcclusionMap", texture);
 
                 mat.SetFloat("_OcclusionStrength", gltfMat.OcclusionTexture.Strength);
@@ -178,7 +186,9 @@ namespace VGltf.Unity
                 {
                     mat.EnableKeyword("_METALLICGLOSSMAP");
 
-                    var texture = await ImportMetallicRoughnessTexture(
+                    var texture = await MetallicRoughnessTextureImporter.Import(
+                        Context,
+                        _config.SkipConvertingMetallicRoughness,
                         pbrMR.MetallicRoughnessTexture.Index,
                         pbrMR.MetallicFactor,
                         pbrMR.RoughnessFactor,
@@ -198,91 +208,177 @@ namespace VGltf.Unity
             }
         }
 
-        struct NormalTexKey
+        public static class NormalTextureImporter
         {
-            public int Index;
-        }
-
-        async Task<Texture2D> ImportNormalTexture(int index, CancellationToken ct)
-        {
-            if (_config.SkipConvertingNormalTex)
+            struct NormalTexKey
             {
-                var res = await Context.Importers.Textures.Import(index, true, ct);
-                return res.Value;
+                public int Index;
             }
 
-            // NormalMap is not color (= as is (linear))
-            // NOTE: If UNITY_NO_DXT5nm is enabled, NO modification is required
-            if (GraphicsSettings.HasShaderDefine(BuiltinShaderDefine.UNITY_NO_DXT5nm))
+            public static async Task<Texture2D> Import(
+                IImporterContext context,
+                bool skipConverting,
+                int index,
+                CancellationToken ct)
             {
-                var res = await Context.Importers.Textures.Import(index, true, ct);
-                return res.Value;
-            }
-            else
-            {
-                var texture = await Context.Importers.Textures.RawImport(index, true, ct);
-                // TODO: support multi-set
-                Context.Resources.AuxResources.Add(new NormalTexKey
+                if (skipConverting)
                 {
-                    Index = index,
-                }, new OverwroteTexDisposable(texture));
+                    var res = await context.Importers.Textures.Import(index, true, ct);
+                    return res.Value;
+                }
 
-                TextureModifier.OverwriteGltfNormalTexToUnityDXT5nm(texture);
+                // NormalMap is not color (= as is (linear))
+                // NOTE: If UNITY_NO_DXT5nm is enabled, NO modification is required
+                if (GraphicsSettings.HasShaderDefine(BuiltinShaderDefine.UNITY_NO_DXT5nm))
+                {
+                    var res = await context.Importers.Textures.Import(index, true, ct);
+                    return res.Value;
+                }
+                else
+                {
+                    var src = await context.Importers.Textures.RawImport(index, true, ct);
+                    using (var srcRes = new OverwroteTexDisposable(src))
+                    {
+                        var texture = await GenerateUnityDXT5nmFromGltfNormal(src);
 
-                return texture;
+                        // TODO: support multi-set
+                        context.Resources.AuxResources.Add(new NormalTexKey
+                        {
+                            Index = index,
+                        }, new OverwroteTexDisposable(texture));
+
+                        return texture;
+                    }
+                }
+            }
+
+            public static Task<Texture2D> GenerateUnityDXT5nmFromGltfNormal(Texture2D src)
+            {
+                var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32 /*TextureFormat.DXT5*/, 0, true);
+                try
+                {
+                    ImageUtils.BlitTex(src, dst, true);
+                    TextureModifier.OverwriteGltfNormalTexToUnityDXT5nm(dst);
+                    dst.Apply();
+                }
+                catch
+                {
+                    Utils.Destroy(dst);
+                    throw;
+                }
+
+                return Task.FromResult(dst);
             }
         }
 
-        struct OcclusionTexKey
+        public static class OcclusionTextureImporter
         {
-            public int Index;
-        }
-
-        async Task<Texture2D> ImportOcclusionTexture(int index, CancellationToken ct)
-        {
-            if (_config.SkipConvertingOcclusionTex)
+            struct OcclusionTexKey
             {
-                var res = await Context.Importers.Textures.Import(index, false, ct);
-                return res.Value;
+                public int Index;
             }
 
-            var texture = await Context.Importers.Textures.RawImport(index, false, ct);
-            // TODO: support multi-set
-            Context.Resources.AuxResources.Add(new OcclusionTexKey
+            public static async Task<Texture2D> Import(
+                IImporterContext context,
+                bool skipConverting,
+                int index,
+                CancellationToken ct)
             {
-                Index = index,
-            }, new OverwroteTexDisposable(texture));
+                if (skipConverting)
+                {
+                    var res = await context.Importers.Textures.Import(index, false, ct);
+                    return res.Value;
+                }
 
-            TextureModifier.OverwriteGltfOcclusionTexToUnity(texture);
+                var src = await context.Importers.Textures.RawImport(index, false, ct);
+                using (var srcRes = new OverwroteTexDisposable(src))
+                {
+                    var texture = await GenerateOcclusionFromGltf(src);
 
-            return texture;
-        }
+                    // TODO: support multi-set
+                    context.Resources.AuxResources.Add(new OcclusionTexKey
+                    {
+                        Index = index,
+                    }, new OverwroteTexDisposable(texture));
 
-        struct MetallicRoughnessTexKey
-        {
-            public int Index;
-        }
-
-        async Task<Texture2D> ImportMetallicRoughnessTexture(int index, float metallic, float roughness, CancellationToken ct)
-        {
-            if (_config.SkipConvertingMetallicRoughness)
-            {
-                var res = await Context.Importers.Textures.Import(index, true, ct);
-                return res.Value;
+                    return texture;
+                }
             }
 
-            // Unity uses glossiness instead of roughness...
-            // So, baking values into textures is needed to invert values
-            var texture = await Context.Importers.Textures.RawImport(index, true, ct);
-            // TODO: support multi-set
-            Context.Resources.AuxResources.Add(new MetallicRoughnessTexKey
+            public static Task<Texture2D> GenerateOcclusionFromGltf(Texture2D src)
             {
-                Index = index,
-            }, new OverwroteTexDisposable(texture));
+                // GlossMap uses R
+                var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32 /*TextureFormat.R8*/, 0, false);
+                try
+                {
+                    ImageUtils.BlitTex(src, dst, false);
+                    TextureModifier.OverwriteGltfOcclusionTexToUnity(dst);
+                    dst.Apply();
+                }
+                catch
+                {
+                    Utils.Destroy(dst);
+                    throw;
+                }
 
-            TextureModifier.OverriteRoughnessMapToGlossMap(texture, metallic, roughness);
+                return Task.FromResult(dst);
+            }
+        }
 
-            return texture;
+        public static class MetallicRoughnessTextureImporter
+        {
+            struct MetallicRoughnessTexKey
+            {
+                public int Index;
+            }
+
+            public static async Task<Texture2D> Import(
+                IImporterContext context,
+                bool skipConverting,
+                int index,
+                float metallic,
+                float roughness,
+                CancellationToken ct)
+            {
+                if (skipConverting)
+                {
+                    var res = await context.Importers.Textures.Import(index, true, ct);
+                    return res.Value;
+                }
+
+                var src = await context.Importers.Textures.RawImport(index, true, ct);
+                using (var srcRes = new OverwroteTexDisposable(src))
+                {
+                    var texture = await GenerateGlossMapFromGltfRoughnessMap(src, metallic, roughness);
+
+                    // TODO: support multi-set
+                    context.Resources.AuxResources.Add(new MetallicRoughnessTexKey
+                    {
+                        Index = index,
+                    }, new OverwroteTexDisposable(texture));
+
+                    return texture;
+                }
+            }
+
+            public static Task<Texture2D> GenerateGlossMapFromGltfRoughnessMap(Texture2D src, float metallic, float roughness)
+            {
+                // GlossMap uses R, A
+                var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32, 0, true);
+                try
+                {
+                    ImageUtils.BlitTex(src, dst, true);
+                    TextureModifier.OverriteRoughnessMapToGlossMap(dst, metallic, roughness);
+                    dst.Apply();
+                }
+                catch
+                {
+                    Utils.Destroy(dst);
+                    throw;
+                }
+
+                return Task.FromResult(dst);
+            }
         }
 
         sealed class OverwroteTexDisposable : IDisposable

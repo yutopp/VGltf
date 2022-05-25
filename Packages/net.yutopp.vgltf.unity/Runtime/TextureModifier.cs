@@ -5,6 +5,7 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace VGltf.Unity
@@ -21,7 +22,6 @@ namespace VGltf.Unity
                 pixels[i] = ValueConv.ConvertGltfNormalTexToUnityDXT5nm(pixels[i]);
             }
             tex.SetPixels(pixels);
-            tex.Apply();
         }
 
         // TODO: non-blocking version
@@ -34,7 +34,6 @@ namespace VGltf.Unity
                 pixels[i] = ValueConv.ConvertUnityDXT5nmNormalTexToGltf(pixels[i]);
             }
             tex.SetPixels(pixels);
-            tex.Apply();
         }
 
         // --
@@ -49,7 +48,6 @@ namespace VGltf.Unity
                 pixels[i] = ValueConv.ConvertGltfOcclusionPixelToUnity(pixels[i]);
             }
             tex.SetPixels(pixels);
-            tex.Apply();
         }
 
         // TODO: non-blocking version
@@ -62,7 +60,6 @@ namespace VGltf.Unity
                 pixels[i] = ValueConv.ConvertUnityOcclusionPixelToGltf(pixels[i]);
             }
             tex.SetPixels(pixels);
-            tex.Apply();
         }
 
         // --
@@ -77,7 +74,6 @@ namespace VGltf.Unity
                 pixels[i] = ValueConv.RoughnessPixelToGlossPixel(pixels[i], metallic, roughness);
             }
             tex.SetPixels(pixels);
-            tex.Apply();
         }
 
         // TODO: non-blocking version
@@ -90,7 +86,6 @@ namespace VGltf.Unity
                 pixels[i] = ValueConv.GlossPixelToRoughnessPixel(pixels[i], metallic, smoothness);
             }
             tex.SetPixels(pixels);
-            tex.Apply();
         }
     }
 }
