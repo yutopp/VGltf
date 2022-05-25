@@ -25,5 +25,21 @@ namespace VGltf.Unity
                 GameObject.Destroy(go);
             }
         }
+
+        public sealed class DestroyOnDispose<T> : System.IDisposable where T : Object
+        {
+            public T Value { get; private set; }
+
+            public DestroyOnDispose(T obj)
+            {
+                Value = obj;
+            }
+
+            public void Dispose()
+            {
+                Utils.Destroy(Value);
+                Value = null;
+            }
+        }
     }
 }

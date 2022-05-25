@@ -27,8 +27,11 @@ namespace VGltf.Unity
             public bool FlipZAxisInsteadOfXAsix = false;
 
             public bool SkipConvertingNormalTex = false;
+            public string ConvertingNormalTexShaderName = "Hidden/VGltfUnity/GltfNormalTexToUnityDXT5nm";
             public bool SkipConvertingOcclusionTex = false;
+            public string ConvertingOcclusionTexShaderName = "Hidden/VGltfUnity/GltfOcclusionTexToUnity";
             public bool SkipConvertingMetallicRoughness = false;
+            public string ConvertingMetallicRoughnessTexShaderName = "Hidden/VGltfUnity/GltfRoughnessMapToUnityGlossMap";
         }
 
         sealed class InnerContext : IImporterContext
@@ -54,8 +57,11 @@ namespace VGltf.Unity
                 var materialImporterConfig = new MaterialImporter.Config
                 {
                     SkipConvertingNormalTex = config.SkipConvertingNormalTex,
+                    ConvertingNormalTexShaderName = config.ConvertingNormalTexShaderName,
                     SkipConvertingOcclusionTex = config.SkipConvertingOcclusionTex,
+                    ConvertingOcclusionTexShaderName = config.ConvertingOcclusionTexShaderName,
                     SkipConvertingMetallicRoughness = config.SkipConvertingMetallicRoughness,
+                    ConvertingMetallicRoughnessTexShaderName = config.ConvertingMetallicRoughnessTexShaderName,
                 };
 
                 Importers = new ResourceImporters

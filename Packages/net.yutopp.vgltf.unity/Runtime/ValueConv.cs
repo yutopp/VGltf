@@ -77,10 +77,6 @@ namespace VGltf.Unity
         // UnityCG.cginc
         // Unity
         //  DXT5nm (R=1, G=y, B=1, A=x) or BC5 (R=x, G=y, B=0, A=1)
-        public static Color ConvertGltfNormalTexToUnityDXT5nm(Color c)
-        {
-            return new Color(c.r, c.g, 0, 1); // BC5, compatible to RGBA
-        }
 
         public static Color ConvertUnityDXT5nmNormalTexToGltf(Color c)
         {
@@ -107,10 +103,6 @@ namespace VGltf.Unity
         //  G: Unity's standard shader uses the G color channel of the occlusion map
         //  B: [unused]
         //  A: [ignored]
-        public static Color ConvertGltfOcclusionPixelToUnity(Color c)
-        {
-            return new Color(0.0f, c.r, 0.0f, 1.0f);
-        }
 
         public static Color ConvertUnityOcclusionPixelToGltf(Color c)
         {
@@ -132,15 +124,6 @@ namespace VGltf.Unity
         //  G: [unused]
         //  B: [unused]
         //  A: Smoothness (Gloss)
-        public static Color RoughnessPixelToGlossPixel(Color c, float metallic, float roughness)
-        {
-            return new Color(
-                c.b * metallic,
-                0.0f,
-                0.0f,
-                RoughnessToSmoothness(c.g * roughness)
-                );
-        }
 
         public static Color GlossPixelToRoughnessPixel(Color c, float metallic, float smoothness)
         {

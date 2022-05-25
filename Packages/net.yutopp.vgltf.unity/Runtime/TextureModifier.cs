@@ -13,18 +13,6 @@ namespace VGltf.Unity
     public static class TextureModifier
     {
         // TODO: non-blocking version
-        // glTF -> Unity
-        public static void OverwriteGltfNormalTexToUnityDXT5nm(Texture2D tex)
-        {
-            var pixels = tex.GetPixels();
-            for (var i = 0; i < pixels.Length; ++i)
-            {
-                pixels[i] = ValueConv.ConvertGltfNormalTexToUnityDXT5nm(pixels[i]);
-            }
-            tex.SetPixels(pixels);
-        }
-
-        // TODO: non-blocking version
         // Unity -> glTF
         public static void OverwriteUnityDXT5nmNormalTexToGltf(Texture2D tex)
         {
@@ -39,18 +27,6 @@ namespace VGltf.Unity
         // --
 
         // TODO: non-blocking version
-        // glTF -> Unity
-        public static void OverwriteGltfOcclusionTexToUnity(Texture2D tex)
-        {
-            var pixels = tex.GetPixels();
-            for (var i = 0; i < pixels.Length; ++i)
-            {
-                pixels[i] = ValueConv.ConvertGltfOcclusionPixelToUnity(pixels[i]);
-            }
-            tex.SetPixels(pixels);
-        }
-
-        // TODO: non-blocking version
         // Unity -> glTF
         public static void OverwriteUnityOcclusionTexToGltf(Texture2D tex)
         {
@@ -63,18 +39,6 @@ namespace VGltf.Unity
         }
 
         // --
-
-        // TODO: non-blocking version
-        // glTF -> Unity
-        public static void OverriteRoughnessMapToGlossMap(Texture2D tex, float metallic, float roughness)
-        {
-            var pixels = tex.GetPixels();
-            for (var i = 0; i < pixels.Length; ++i)
-            {
-                pixels[i] = ValueConv.RoughnessPixelToGlossPixel(pixels[i], metallic, roughness);
-            }
-            tex.SetPixels(pixels);
-        }
 
         // TODO: non-blocking version
         // Unity -> glTF

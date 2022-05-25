@@ -13,7 +13,7 @@ namespace VGltf.Unity
 {
     public static class ImageUtils
     {
-        public static void BlitTex(Texture2D src, Texture2D dst, bool isLinear)
+        public static void BlitTex(Texture2D src, Texture2D dst, bool isLinear, Material mat = null)
         {
             var previous = RenderTexture.active;
 
@@ -25,7 +25,14 @@ namespace VGltf.Unity
                 isLinear ? RenderTextureReadWrite.Linear : RenderTextureReadWrite.sRGB);
             try
             {
-                Graphics.Blit(src, renderTex);
+                if (mat != null)
+                {
+                    Graphics.Blit(src, renderTex, mat);
+                }
+                else
+                {
+                    Graphics.Blit(src, renderTex);
+                }
 
                 dst.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0); // read from render texture
             }
