@@ -276,13 +276,14 @@ namespace VGltf.Unity
 
             public static Task<Texture2D> GenerateUnityDXT5nmFromGltfNormal(Texture2D src, Shader convertingShader)
             {
-                var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32 /*TextureFormat.DXT5*/, 0, true);
+                var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32, 0, true);
                 try
                 {
                     using (var mat = new Utils.DestroyOnDispose<Material>(new Material(convertingShader)))
                     {
                         ImageUtils.BlitTex(src, dst, true, mat.Value);
                     }
+                    dst.Compress(false);
                     dst.Apply();
                 }
                 catch
@@ -337,14 +338,16 @@ namespace VGltf.Unity
 
             public static Task<Texture2D> GenerateOcclusionFromGltf(Texture2D src, Shader convertingShader)
             {
-                // GlossMap uses R
-                var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32 /*TextureFormat.R8*/, 0, false);
+                // OcclusionMap uses G
+                var fmt = SystemInfo.SupportsTextureFormat(TextureFormat.RG16) ? TextureFormat.RG16 : TextureFormat.RGBA32;
+                var dst = new Texture2D(src.width, src.height, fmt, 0, false);
                 try
                 {
                     using (var mat = new Utils.DestroyOnDispose<Material>(new Material(convertingShader)))
                     {
                         ImageUtils.BlitTex(src, dst, false, mat.Value);
                     }
+                    dst.Compress(false);
                     dst.Apply();
                 }
                 catch
@@ -419,6 +422,7 @@ namespace VGltf.Unity
 
                         ImageUtils.BlitTex(src, dst, true, mat.Value);
                     }
+                    dst.Compress(false);
                     dst.Apply();
                 }
                 catch
