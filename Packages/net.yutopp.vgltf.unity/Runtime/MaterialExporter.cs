@@ -57,7 +57,7 @@ namespace VGltf.Unity
 
         public IndexedResource<Material> ForceExportUnlit(Material mat)
         {
-            var tex = mat.GetTexture("_MainTex");
+            var tex = mat.GetTexture("_MainTex") as Texture2D;
             IndexedResource<Texture> textureResource = null;
             if (tex != null)
             {
@@ -209,7 +209,7 @@ namespace VGltf.Unity
                 return null;
             }
 
-            var tex = mat.GetTexture(name);
+            var tex = mat.GetTexture(name) as Texture2D;
             if (tex == null)
             {
                 return null;
@@ -226,7 +226,7 @@ namespace VGltf.Unity
                 return null;
             }
 
-            var tex = mat.GetTexture(name);
+            var tex = mat.GetTexture(name) as Texture2D;
             if (tex == null)
             {
                 return null;
@@ -251,7 +251,7 @@ namespace VGltf.Unity
                 return null;
             }
 
-            var tex = mat.GetTexture(name);
+            var tex = mat.GetTexture(name) as Texture2D;
             if (tex == null)
             {
                 return null;
@@ -268,7 +268,7 @@ namespace VGltf.Unity
                 return null;
             }
 
-            var tex = mat.GetTexture(name);
+            var tex = mat.GetTexture(name) as Texture2D;
             if (tex == null)
             {
                 return null;

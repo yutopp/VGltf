@@ -11,7 +11,7 @@ using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
-    public class ImageExporter : ExporterRefHookable<uint>
+    public sealed class ImageExporter : ExporterRefHookable<uint>
     {
         public override IExporterContext Context { get; }
 
@@ -21,41 +21,24 @@ namespace VGltf.Unity
         }
 
         public int RawExport(
-            Texture tex,
+            Texture2D tex,
             bool isLinear = false,
             Action<Texture2D> texOverwriter = null
             )
         {
             byte[] pngBytes;
 
-            RenderTexture previous = RenderTexture.active;
-
-            Texture2D readableTex = null;
-            RenderTexture renderTex = RenderTexture.GetTemporary(
-                tex.width,
-                tex.height,
-                0,
-                RenderTextureFormat.Default,
-                isLinear ? RenderTextureReadWrite.Linear : RenderTextureReadWrite.sRGB);
+            var readableTex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, true, isLinear);
             try
             {
-                Graphics.Blit(tex, renderTex);
-
-                RenderTexture.active = renderTex;
-
-                readableTex = new Texture2D(tex.width, tex.height, TextureFormat.RGBA32, true, isLinear);
-                readableTex.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
-                readableTex.Apply();
-
+                ImageUtils.BlitTex(tex, readableTex, isLinear);
                 texOverwriter?.Invoke(readableTex);
+                readableTex.Apply();
 
                 pngBytes = readableTex.EncodeToPNG();
             }
             finally
             {
-                RenderTexture.active = previous;
-
-                RenderTexture.ReleaseTemporary(renderTex);
                 Utils.Destroy(readableTex);
             }
 

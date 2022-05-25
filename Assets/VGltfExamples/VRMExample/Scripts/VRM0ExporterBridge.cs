@@ -81,7 +81,7 @@ namespace VGltfExamples.VRMExample
 
                     case MToonProps.PropKind.Tex:
                         {
-                            var v = mat.GetTexture(prop.Key);
+                            var v = mat.GetTexture(prop.Key) as Texture2D;
                             if (v == null)
                             {
                                 continue;
