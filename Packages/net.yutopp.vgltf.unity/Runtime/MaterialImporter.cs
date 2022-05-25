@@ -21,13 +21,22 @@ namespace VGltf.Unity
         public abstract Task<IndexedResource<Material>> Import(IImporterContext context, int matIndex, CancellationToken ct);
     }
 
-    public class MaterialImporter : ImporterRefHookable<MaterialImporterHook>
+    public sealed class MaterialImporter : ImporterRefHookable<MaterialImporterHook>
     {
-        public override IImporterContext Context { get; }
+        public sealed class Config
+        {
+            public bool SkipConvertingNormalTex;
+            public bool SkipConvertingOcclusionTex;
+            public bool SkipConvertingMetallicRoughness;
+        }
 
-        public MaterialImporter(IImporterContext context)
+        public override IImporterContext Context { get; }
+        readonly Config _config;
+
+        public MaterialImporter(IImporterContext context, Config config)
         {
             Context = context;
+            _config = config;
         }
 
         public async Task<IndexedResource<Material>> Import(int matIndex, CancellationToken ct)
@@ -196,6 +205,12 @@ namespace VGltf.Unity
 
         async Task<Texture2D> ImportNormalTexture(int index, CancellationToken ct)
         {
+            if (_config.SkipConvertingNormalTex)
+            {
+                var res = await Context.Importers.Textures.Import(index, true, ct);
+                return res.Value;
+            }
+
             // NormalMap is not color (= as is (linear))
             // NOTE: If UNITY_NO_DXT5nm is enabled, NO modification is required
             if (GraphicsSettings.HasShaderDefine(BuiltinShaderDefine.UNITY_NO_DXT5nm))
@@ -225,6 +240,12 @@ namespace VGltf.Unity
 
         async Task<Texture2D> ImportOcclusionTexture(int index, CancellationToken ct)
         {
+            if (_config.SkipConvertingOcclusionTex)
+            {
+                var res = await Context.Importers.Textures.Import(index, false, ct);
+                return res.Value;
+            }
+
             var texture = await Context.Importers.Textures.RawImport(index, false, ct);
             // TODO: support multi-set
             Context.Resources.AuxResources.Add(new OcclusionTexKey
@@ -244,6 +265,12 @@ namespace VGltf.Unity
 
         async Task<Texture2D> ImportMetallicRoughnessTexture(int index, float metallic, float roughness, CancellationToken ct)
         {
+            if (_config.SkipConvertingMetallicRoughness)
+            {
+                var res = await Context.Importers.Textures.Import(index, true, ct);
+                return res.Value;
+            }
+
             // Unity uses glossiness instead of roughness...
             // So, baking values into textures is needed to invert values
             var texture = await Context.Importers.Textures.RawImport(index, true, ct);

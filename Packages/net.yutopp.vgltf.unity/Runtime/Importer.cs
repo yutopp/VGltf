@@ -25,6 +25,10 @@ namespace VGltf.Unity
         public sealed class Config
         {
             public bool FlipZAxisInsteadOfXAsix = false;
+
+            public bool SkipConvertingNormalTex = false;
+            public bool SkipConvertingOcclusionTex = false;
+            public bool SkipConvertingMetallicRoughness = false;
         }
 
         sealed class InnerContext : IImporterContext
@@ -47,11 +51,18 @@ namespace VGltf.Unity
                 TimeSlicer = timeSlicer;
                 CoordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
 
+                var materialImporterConfig = new MaterialImporter.Config
+                {
+                    SkipConvertingNormalTex = config.SkipConvertingNormalTex,
+                    SkipConvertingOcclusionTex = config.SkipConvertingOcclusionTex,
+                    SkipConvertingMetallicRoughness = config.SkipConvertingMetallicRoughness,
+                };
+
                 Importers = new ResourceImporters
                 {
                     Nodes = new NodeImporter(this),
                     Meshes = new MeshImporter(this),
-                    Materials = new MaterialImporter(this),
+                    Materials = new MaterialImporter(this, materialImporterConfig),
                     Textures = new TextureImporter(this),
                     Images = new ImageImporter(this),
                 };
