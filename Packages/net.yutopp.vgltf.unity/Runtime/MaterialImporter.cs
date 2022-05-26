@@ -262,18 +262,17 @@ namespace VGltf.Unity
                 else
                 {
                     var src = await context.Importers.Textures.RawImport(index, true, ct);
-                    await context.TimeSlicer.Slice(ct);
-
                     using (var srcRes = new Utils.DestroyOnDispose<Texture2D>(src))
                     {
-                        var texture = await GenerateUnityDXT5nmFromGltfNormal(src, convertingShader, compressHighQual);
                         await context.TimeSlicer.Slice(ct);
 
-                        // TODO: support multi-set
-                        context.Resources.AuxResources.Add(new NormalTexKey
+                        var texture = await GenerateUnityDXT5nmFromGltfNormal(src, convertingShader, compressHighQual);
+                        context.Resources.AuxResources.Add(new NormalTexKey // TODO: support multi-set
                         {
                             Index = index,
                         }, new Utils.DestroyOnDispose<Texture2D>(texture));
+
+                        await context.TimeSlicer.Slice(ct);
 
                         return texture;
                     }
@@ -332,18 +331,17 @@ namespace VGltf.Unity
                 }
 
                 var src = await context.Importers.Textures.RawImport(index, false, ct);
-                await context.TimeSlicer.Slice(ct);
-
                 using (var srcRes = new Utils.DestroyOnDispose<Texture2D>(src))
                 {
-                    var texture = await GenerateOcclusionFromGltf(src, convertingShader, compressHighQual);
                     await context.TimeSlicer.Slice(ct);
 
-                    // TODO: support multi-set
-                    context.Resources.AuxResources.Add(new OcclusionTexKey
+                    var texture = await GenerateOcclusionFromGltf(src, convertingShader, compressHighQual);
+                    context.Resources.AuxResources.Add(new OcclusionTexKey // TODO: support multi-set
                     {
                         Index = index,
                     }, new Utils.DestroyOnDispose<Texture2D>(texture));
+
+                    await context.TimeSlicer.Slice(ct);
 
                     return texture;
                 }
@@ -408,18 +406,17 @@ namespace VGltf.Unity
                 }
 
                 var src = await context.Importers.Textures.RawImport(index, true, ct);
-                await context.TimeSlicer.Slice(ct);
-
                 using (var srcRes = new Utils.DestroyOnDispose<Texture2D>(src))
                 {
-                    var texture = await GenerateGlossMapFromGltfRoughnessMap(src, convertingShader, metallic, roughness, compressHighQual);
                     await context.TimeSlicer.Slice(ct);
 
-                    // TODO: support multi-set
-                    context.Resources.AuxResources.Add(new MetallicRoughnessTexKey
+                    var texture = await GenerateGlossMapFromGltfRoughnessMap(src, convertingShader, metallic, roughness, compressHighQual);
+                    context.Resources.AuxResources.Add(new MetallicRoughnessTexKey // TODO: support multi-set
                     {
                         Index = index,
                     }, new Utils.DestroyOnDispose<Texture2D>(texture));
+
+                    await context.TimeSlicer.Slice(ct);
 
                     return texture;
                 }
