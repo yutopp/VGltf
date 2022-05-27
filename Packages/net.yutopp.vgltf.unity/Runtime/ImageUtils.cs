@@ -13,7 +13,7 @@ namespace VGltf.Unity
 {
     public static class ImageUtils
     {
-        public static void BlitTex(Texture2D src, Texture2D dst, bool isLinear, Material mat = null)
+        public static void BlitTex(Texture src, Texture2D dst, bool isLinear, Material mat = null)
         {
             var previous = RenderTexture.active;
 

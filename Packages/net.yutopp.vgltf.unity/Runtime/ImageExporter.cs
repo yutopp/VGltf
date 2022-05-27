@@ -21,7 +21,7 @@ namespace VGltf.Unity
         }
 
         public int RawExport(
-            Texture2D tex,
+            Texture tex,
             bool isLinear = false,
             Material mat = null
             )

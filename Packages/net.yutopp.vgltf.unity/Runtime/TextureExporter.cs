@@ -20,7 +20,7 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public IndexedResource<Texture> Export(Texture2D tex, bool isLinear = false)
+        public IndexedResource<Texture> Export(Texture tex, bool isLinear = false)
         {
             return Context.Resources.Textures.GetOrCall(tex, () => {
                 var texIndex = RawExport(tex, isLinear);
@@ -31,7 +31,7 @@ namespace VGltf.Unity
         }
 
         public int RawExport(
-            Texture2D tex,
+            Texture tex,
             bool isLinear = false,
             Material mat = null
             )
