@@ -148,6 +148,7 @@ namespace VGltf.Unity
             if (emissionColor != Color.black)
             {
                 mat.EnableKeyword("_EMISSION");
+                mat.globalIlluminationFlags &= ~MaterialGlobalIlluminationFlags.EmissiveIsBlack;
                 mat.SetColor("_EmissionColor", emissionColor);
             }
 
