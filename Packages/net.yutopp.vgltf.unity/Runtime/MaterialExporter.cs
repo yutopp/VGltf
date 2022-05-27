@@ -134,8 +134,18 @@ namespace VGltf.Unity
             var occlusionTexIndex = ExportOcclusionTextureIfExist(mat, "_OcclusionMap");
             mat.TryGetFloatOrDefault("_OcclusionStrength", 1.0f, out var occlutionStrength);
 
-            mat.TryGetColorOrDefault("_EmissionColor", Color.black, out var emissionColor);
-            var emissionTexIndex = ExportTextureIfExist(mat, "_EmissionMap");
+            Color emissionColor;
+            int? emissionTexIndex;
+            if ((mat.globalIlluminationFlags & MaterialGlobalIlluminationFlags.EmissiveIsBlack) == 0)
+            {
+                mat.TryGetColorOrDefault("_EmissionColor", Color.black, out emissionColor);
+                emissionTexIndex = ExportTextureIfExist(mat, "_EmissionMap");
+            }
+            else
+            {
+                emissionColor = Color.black;
+                emissionTexIndex = null;
+            }
 
             var alphaMode = GetAlphaMode(mat);
             mat.TryGetFloatOrDefault("_Cutoff", 0.0f, out var alphaCutoff);
