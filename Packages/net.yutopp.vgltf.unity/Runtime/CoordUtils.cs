@@ -75,6 +75,9 @@ namespace VGltf.Unity
 
         public Matrix4x4 ConvertSpace(Matrix4x4 m)
         {
+#if true
+            var (t, r, s) = DeconstructTRS(m);
+#else
             //
             // NOTE: Calcurated matrix will be BROKEN, when scale or rotation is NOT uniformed.
             // At first, this logic decompose matrices into TRS, and convert coordinates, then compose them again.
@@ -90,8 +93,26 @@ namespace VGltf.Unity
             {
                 Debug.LogWarningFormat("Scale or Rotation should be identity: Actual = {0}", s.ToString("G7"));
             }
-
+#endif
             return Matrix4x4.TRS(ConvertSpace(t), ConvertSpace(r), s);
+        }
+
+        public static (Vector3 t, Quaternion r, Vector3 s) DeconstructTRS(Matrix4x4 m)
+        {
+            // X=RS then, X^t X=S^2
+            //   X :: Matrix3x3, s > 0
+            var powS = m.transpose * m;
+
+            var s = new Vector3(Mathf.Sqrt(powS[0, 0]), Mathf.Sqrt(powS[1, 1]), Mathf.Sqrt(powS[2, 2]));
+            var sm = Matrix4x4.Scale(s);
+
+            // R=XS^{-1}
+            var rm = m * sm.inverse;
+            var r = rm.rotation;
+
+            var t = GetTranslate(m);
+
+            return (t, r, s);
         }
 
         // https://answers.unity.com/questions/402280/how-to-decompose-a-trs-matrix.html
