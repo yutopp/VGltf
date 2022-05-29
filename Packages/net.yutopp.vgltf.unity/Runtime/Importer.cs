@@ -25,6 +25,21 @@ namespace VGltf.Unity
         public sealed class Config
         {
             public bool FlipZAxisInsteadOfXAsix = false;
+
+            public bool TextureUpdateMipmaps = true;
+            public bool TextureMakeNoLongerReadable = true;
+
+            public bool SkipConvertingNormalTex = false;
+            public string ConvertingNormalTexShaderName = "Hidden/VGltfUnity/GltfNormalTexToUnityDXT5nm";
+            public bool? CompressNormalTexHighQual;
+
+            public bool SkipConvertingOcclusionTex = false;
+            public string ConvertingOcclusionTexShaderName = "Hidden/VGltfUnity/GltfOcclusionTexToUnity";
+            public bool? CompressOcclusionTexHighQual;
+
+            public bool SkipConvertingMetallicRoughness = false;
+            public string ConvertingMetallicRoughnessTexShaderName = "Hidden/VGltfUnity/GltfRoughnessMapToUnityGlossMap";
+            public bool? CompressMetallicRoughnessTexHighQual;
         }
 
         sealed class InnerContext : IImporterContext
@@ -35,23 +50,49 @@ namespace VGltf.Unity
             public ImporterRuntimeResources Resources { get; }
             public ITimeSlicer TimeSlicer { get; }
             public CoordUtils CoordUtils { get; }
+            public ImportingSetting ImportingSetting { get; }
 
             public ResourceImporters Importers { get; }
 
-            public InnerContext(GltfContainer container, IResourceLoader loader, ITimeSlicer timeSlicer, CoordUtils coordUtils)
+            public InnerContext(GltfContainer container, IResourceLoader loader, ITimeSlicer timeSlicer, Config config)
             {
                 Container = container;
                 GltfResources = new ResourcesStore(container, loader);
 
                 Resources = new ImporterRuntimeResources();
                 TimeSlicer = timeSlicer;
-                CoordUtils = coordUtils;
+                CoordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
+                ImportingSetting = new ImportingSetting
+                {
+                    TextureUpdateMipmaps = config.TextureUpdateMipmaps,
+                    TextureMakeNoLongerReadable = config.TextureMakeNoLongerReadable,
+                };
+
+                // TODO: pass config directly
+                var standardMatImporter = new BuiltinStandardMaterialImporterHook(new BuiltinStandardMaterialImporterHook.Config
+                {
+                    SkipConvertingNormalTex = config.SkipConvertingNormalTex,
+                    ConvertingNormalTexShaderName = config.ConvertingNormalTexShaderName,
+                    CompressNormalTexHighQual = config.CompressNormalTexHighQual,
+
+                    SkipConvertingOcclusionTex = config.SkipConvertingOcclusionTex,
+                    ConvertingOcclusionTexShaderName = config.ConvertingOcclusionTexShaderName,
+                    CompressOcclusionTexHighQual = config.CompressOcclusionTexHighQual,
+
+                    SkipConvertingMetallicRoughness = config.SkipConvertingMetallicRoughness,
+                    ConvertingMetallicRoughnessTexShaderName = config.ConvertingMetallicRoughnessTexShaderName,
+                    CompressMetallicRoughnessTexHighQual = config.CompressMetallicRoughnessTexHighQual,
+                });
+                var materialImporterConfig = new MaterialImporter.Config
+                {
+                    StandardMaterialImporter = standardMatImporter,
+                };
 
                 Importers = new ResourceImporters
                 {
                     Nodes = new NodeImporter(this),
                     Meshes = new MeshImporter(this),
-                    Materials = new MaterialImporter(this),
+                    Materials = new MaterialImporter(this, materialImporterConfig),
                     Textures = new TextureImporter(this),
                     Images = new ImageImporter(this),
                 };
@@ -94,8 +135,7 @@ namespace VGltf.Unity
                 config = new Config();
             }
 
-            var coordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
-            _context = new InnerContext(container, loader, timeSlicer, coordUtils);
+            _context = new InnerContext(container, loader, timeSlicer, config);
         }
 
         public Importer(GltfContainer container, ITimeSlicer timeSlicer, Config config = null)

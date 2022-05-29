@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -27,7 +26,23 @@ namespace VGltf.Unity
             }
         }
 
-        public struct DebugStopwatch : IDisposable
+        public sealed class DestroyOnDispose<T> : System.IDisposable where T : Object
+        {
+            public T Value { get; private set; }
+
+            public DestroyOnDispose(T obj)
+            {
+                Value = obj;
+            }
+
+            public void Dispose()
+            {
+                Utils.Destroy(Value);
+                Value = null;
+            }
+        }
+    
+        public struct DebugStopwatch : System.IDisposable
         {
             readonly System.Diagnostics.Stopwatch _stopwatch;
             readonly string _name;

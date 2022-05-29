@@ -81,6 +81,9 @@ namespace VGltf.Unity
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Matrix4x4 ConvertSpace(Matrix4x4 m)
         {
+#if true
+            var (t, r, s) = DeconstructTRS(m);
+#else
             //
             // NOTE: Calcurated matrix will be BROKEN, when scale or rotation is NOT uniformed.
             // At first, this logic decompose matrices into TRS, and convert coordinates, then compose them again.
@@ -94,10 +97,28 @@ namespace VGltf.Unity
             var s = GetScale(m);
             if (s != Vector3.one)
             {
-                Debug.LogWarningFormat("Scale should be identity: Actual = {0}", s.ToString("G7"));
+                Debug.LogWarningFormat("Scale or Rotation should be identity: Actual = {0}", s.ToString("G7"));
             }
-
+#endif
             return Matrix4x4.TRS(ConvertSpace(t), ConvertSpace(r), s);
+        }
+
+        public static (Vector3 t, Quaternion r, Vector3 s) DeconstructTRS(Matrix4x4 m)
+        {
+            // X=RS then, X^t X=S^2
+            //   X :: Matrix3x3, s > 0
+            var powS = m.transpose * m;
+
+            var s = new Vector3(Mathf.Sqrt(powS[0, 0]), Mathf.Sqrt(powS[1, 1]), Mathf.Sqrt(powS[2, 2]));
+            var sm = Matrix4x4.Scale(s);
+
+            // R=XS^{-1}
+            var rm = m * sm.inverse;
+            var r = rm.rotation;
+
+            var t = GetTranslate(m);
+
+            return (t, r, s);
         }
 
         // https://answers.unity.com/questions/402280/how-to-decompose-a-trs-matrix.html
@@ -129,29 +150,6 @@ namespace VGltf.Unity
                 );
 
             return s;
-        }
-
-        // IMPORTANT: We assume that Linear workflow is used.
-
-        // glTF world(sRGB) -> Shader(sRGB)|Unity(Linear)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color ColorFromSRGB(Vector4 v)
-        {
-            return v;
-        }
-
-        // glTF world(sRGB) -> Shader(sRGB)|Unity(Linear)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color ColorFromSRGB(Vector3 v)
-        {
-            return ColorFromLinear(new Vector4(v.x, v.y, v.z, 1.0f));
-        }
-
-        // glTF world(Linear) -> Shader(sRGB)|Unity(Linear)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color ColorFromLinear(Vector4 v)
-        {
-            return ((Color)v).gamma;
         }
     }
 }

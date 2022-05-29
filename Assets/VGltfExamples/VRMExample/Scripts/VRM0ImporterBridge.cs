@@ -15,9 +15,19 @@ namespace VGltfExamples.VRMExample
             _defaultBridge.ImportMeta(context, vrmMeta, go);
         }
 
+        public void ImportFirstPerson(IImporterContext context, VGltf.Ext.Vrm0.Types.FirstPerson vrmFirstPerson, GameObject go)
+        {
+            _defaultBridge.ImportFirstPerson(context, vrmFirstPerson, go);
+        }
+
         public void ImportBlendShapeMaster(IImporterContext context, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
         {
             _defaultBridge.ImportBlendShapeMaster(context, vrmBlendShape, go);
+        }
+
+        public void ImportSecondaryAnimation(IImporterContext context, VGltf.Ext.Vrm0.Types.SecondaryAnimation vrmSecondaryAnimation, GameObject go)
+        {
+            _defaultBridge.ImportSecondaryAnimation(context, vrmSecondaryAnimation, go);
         }
 
         public async Task ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat, CancellationToken ct)

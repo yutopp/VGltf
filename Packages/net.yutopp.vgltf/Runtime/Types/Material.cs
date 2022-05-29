@@ -36,7 +36,7 @@ namespace VGltf.Types
         public AlphaModeEnum AlphaMode = AlphaModeEnum.Opaque;
 
         [JsonField(Name = "alphaCutoff")]
-        [JsonSchema(Minimum = 0.0)]
+        [JsonSchema(Minimum = 0.0), JsonFieldIgnorable(WhenValueIs = 0.0f)]
         [JsonSchemaDependencies(new string[] { "alphaMode" })]
         public float AlphaCutoff = 0.5f;
 

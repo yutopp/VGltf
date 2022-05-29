@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using VGltf.Ext.Vrm0.Unity.Extensions;
 using VGltf.Unity;
 
 namespace VGltf.Ext.Vrm0.Unity
@@ -34,6 +35,18 @@ namespace VGltf.Ext.Vrm0.Unity
             meta.OtherPermissionUrl = vrmMeta.OtherPermissionUrl;
             meta.License = vrmMeta.License;
             meta.OtherLicenseUrl = vrmMeta.OtherLicenseUrl;
+        }
+
+        public void ImportFirstPerson(IImporterContext context, VGltf.Ext.Vrm0.Types.FirstPerson vrmFirstPerson, GameObject go)
+        {
+            var fp = go.AddComponent<VRM0FirstPerson>();
+
+            var fpBone = context.Resources.Nodes[vrmFirstPerson.FirstPersonBone];
+            fp.FirstPersonBone = fpBone.Value.transform;
+
+            fp.FirstPersonOffset = vrmFirstPerson.FirstPersonBoneOffset.ToUnity();
+
+            // TODO: support lookAt* and meshAnnotations
         }
 
         public void ImportBlendShapeMaster(IImporterContext context, VGltf.Ext.Vrm0.Types.BlendShape vrmBlendShape, GameObject go)
@@ -81,6 +94,56 @@ namespace VGltf.Ext.Vrm0.Unity
 
                 proxy.Groups.Add(g);
             }
+        }
+
+        public void ImportSecondaryAnimation(IImporterContext context, VGltf.Ext.Vrm0.Types.SecondaryAnimation vrmSecondaryAnimation, GameObject go)
+        {
+            // if the node named "secondary" exists, attach VRM0SecondaryAnimation to this. Otherwise, ignore that.
+            var secondaryNode = go.transform.Find("secondary");
+            if (secondaryNode == null)
+            {
+                return;
+            }
+
+            var sa = secondaryNode.gameObject.AddComponent<VRM0SecondaryAnimation>();
+
+            sa.Springs = vrmSecondaryAnimation.BoneGroups.Select(vrmBg =>
+            {
+                var sp = new VRM0SecondaryAnimation.Spring();
+                sp.Comment = vrmBg.comment;
+                sp.Stiffiness = vrmBg.stiffiness;
+                sp.GravityPower = vrmBg.gravityPower;
+                sp.GravityDir = vrmBg.gravityDir.ToUnity();
+                sp.DragForce = vrmBg.dragForce;
+                if (vrmBg.center != -1)
+                {
+                    sp.Center = context.Resources.Nodes[vrmBg.center].Value.transform;
+                }
+                sp.HitRadius = vrmBg.hitRadius;
+                sp.Bones = vrmBg.Bones.Select(vrmBIndex =>
+                {
+                    return context.Resources.Nodes[vrmBIndex].Value.transform;
+                }).ToArray();
+                sp.ColliderGroups = vrmBg.ColliderGroups;
+
+                return sp;
+            }).ToArray();
+
+            sa.ColliderGroups = vrmSecondaryAnimation.ColliderGroups.Select(vrmCg =>
+            {
+                var cg = new VRM0SecondaryAnimation.ColliderGroup();
+                cg.Node = context.Resources.Nodes[vrmCg.Node].Value.transform;
+                cg.Colliders = vrmCg.Colliders.Select(vrmC =>
+                {
+                    var c = new VRM0SecondaryAnimation.Collider();
+                    c.Offset = vrmC.Offset.ToUnity();
+                    c.Radius = vrmC.Radius;
+
+                    return c;
+                }).ToArray();
+
+                return cg;
+            }).ToArray();
         }
 
         public Task ReplaceMaterialByMtoon(IImporterContext context, VGltf.Ext.Vrm0.Types.Material matProp, Material mat, CancellationToken ct)

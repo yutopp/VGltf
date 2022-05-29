@@ -13,13 +13,13 @@ jobs:
       - name: setup env
         run: sudo apt-get update -yy && sudo apt-get install -yy make git python3
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '5.0.x'
-
-      - run: make setup
 
       - run: make test-dotnet
 
@@ -30,7 +30,9 @@ jobs:
       - name: setup env
         run: sudo apt-get update -yy && sudo apt-get install -yy make git python3
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - uses: actions/setup-dotnet@v1
         with:
@@ -39,8 +41,6 @@ jobs:
       - run: |
           curl -s https://codecov.io/bash > codecov
           chmod +x codecov
-
-      - run: make setup
 
       - run: make coverage-dotnet
 
@@ -75,9 +75,9 @@ jobs:
         env:
           UNITY_ULF: ${{ secrets[matrix.ulf_secrets_key] }}
 
-      - uses: actions/checkout@v2
-
-      - run: make setup
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: download RuntimeUnitTestToolkit
         run: |

@@ -57,7 +57,10 @@ namespace VGltf.Unity
             var matrix = PrimitiveImporter.AsMatrix4x4(gltfNode.Matrix);
             if (!matrix.isIdentity)
             {
-                throw new NotImplementedException("matrix is not implemented");
+                var trs = Context.CoordUtils.ConvertSpace(matrix);
+                go.transform.localPosition = CoordUtils.GetTranslate(trs);
+                go.transform.localRotation = CoordUtils.GetRotation(trs);
+                go.transform.localScale = CoordUtils.GetScale(trs);
             }
             else
             {

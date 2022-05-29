@@ -35,41 +35,37 @@ namespace VGltf.Unity
 
             return await Context.Resources.Textures.GetOrCallAsync(texIndex, async () =>
             {
-                using (Utils.MeasureAndPrintTime($"Import.Texture"))
-                {
-                    return await ForceImport(texIndex, isLinear, ct);
-                }
+                var tex = await RawImport(texIndex, isLinear, ct);
+
+                var res = Context.Resources.Textures.Add(texIndex, texIndex, tex.name, tex);
+                return res;
             });
         }
 
-        public async Task<IndexedResource<Texture2D>> ForceImport(int texIndex, bool isLinear, CancellationToken ct)
+        public async Task<Texture2D> RawImport(int texIndex, bool isLinear, CancellationToken ct)
         {
             var gltf = Context.Container.Gltf;
             var gltfTex = gltf.Textures[texIndex];
 
-            IndexedResource<Texture2D> resource = null;
+            var tex = default(Texture2D);
 
             // When texture.source is undefined, the image SHOULD be provided by an extension or application-specific means, otherwise the texture object is undefined.
             if (gltfTex.Source != null)
             {
-                var tex = await Context.Importers.Images.ImportAsTex(gltfTex.Source.Value, isLinear, ct);
+                tex = await Context.Importers.Images.ImportAsTex(gltfTex.Source.Value, isLinear, ct);
                 tex.name = gltfTex.Name;
-
-                resource = Context.Resources.Textures.Add(texIndex, texIndex, tex.name, tex);
             }
             else
             {
                 // Source is undefined, thus add dummy texture (u.b.).
-                var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, isLinear);
+                tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, isLinear);
                 tex.name = gltfTex.Name;
-
-                resource = Context.Resources.Textures.Add(texIndex, texIndex, tex.name, tex);
             }
 
             // When texture.sampler is undefined, a sampler with repeat wrapping (in both directions) and auto filtering MUST be used.
             // NOTE: Not implemented currently
 
-            return resource;
+            return tex;
         }
     }
 }

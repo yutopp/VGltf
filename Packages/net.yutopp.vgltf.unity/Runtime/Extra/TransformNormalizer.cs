@@ -14,8 +14,8 @@ namespace VGltf.Unity.Ext
 {
     public sealed class TransformNormalizer : IDisposable
     {
-        public GameObject Go;
-        private Dictionary<Mesh, Mesh> bakedMeshes = new Dictionary<Mesh, Mesh>();
+        public GameObject Go { get; private set; }
+        readonly HashSet<Mesh> bakedMeshes = new HashSet<Mesh>();
 
         void IDisposable.Dispose()
         {
@@ -28,7 +28,7 @@ namespace VGltf.Unity.Ext
             // Destroy baked meshes
             foreach (var kv in bakedMeshes)
             {
-                Utils.Destroy(kv.Value);
+                Utils.Destroy(kv);
             }
             bakedMeshes.Clear();
         }
@@ -53,9 +53,11 @@ namespace VGltf.Unity.Ext
         {
             nGo.name = go.name;
 
-            nGo.transform.localPosition = Vector3.zero;
-            nGo.transform.localRotation = Quaternion.identity;
-            nGo.transform.localScale = Vector3.one;
+            var anim = go.GetComponent<Animator>();
+            if (anim == null)
+            {
+                return;
+            }
 
             BakeMeshes(nGo);
             NormalizeTransforms(nGo.transform, Matrix4x4.identity);
@@ -64,27 +66,12 @@ namespace VGltf.Unity.Ext
 
         public void BakeMeshes(GameObject go)
         {
+            // Fix TRS to origin ans bake meshes because skined meshes will be transformed by bindposes.
             var smr = go.GetComponent<SkinnedMeshRenderer>();
             if (smr != null)
             {
                 var sharedMesh = smr.sharedMesh;
 
-                var weights = sharedMesh.boneWeights.Select(w =>
-                {
-                    return new BoneWeight
-                    {
-                        weight0 = w.weight0,
-                        weight1 = w.weight1,
-                        weight2 = w.weight2,
-                        weight3 = w.weight3,
-                        boneIndex0 = w.boneIndex0,
-                        boneIndex1 = w.boneIndex1,
-                        boneIndex2 = w.boneIndex2,
-                        boneIndex3 = w.boneIndex3,
-                    };
-                }).ToArray();
-
-                // Initialize forms
                 go.transform.localPosition = Vector3.zero;
                 go.transform.localRotation = Quaternion.identity;
                 go.transform.localScale = Vector3.one;
@@ -101,12 +88,12 @@ namespace VGltf.Unity.Ext
 
                 // Bake
                 var mesh = new Mesh();
-                bakedMeshes.Add(sharedMesh, mesh);
+                bakedMeshes.Add(mesh);
 
                 smr.BakeMesh(mesh);
 
                 mesh.name = sharedMesh.name;
-                mesh.boneWeights = weights;
+                mesh.boneWeights = sharedMesh.boneWeights;
 
                 var vertices = mesh.vertices;
                 var normals = mesh.normals;
@@ -152,6 +139,8 @@ namespace VGltf.Unity.Ext
                         smr.SetBlendShapeWeight(i, 0.0f);
                     }
                 }
+
+                smr.sharedMesh = mesh;
             }
 
             for (var i = 0; i < go.transform.childCount; ++i)
@@ -182,7 +171,22 @@ namespace VGltf.Unity.Ext
             var smr = go.GetComponent<SkinnedMeshRenderer>();
             if (smr != null)
             {
-                var bones = smr.bones;
+                var replaceMap = new Dictionary<int, int>();
+                var bonesList = new List<Transform>();
+                foreach (var (bone, boneIndexOrig) in smr.bones.Select((b, i) => (b, i)))
+                {
+                    if (bone == null)
+                    {
+                        continue;
+                    }
+
+                    var boneIndex = bonesList.Count;
+                    replaceMap.Add(boneIndexOrig, boneIndex);
+
+                    bonesList.Add(bone);
+                }
+
+                var bones = bonesList.ToArray();
                 var newBindPoses = bones.Select(t =>
                 {
                     // Ref: https://forum.unity.com/threads/runtime-model-import-wrong-bind-pose.276411/
@@ -191,11 +195,27 @@ namespace VGltf.Unity.Ext
                 }).ToArray();
                 Debug.Assert(newBindPoses.Count() == bones.Count());
 
-                var mesh = bakedMeshes[smr.sharedMesh];
+                var mesh = smr.sharedMesh;
+                mesh.boneWeights = mesh.boneWeights.Select(bwOrig =>
+                {
+                    var bw = new BoneWeight
+                    {
+                        weight0 = bwOrig.weight0,
+                        weight1 = bwOrig.weight1,
+                        weight2 = bwOrig.weight2,
+                        weight3 = bwOrig.weight3,
+                        // NOTE: Raise exceptions if nodes which expected to be removed have any bone weights.
+                        boneIndex0 = replaceMap[bwOrig.boneIndex0],
+                        boneIndex1 = replaceMap[bwOrig.boneIndex1],
+                        boneIndex2 = replaceMap[bwOrig.boneIndex2],
+                        boneIndex3 = replaceMap[bwOrig.boneIndex3]
+                    };
+                    return bw;
+                }).ToArray();
                 mesh.bindposes = newBindPoses;
                 mesh.RecalculateBounds();
 
-                smr.sharedMesh = mesh;
+                smr.bones = bones;
             }
 
             for (var i = 0; i < go.transform.childCount; ++i)

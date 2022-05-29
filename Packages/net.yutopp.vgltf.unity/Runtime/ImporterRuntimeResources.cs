@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace VGltf.Unity
@@ -16,6 +17,7 @@ namespace VGltf.Unity
         public IndexedResourceDict<int, Texture2D> Textures = new IndexedResourceDict<int, Texture2D>();
         public IndexedResourceDict<int, Material> Materials = new IndexedResourceDict<int, Material>();
         public IndexedResourceDict<int, Mesh> Meshes = new IndexedResourceDict<int, Mesh>();
+        public Dictionary<object, IDisposable> AuxResources { get; } = new Dictionary<object, IDisposable>();
 
         public void Dispose()
         {
@@ -23,6 +25,11 @@ namespace VGltf.Unity
             Meshes.Dispose();
             Materials.Dispose();
             Textures.Dispose();
+            
+            foreach(var disposable in AuxResources)
+            {
+                disposable.Value.Dispose();
+            }
         }
     }
 }

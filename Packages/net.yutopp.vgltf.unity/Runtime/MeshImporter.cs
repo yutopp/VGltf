@@ -36,10 +36,11 @@ namespace VGltf.Unity
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
 
-            return await Context.Resources.Meshes.GetOrCallAsync(meshIndex, async () =>
-            {
-                return await ForceImport(meshIndex, go, ct);
-            });
+            var mesh = Context.Resources.Meshes.GetOrCall(meshIndex, () => ForceImport(meshIndex));
+
+            var renderer = AddRenderer(go, mesh.Value, gltfMesh);
+            renderer.sharedMaterials = await ImportMaterials(gltfMesh, ct);
+            return mesh;
         }
 
         sealed class Target : IEquatable<Target>
@@ -70,7 +71,6 @@ namespace VGltf.Unity
         sealed class Primitive
         {
             public int? Indices;
-            public int? Material;
             public int? Position;
             public int? Normal;
             public int? Tangent;
@@ -85,7 +85,6 @@ namespace VGltf.Unity
         sealed class PrimitiveResource
         {
             public int[] Indices;
-            public Material Material;
             public Vector3[] Vertices;
             public Vector3[] Normals;
             public Vector4[] Tangents;
@@ -104,7 +103,7 @@ namespace VGltf.Unity
             public Vector3[] Tangents;
         }
 
-        public async Task<IndexedResource<Mesh>> ForceImport(int meshIndex, GameObject go, CancellationToken ct)
+        public IndexedResource<Mesh> ForceImport(int meshIndex)
         {
             var gltf = Context.Container.Gltf;
             var gltfMesh = gltf.Meshes[meshIndex];
@@ -113,18 +112,12 @@ namespace VGltf.Unity
                 .Select(p => ExtractPrimitive(p))
                 .ToArray();
 
-            ;
             foreach (var (p, i) in primsRaw.Skip(1).Select((p, i) => (p, i)))
             {
                 ValidateSubPrimitives(primsRaw[0], p, i);
             }
 
-            var prims = await Task.WhenAll(primsRaw.Select(async (p, i) =>
-            {
-                var prim = await ImportPrimitive(gltfMesh, p, i == 0, ct);
-                await Context.TimeSlicer.Slice(ct);
-                return prim;
-            }));
+            var prims = primsRaw.Select((p, i) => ImportPrimitive(gltfMesh, p, i == 0));
 
             var mesh = new Mesh();
             mesh.name = gltfMesh.Name;
@@ -133,15 +126,11 @@ namespace VGltf.Unity
 
             mesh.subMeshCount = gltfMesh.Primitives.Count;
 
-            var materials = new List<Material>();
-            var skinedMesh = false;
             var submeshIndex = 0;
             foreach (var prim in prims)
             {
                 if (submeshIndex == 0)
                 {
-                    skinedMesh = prim.BoneWeights != null;
-
                     mesh.vertices = prim.Vertices;
                     mesh.normals = prim.Normals;
                     mesh.tangents = prim.Tangents;
@@ -160,15 +149,25 @@ namespace VGltf.Unity
 
                 mesh.SetIndices(prim.Indices, MeshTopology.Triangles, submeshIndex);
                 submeshIndex++;
-
-                materials.Add(prim.Material);
             }
 
             mesh.RecalculateBounds();
             mesh.RecalculateTangents();
 
-            Renderer r = null;
-            if (skinedMesh)
+            return resource;
+        }
+
+        static bool IsSkinnedMesh(Types.Mesh gltfMesh)
+        {
+            if (gltfMesh.Primitives.Count == 0) return false;
+            var primaryAttributes = gltfMesh.Primitives[0].Attributes;
+            return primaryAttributes.ContainsKey(Types.Mesh.PrimitiveType.AttributeName.WEIGHTS_0) &&
+                   primaryAttributes.ContainsKey(Types.Mesh.PrimitiveType.AttributeName.JOINTS_0);
+        }
+
+        Renderer AddRenderer(GameObject go, Mesh mesh, Types.Mesh gltfMesh)
+        {
+            if (IsSkinnedMesh(gltfMesh))
             {
                 var smr = go.AddComponent<SkinnedMeshRenderer>();
                 smr.sharedMesh = mesh;
@@ -184,7 +183,7 @@ namespace VGltf.Unity
                     }
                 }
 
-                r = smr;
+                return smr;
             }
             else
             {
@@ -193,12 +192,28 @@ namespace VGltf.Unity
 
                 var mr = go.AddComponent<MeshRenderer>();
                 mr.enabled = false; // Do not render by default until explicitly enabled
-                r = mr;
+                return mr;
+            }
+        }
+
+        async Task<Material[]> ImportMaterials(Types.Mesh gltfMesh, CancellationToken ct)
+        {
+            var materials = new Material[gltfMesh.Primitives.Count];
+
+            var index = 0;
+            foreach (var prim in gltfMesh.Primitives)
+            {
+                if (prim.Material.HasValue)
+                {
+                    var mat = await Context.Importers.Materials.Import(prim.Material.Value, ct);
+                    await Context.TimeSlicer.Slice(ct);
+                    materials[index] = mat.Value;
+                }
+
+                ++index;
             }
 
-            r.sharedMaterials = materials.ToArray();
-
-            return resource;
+            return materials;
         }
 
         Primitive ExtractPrimitive(Types.Mesh.PrimitiveType gltfPrim)
@@ -208,7 +223,6 @@ namespace VGltf.Unity
             var res = new Primitive();
 
             res.Indices = gltfPrim.Indices;
-            res.Material = gltfPrim.Material;
 
             {
                 if (gltfAttr.TryGetValue(Types.Mesh.PrimitiveType.AttributeName.POSITION, out var index))
@@ -357,65 +371,43 @@ namespace VGltf.Unity
             }
         }
 
-        async Task<PrimitiveResource> ImportPrimitive(Types.Mesh gltfMesh, Primitive prim, bool isPrimary, CancellationToken ct)
+        PrimitiveResource ImportPrimitive(Types.Mesh gltfMesh, Primitive prim, bool isPrimary)
         {
             var res = new PrimitiveResource();
 
             if (prim.Indices != null)
             {
                 res.Indices = ImportIndices(prim.Indices.Value);
-
-                await Context.TimeSlicer.Slice(ct);
-            }
-
-            if (prim.Material != null)
-            {
-                var materialRes = await Context.Importers.Materials.Import(prim.Material.Value, ct);
-                res.Material = materialRes.Value;
-
-                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.Position != null)
             {
                 res.Vertices = ImportPositions(prim.Position.Value);
-
-                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.Normal != null)
             {
                 res.Normals = ImportNormals(prim.Normal.Value);
-
-                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.Tangent != null)
             {
                 res.Tangents = ImportTangents(prim.Tangent.Value);
-
-                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.TexCoord0 != null)
             {
                 res.UV = ImportUV(prim.TexCoord0.Value);
-
-                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.TexCoord1 != null)
             {
                 res.UV2 = ImportUV(prim.TexCoord1.Value);
-
-                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && prim.Color != null)
             {
                 res.Colors = ImportColors(prim.Color.Value);
-
-                await Context.TimeSlicer.Slice(ct);
             }
 
             if (isPrimary && (prim.Joint != null && prim.Weight != null))
@@ -444,28 +436,23 @@ namespace VGltf.Unity
                     boneWeights[i].weight3 = w.w;
                 }
                 res.BoneWeights = boneWeights;
-
-                await Context.TimeSlicer.Slice(ct);
             }
 
             if (prim.Targets != null)
             {
-                // https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#morph-targets
-                string[] targetNames = null;
-                gltfMesh.TryGetExtra("targetNames", Context.Container.JsonSchemas, out targetNames);
+                // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#morph-targets
+                gltfMesh.TryGetExtra<string[]>("targetNames", Context.Container.JsonSchemas, out var targetNames);
 
                 var blendSpapes = new List<BlendShapeResource>();
                 var i = 0;
                 foreach (var t in prim.Targets)
                 {
                     var deltaVertices = ImportPositions(t.Position);
-                    await Context.TimeSlicer.Slice(ct);
 
                     var deltaNormals = default(Vector3[]);
                     if (t.Normal != null)
                     {
                         deltaNormals = ImportNormals(t.Normal.Value);
-                        await Context.TimeSlicer.Slice(ct);
                     }
 
                     var deltaTangents = default(Vector3[]);
@@ -592,7 +579,7 @@ namespace VGltf.Unity
             {
                 if (acc.ComponentType == Types.Accessor.ComponentTypeEnum.FLOAT)
                 {
-                    return buf.GetEntity<float, Color>((xs, i) => CoordUtils.ColorFromSRGB(PrimitiveImporter.AsVector4(xs, i))).AsArray();
+                    return buf.GetEntity<float, Color>((xs, i) => ValueConv.ColorFromSRGB(PrimitiveImporter.AsVector4(xs, i))).AsArray();
                 }
             }
 
