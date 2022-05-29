@@ -344,7 +344,7 @@ namespace VGltf.Unity
 
         int ExportPositionsBuffer(ref Vector3[] vec3, out Types.Accessor.ComponentTypeEnum componentType)
         {
-            vec3 = vec3.Select(Context.CoordUtils.ConvertSpace).ToArray();
+            Context.CoordUtils.ConvertSpaces(vec3);
 
             // VEC3! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(vec3);
@@ -357,7 +357,7 @@ namespace VGltf.Unity
 
         int ExportNormals(Vector3[] vec3)
         {
-            vec3 = vec3.Select(Context.CoordUtils.ConvertSpace).ToArray();
+            Context.CoordUtils.ConvertSpaces(vec3);
 
             // VEC3! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(vec3);
@@ -376,7 +376,7 @@ namespace VGltf.Unity
 
         int ExportTangents(Vector4[] vec4)
         {
-            vec4 = vec4.Select(Context.CoordUtils.ConvertSpace).ToArray();
+            Context.CoordUtils.ConvertSpaces(vec4);
 
             // VEC4! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(vec4);
@@ -395,7 +395,7 @@ namespace VGltf.Unity
 
         int ExportUV(Vector2[] uv)
         {
-            uv = uv.Select(Context.CoordUtils.ConvertUV).ToArray();
+            CoordUtils.ConvertUVs(uv);
 
             // VEC2! | FLOAT!
             //       | UNSIGNED_BYTE  (normalized) 

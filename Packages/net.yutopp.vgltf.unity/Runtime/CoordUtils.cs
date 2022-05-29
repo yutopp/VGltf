@@ -59,10 +59,26 @@ namespace VGltf.Unity
             return new Vector2(v.x, 1 - v.y);
         }
 
+        public static void ConvertUVs(Vector2[] vs)
+        {
+            for(var i=0; i<vs.Length; ++i)
+            {
+                vs[i] = ConvertUV(vs[i]);
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3 ConvertSpace(Vector3 v)
         {
             return new Vector3(v.x * CoordinateSpaceAxisFlip.x, v.y * CoordinateSpaceAxisFlip.y, v.z * CoordinateSpaceAxisFlip.z);
+        }
+
+        public void ConvertSpaces(Vector3[] vs)
+        {
+            for(var i=0; i<vs.Length; ++i)
+            {
+                vs[i] = ConvertSpace(vs[i]);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,11 +87,27 @@ namespace VGltf.Unity
             return new Vector4(v.x * CoordinateSpaceAxisFlip.x, v.y * CoordinateSpaceAxisFlip.y, v.z * CoordinateSpaceAxisFlip.z, v.w * -1);
         }
 
+        public void ConvertSpaces(Vector4[] vs)
+        {
+            for(var i=0; i<vs.Length; ++i)
+            {
+                vs[i] = ConvertSpace(vs[i]);
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Quaternion ConvertSpace(Quaternion q)
         {
             // https://stackoverflow.com/questions/41816497/right-hand-camera-to-left-hand-opencv-to-unity
             return new Quaternion(q.x * -CoordinateSpaceAxisFlip.x, q.y * -CoordinateSpaceAxisFlip.y, q.z * -CoordinateSpaceAxisFlip.z, q.w * -(-1));
+        }
+
+        public void ConvertSpaces(Quaternion[] vs)
+        {
+            for(var i=0; i<vs.Length; ++i)
+            {
+                vs[i] = ConvertSpace(vs[i]);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
