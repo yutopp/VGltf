@@ -59,7 +59,8 @@ namespace VGltf.Unity
                 TimeSlicer = timeSlicer;
                 CoordUtils = config.FlipZAxisInsteadOfXAsix ? new CoordUtils(new Vector3(1, 1, -1)) : new CoordUtils();
 
-                var materialImporterConfig = new MaterialImporter.Config
+                // TODO: pass config directly
+                var standardMatImporter = new BuiltinStandardMaterialImporterHook(new BuiltinStandardMaterialImporterHook.Config
                 {
                     SkipConvertingNormalTex = config.SkipConvertingNormalTex,
                     ConvertingNormalTexShaderName = config.ConvertingNormalTexShaderName,
@@ -72,6 +73,10 @@ namespace VGltf.Unity
                     SkipConvertingMetallicRoughness = config.SkipConvertingMetallicRoughness,
                     ConvertingMetallicRoughnessTexShaderName = config.ConvertingMetallicRoughnessTexShaderName,
                     CompressMetallicRoughnessTexHighQual = config.CompressMetallicRoughnessTexHighQual,
+                });
+                var materialImporterConfig = new MaterialImporter.Config
+                {
+                    StandardMaterialImporter = standardMatImporter,
                 };
 
                 Importers = new ResourceImporters

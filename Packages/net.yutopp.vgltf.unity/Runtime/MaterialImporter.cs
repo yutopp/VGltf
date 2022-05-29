@@ -22,34 +22,16 @@ namespace VGltf.Unity
     {
         public sealed class Config
         {
-            public bool SkipConvertingNormalTex;
-            public string ConvertingNormalTexShaderName;
-            public bool? CompressNormalTexHighQual;
-
-            public bool SkipConvertingOcclusionTex;
-            public string ConvertingOcclusionTexShaderName;
-            public bool? CompressOcclusionTexHighQual;
-
-            public bool SkipConvertingMetallicRoughness;
-            public string ConvertingMetallicRoughnessTexShaderName;
-            public bool? CompressMetallicRoughnessTexHighQual;
+            public MaterialImporterHook StandardMaterialImporter;
         }
 
         public override IImporterContext Context { get; }
         readonly Config _config;
 
-        readonly Shader _convertingNormalTexShader;
-        readonly Shader _convertingOcclusionTexShader;
-        readonly Shader _convertingMetallicRoughnessTexShader;
-
         public MaterialImporter(IImporterContext context, Config config)
         {
             Context = context;
             _config = config;
-
-            _convertingNormalTexShader = Shader.Find(_config.ConvertingNormalTexShaderName);
-            _convertingOcclusionTexShader = Shader.Find(_config.ConvertingOcclusionTexShaderName);
-            _convertingMetallicRoughnessTexShader = Shader.Find(_config.ConvertingMetallicRoughnessTexShaderName);
         }
 
         public async Task<IndexedResource<Material>> Import(int matIndex, CancellationToken ct)
@@ -75,26 +57,79 @@ namespace VGltf.Unity
             }
 
             // Default import
-            var gltf = Context.Container.Gltf;
+            var standard = _config.StandardMaterialImporter;
+            if (standard == null)
+            {
+                throw new Exception($"Importer for Standard shader is null");
+            }
+
+            var res = await standard.Import(Context, matIndex, ct);
+            if (res == null)
+            {
+                throw new Exception($"Failed to import Standard material");
+            }
+
+            return res;
+        }
+    }
+
+    public sealed class BuiltinStandardMaterialImporterHook : MaterialImporterHook
+    {
+        public sealed class Config
+        {
+            public string StandardShaderName = "Standard";
+
+            public bool SkipConvertingNormalTex;
+            public string ConvertingNormalTexShaderName;
+            public bool? CompressNormalTexHighQual;
+
+            public bool SkipConvertingOcclusionTex;
+            public string ConvertingOcclusionTexShaderName;
+            public bool? CompressOcclusionTexHighQual;
+
+            public bool SkipConvertingMetallicRoughness;
+            public string ConvertingMetallicRoughnessTexShaderName;
+            public bool? CompressMetallicRoughnessTexHighQual;
+        }
+
+        readonly Config _config;
+
+        readonly Shader _convertingNormalTexShader;
+        readonly Shader _convertingOcclusionTexShader;
+        readonly Shader _convertingMetallicRoughnessTexShader;
+
+        public BuiltinStandardMaterialImporterHook(Config config)
+        {
+            _config = config;
+
+            _convertingNormalTexShader = Shader.Find(_config.ConvertingNormalTexShaderName);
+            _convertingOcclusionTexShader = Shader.Find(_config.ConvertingOcclusionTexShaderName);
+            _convertingMetallicRoughnessTexShader = Shader.Find(_config.ConvertingMetallicRoughnessTexShaderName);
+        }
+
+        public override async Task<IndexedResource<Material>> Import(IImporterContext context, int matIndex, CancellationToken ct)
+        {
+            // Default import
+            var gltf = context.Container.Gltf;
             var gltfMat = gltf.Materials[matIndex];
 
-            var shader = Shader.Find("Standard");
+            var shader = Shader.Find(_config.StandardShaderName);
             if (shader == null)
             {
-                throw new Exception($"Standard shader is not found");
+                throw new Exception($"Standard shader is not found: Name = {_config.StandardShaderName}");
             }
 
             var mat = new Material(shader);
+            var resource = context.Resources.Materials.Add(matIndex, matIndex, mat.name, mat);
+
             mat.name = gltfMat.Name;
 
-            var resource = Context.Resources.Materials.Add(matIndex, matIndex, mat.name, mat);
-
-            await ImportStandardMaterialProps(mat, gltfMat, ct);
+            await ImportStandardMaterialProps(context, mat, gltfMat, ct);
 
             return resource;
         }
 
-        public async Task ImportStandardMaterialProps(Material mat, Types.Material gltfMat, CancellationToken ct)
+        public async Task ImportStandardMaterialProps(IImporterContext context, Material mat, Types.Material gltfMat, CancellationToken ct)
         {
             if (gltfMat.DoubleSided)
             {
@@ -154,7 +189,7 @@ namespace VGltf.Unity
 
             if (gltfMat.EmissiveTexture != null)
             {
-                var textureResource = await Context.Importers.Textures.Import(gltfMat.EmissiveTexture.Index, false, ct);
+                var textureResource = await context.Importers.Textures.Import(gltfMat.EmissiveTexture.Index, false, ct);
                 mat.SetTexture("_EmissionMap", textureResource.Value);
             }
 
@@ -163,7 +198,7 @@ namespace VGltf.Unity
                 mat.EnableKeyword("_NORMALMAP");
 
                 var texture = await NormalTextureImporter.Import(
-                    Context,
+                    context,
                     _config.SkipConvertingNormalTex,
                     _convertingNormalTexShader,
                     _config.CompressNormalTexHighQual,
@@ -175,7 +210,7 @@ namespace VGltf.Unity
             if (gltfMat.OcclusionTexture != null)
             {
                 var texture = await OcclusionTextureImporter.Import(
-                    Context,
+                    context,
                     _config.SkipConvertingOcclusionTex,
                     _convertingOcclusionTexShader,
                     _config.CompressOcclusionTexHighQual,
@@ -196,7 +231,7 @@ namespace VGltf.Unity
 
                 if (pbrMR.BaseColorTexture != null)
                 {
-                    var textureResource = await Context.Importers.Textures.Import(pbrMR.BaseColorTexture.Index, false, ct);
+                    var textureResource = await context.Importers.Textures.Import(pbrMR.BaseColorTexture.Index, false, ct);
                     mat.SetTexture("_MainTex", textureResource.Value);
                 }
 
@@ -205,7 +240,7 @@ namespace VGltf.Unity
                     mat.EnableKeyword("_METALLICGLOSSMAP");
 
                     var texture = await MetallicRoughnessTextureImporter.Import(
-                        Context,
+                        context,
                         _config.SkipConvertingMetallicRoughness,
                         _convertingMetallicRoughnessTexShader,
                         _config.CompressMetallicRoughnessTexHighQual,
