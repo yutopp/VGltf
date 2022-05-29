@@ -48,6 +48,11 @@ namespace VGltfExamples.VRMExample
             mat.renderQueue = matProp.RenderQueue;
             foreach (var kv in matProp.FloatProperties)
             {
+                if (!mat.HasFloat(kv.Key))
+                {
+                    continue;
+                }
+
                 mat.SetFloat(kv.Key, kv.Value);
             }
             foreach (var kv in matProp.KeywordMap)
@@ -67,6 +72,11 @@ namespace VGltfExamples.VRMExample
             }
             foreach (var kv in matProp.TextureProperties)
             {
+                if (!mat.HasTexture(kv.Key))
+                {
+                    continue;
+                }
+
                 if (!context.Resources.Textures.TryGetValue(kv.Value, out var texRes))
                 {
                     texRes = await context.Importers.Textures.Import(kv.Value, false, ct);
@@ -76,10 +86,11 @@ namespace VGltfExamples.VRMExample
             }
             foreach (var kv in matProp.VectorProperties)
             {
-                if (matProp.TextureProperties.ContainsKey(kv.Key))
+                if (!mat.HasVector(kv.Key))
                 {
                     continue;
                 }
+
                 mat.SetVector(kv.Key, new Vector4(kv.Value[0], kv.Value[1], kv.Value[2], kv.Value[3]));
             }
         }
