@@ -120,9 +120,9 @@ namespace VGltf.Unity
             }
 
             var mat = new Material(shader);
-            var resource = context.Resources.Materials.Add(matIndex, matIndex, mat.name, mat);
-
             mat.name = gltfMat.Name;
+
+            var resource = context.Resources.Materials.Add(matIndex, matIndex, mat.name, mat);
 
             await ImportStandardMaterialProps(context, mat, gltfMat, ct);
 
@@ -302,7 +302,12 @@ namespace VGltf.Unity
                     {
                         await context.TimeSlicer.Slice(ct);
 
-                        var texture = await GenerateUnityDXT5nmFromGltfNormal(src, convertingShader, compressHighQual);
+                        var texture = await GenerateUnityDXT5nmFromGltfNormal(
+                            src,
+                            convertingShader,
+                            context.ImportingSetting.TextureUpdateMipmaps,
+                            context.ImportingSetting.TextureMakeNoLongerReadable,
+                            compressHighQual);
                         context.Resources.AuxResources.Add(new NormalTexKey // TODO: support multi-set
                         {
                             Index = index,
@@ -318,6 +323,8 @@ namespace VGltf.Unity
             public static Task<Texture2D> GenerateUnityDXT5nmFromGltfNormal(
                 Texture2D src,
                 Shader convertingShader,
+                bool updateMipmaps,
+                bool makeNoLongerReadable,
                 bool? compressHighQual = null)
             {
                 var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32, 0, true);
@@ -331,7 +338,7 @@ namespace VGltf.Unity
                     {
                         dst.Compress(compressHighQual.Value);
                     }
-                    dst.Apply();
+                    dst.Apply(updateMipmaps, makeNoLongerReadable);
                 }
                 catch
                 {
@@ -371,7 +378,12 @@ namespace VGltf.Unity
                 {
                     await context.TimeSlicer.Slice(ct);
 
-                    var texture = await GenerateOcclusionFromGltf(src, convertingShader, compressHighQual);
+                    var texture = await GenerateOcclusionFromGltf(
+                        src,
+                        convertingShader,
+                        context.ImportingSetting.TextureUpdateMipmaps,
+                        context.ImportingSetting.TextureMakeNoLongerReadable,
+                        compressHighQual);
                     context.Resources.AuxResources.Add(new OcclusionTexKey // TODO: support multi-set
                     {
                         Index = index,
@@ -386,6 +398,8 @@ namespace VGltf.Unity
             public static Task<Texture2D> GenerateOcclusionFromGltf(
                 Texture2D src,
                 Shader convertingShader,
+                bool updateMipmaps,
+                bool makeNoLongerReadable,
                 bool? compressHighQual = null)
             {
                 // OcclusionMap uses G
@@ -401,7 +415,7 @@ namespace VGltf.Unity
                     {
                         dst.Compress(compressHighQual.Value);
                     }
-                    dst.Apply();
+                    dst.Apply(updateMipmaps, makeNoLongerReadable);
                 }
                 catch
                 {
@@ -446,7 +460,14 @@ namespace VGltf.Unity
                 {
                     await context.TimeSlicer.Slice(ct);
 
-                    var texture = await GenerateGlossMapFromGltfRoughnessMap(src, convertingShader, metallic, roughness, compressHighQual);
+                    var texture = await GenerateGlossMapFromGltfRoughnessMap(
+                        src,
+                        convertingShader,
+                        metallic,
+                        roughness,
+                        context.ImportingSetting.TextureUpdateMipmaps,
+                        context.ImportingSetting.TextureMakeNoLongerReadable,
+                        compressHighQual);
                     context.Resources.AuxResources.Add(new MetallicRoughnessTexKey // TODO: support multi-set
                     {
                         Index = index,
@@ -463,6 +484,8 @@ namespace VGltf.Unity
                 Shader convertingShader,
                 float metallic,
                 float roughness,
+                bool updateMipmaps,
+                bool makeNoLongerReadable,
                 bool? compressHighQual = null)
             {
                 // GlossMap uses R, A
@@ -480,7 +503,7 @@ namespace VGltf.Unity
                     {
                         dst.Compress(compressHighQual.Value);
                     }
-                    dst.Apply();
+                    dst.Apply(updateMipmaps, makeNoLongerReadable);
                 }
                 catch
                 {
