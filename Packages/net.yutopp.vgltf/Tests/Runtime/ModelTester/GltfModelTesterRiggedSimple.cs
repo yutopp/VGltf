@@ -5,7 +5,6 @@
 // file LICENSE_1_0.txt or copy at  https://www.boost.org/LICENSE_1_0.txt)
 //
 
-using System.Linq;
 using NUnit.Framework;
 using VGltf.UnitTests.Shims;
 
@@ -28,11 +27,11 @@ namespace VGltf.UnitTests.ModelTester
 
             // Index 1
             var joints0 = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["JOINTS_0"]);
-            Assert.AreEqual(96, joints0.GetEntity<ushort, Vec4UShort>(Vec4UShort.FromArray).GetEnumerable().Count());
+            Assert.AreEqual(96, joints0.GetEntity<ushort, Vec4UShort>(Vec4UShort.FromArray).AsArray().Length);
 
             // Index 4
             var weights0 = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["WEIGHTS_0"]);
-            Assert.AreEqual(96, weights0.GetEntity<float, Vec4Float>(Vec4Float.FromArray).GetEnumerable().Count());
+            Assert.AreEqual(96, weights0.GetEntity<float, Vec4Float>(Vec4Float.FromArray).AsArray().Length);
         }
     }
 }

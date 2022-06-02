@@ -48,6 +48,15 @@ namespace VGltfExamples.VRMExample
             mat.renderQueue = matProp.RenderQueue;
             foreach (var kv in matProp.FloatProperties)
             {
+                if (!mat.HasProperty(kv.Key))
+                {
+                    continue;
+                }
+                if (!MToonProps.TryGetPropKind(kv.Key, out var kind) || kind != MToonProps.PropKind.Float)
+                {
+                    continue;
+                }
+
                 mat.SetFloat(kv.Key, kv.Value);
             }
             foreach (var kv in matProp.KeywordMap)
@@ -67,6 +76,15 @@ namespace VGltfExamples.VRMExample
             }
             foreach (var kv in matProp.TextureProperties)
             {
+                if (!mat.HasProperty(kv.Key))
+                {
+                    continue;
+                }
+                if (!MToonProps.TryGetPropKind(kv.Key, out var kind) || kind != MToonProps.PropKind.Tex)
+                {
+                    continue;
+                }
+
                 if (!context.Resources.Textures.TryGetValue(kv.Value, out var texRes))
                 {
                     texRes = await context.Importers.Textures.Import(kv.Value, false, ct);
@@ -76,10 +94,15 @@ namespace VGltfExamples.VRMExample
             }
             foreach (var kv in matProp.VectorProperties)
             {
-                if (matProp.TextureProperties.ContainsKey(kv.Key))
+                if (!mat.HasProperty(kv.Key))
                 {
                     continue;
                 }
+                if (!MToonProps.TryGetPropKind(kv.Key, out var kind) || kind != MToonProps.PropKind.Color)
+                {
+                    continue;
+                }
+
                 mat.SetVector(kv.Key, new Vector4(kv.Value[0], kv.Value[1], kv.Value[2], kv.Value[3]));
             }
         }

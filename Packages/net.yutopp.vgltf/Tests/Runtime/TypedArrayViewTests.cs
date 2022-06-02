@@ -27,7 +27,7 @@ namespace VGltf.UnitTests
                 /* [1]x */ 0x10, 0x11, 0x12, 0x13, /* [1]y */ 0x14, 0x15, 0x16, 0x17,
             };
 
-            var view = new TypedArrayView<UInt32, Vec2<UInt32>>(
+            var view = TypedArrayView<Vec2<UInt32>>.CreateFromPrimitive<UInt32>(
                 new ArraySegment<byte>(buffer),
                 8 /* stride */,
                 4 /* uint32 = 4 */,
@@ -35,7 +35,7 @@ namespace VGltf.UnitTests
                 2,
                 Vec2<UInt32>.FromArray);
 
-            var compositedResult = view.GetEnumerable().ToArray();
+            var compositedResult = view.TypedBuffer;
             Assert.That(compositedResult.Length, Is.EqualTo(2));
             Assert.That(compositedResult[0], Is.EqualTo(new Vec2<UInt32>(0x03020100, 0x07060504)));
             Assert.That(compositedResult[1], Is.EqualTo(new Vec2<UInt32>(0x13121110, 0x17161514)));

@@ -233,6 +233,8 @@ namespace VGltf.Unity
                 {
                     var textureResource = await context.Importers.Textures.Import(pbrMR.BaseColorTexture.Index, false, ct);
                     mat.SetTexture("_MainTex", textureResource.Value);
+
+                    await context.TimeSlicer.Slice(ct);
                 }
 
                 if (pbrMR.MetallicRoughnessTexture != null)

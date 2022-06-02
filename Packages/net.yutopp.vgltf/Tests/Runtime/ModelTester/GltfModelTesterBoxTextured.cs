@@ -57,19 +57,19 @@ namespace VGltf.UnitTests.ModelTester
             // Accesses
             // index 1
             var normal = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["NORMAL"]);
-            Assert.AreEqual(24, normal.GetEntity<float, Vec3Float>(Vec3Float.FromArray).GetEnumerable().Count());
+            Assert.AreEqual(24, normal.GetEntity<float, Vec3Float>(Vec3Float.FromArray).AsArray().Length);
 
             // index 2
             var position = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["POSITION"]);
-            Assert.AreEqual(24, position.GetEntity<float, Vec3Float>(Vec3Float.FromArray).GetEnumerable().Count());
+            Assert.AreEqual(24, position.GetEntity<float, Vec3Float>(Vec3Float.FromArray).AsArray().Length);
 
             // index 3
             var texCoord0 = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Attributes["TEXCOORD_0"]);
-            Assert.AreEqual(24, texCoord0.GetEntity<float, Vec2Float>(Vec2Float.FromArray).GetEnumerable().Count());
+            Assert.AreEqual(24, texCoord0.GetEntity<float, Vec2Float>(Vec2Float.FromArray).AsArray().Length);
 
             // index 0
             var indicies = store.GetOrLoadTypedBufferByAccessorIndex(primitive.Indices.Value);
-            Assert.AreEqual(36, indicies.GetPrimitivesAsCasted<int>().Count());
+            Assert.AreEqual(36, indicies.GetPrimitivesAsInt().Count());
 
             // Materials
             // index0
