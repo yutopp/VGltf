@@ -56,19 +56,32 @@ namespace VGltf.Unity.UnitTests
         }
 
         [Test]
-        [TestCaseSource("TRSElems")]
+        [TestCaseSource(nameof(TRSElems))]
+        public void Matrix4x4DeconstructionTest(Vector3 srcT, Quaternion srcR, Vector3 srcS)
+        {
+            var m = Matrix4x4.TRS(srcT, srcR, srcS);
+            var (dstT, dstR, dstS) = CoordUtils.DeconstructTRS(m);
+
+            Assert.IsTrue(Asserts.EqualsWithDelta(srcT, dstT),
+                string.Format("Expect = {0}, Actual = {1}", srcT, dstT));
+            Assert.IsTrue(Asserts.EqualsWithDelta(srcR, dstR),
+                string.Format("Expect = {0}, Actual = {1}", srcR, dstR));
+            Assert.IsTrue(Asserts.EqualsWithDelta(srcS, dstS),
+                string.Format("Expect = {0}, Actual = {1}", srcS, dstS));
+        }
+
+        [Test]
+        [TestCaseSource(nameof(TRSElems))]
         public void Matrix4x4Test(Vector3 srcT, Quaternion srcR, Vector3 srcS)
         {
             var coordUtils = new CoordUtils();
 
-            var srcM = new Matrix4x4();
-            srcM.SetTRS(srcT, srcR, srcS);
-            Assert.IsTrue(Asserts.EqualsWithDelta(srcM, srcM));
+            var srcM = Matrix4x4.TRS(srcT, srcR, srcS);
 
+            // Unity -> glTF
             var conv = coordUtils.ConvertSpace(srcM);
-            var convT = CoordUtils.GetTranslate(conv);
-            var convR = CoordUtils.GetRotation(conv);
-            var convS = CoordUtils.GetScale(conv);
+            var (convT, convR, convS) = CoordUtils.DeconstructTRS(conv);
+
             Assert.IsTrue(Asserts.EqualsWithDelta(coordUtils.ConvertSpace(srcT), convT),
                 string.Format("Expect = {0}, Actual = {1}", coordUtils.ConvertSpace(srcT), convT));
             Assert.IsTrue(Asserts.EqualsWithDelta(coordUtils.ConvertSpace(srcR), convR),
@@ -76,12 +89,10 @@ namespace VGltf.Unity.UnitTests
             Assert.IsTrue(Asserts.EqualsWithDelta(srcS, convS),
                 string.Format("Expect = {0}, Actual = {1}", srcS, convS));
 
+            // glTF -> Unity
             var dstM = coordUtils.ConvertSpace(conv);
-            Assert.IsTrue(Asserts.EqualsWithDelta(dstM, srcM));
+            var (dstT, dstR, dstS) = CoordUtils.DeconstructTRS(dstM);
 
-            var dstT = CoordUtils.GetTranslate(dstM);
-            var dstR = CoordUtils.GetRotation(dstM);
-            var dstS = CoordUtils.GetScale(dstM);
             Assert.IsTrue(Asserts.EqualsWithDelta(srcT, dstT),
                 string.Format("Expect = {0}, Actual = {1}", srcT, dstT));
             Assert.IsTrue(Asserts.EqualsWithDelta(srcR, dstR),
@@ -111,12 +122,17 @@ namespace VGltf.Unity.UnitTests
                 Quaternion.AngleAxis(-30, new Vector3(-1, -2, -3)),
                 Vector3.one,
             },
+            new object[] {
+                new Vector3(-1f, -2f, -3f),
+                Quaternion.AngleAxis(-30, new Vector3(-1, -2, -3)),
+                new Vector3(1, 2, 3),
+            },
         };
     }
 
-    public class Asserts
+    static class Asserts
     {
-        class AssertionFailedException : Exception
+        sealed class AssertionFailedException : Exception
         {
             public AssertionFailedException(string message) : base(message)
             {
@@ -125,31 +141,26 @@ namespace VGltf.Unity.UnitTests
 
         public static bool EqualsWithDelta(Vector2 a, Vector2 b)
         {
-            return Mathf.Approximately(a[0], b[0])
-                && Mathf.Approximately(a[1], b[1]);
+            return a == b;
         }
 
         public static bool EqualsWithDelta(Vector3 a, Vector3 b)
         {
-            return Mathf.Approximately(a[0], b[0])
-                && Mathf.Approximately(a[1], b[1])
-                && Mathf.Approximately(a[2], b[2]);
+            // https://docs.unity3d.com/ScriptReference/Vector3-operator_eq.html
+            // > Returns true if two vectors are approximately equal.
+            return a == b;
         }
 
         public static bool EqualsWithDelta(Vector4 a, Vector4 b)
         {
-            return Mathf.Approximately(a[0], b[0])
-                && Mathf.Approximately(a[1], b[1])
-                && Mathf.Approximately(a[2], b[2])
-                && Mathf.Approximately(a[3], b[3]);
+            return a == b;
         }
 
         public static bool EqualsWithDelta(Quaternion a, Quaternion b)
         {
-            return Mathf.Approximately(a[0], b[0])
-                && Mathf.Approximately(a[1], b[1])
-                && Mathf.Approximately(a[2], b[2])
-                && Mathf.Approximately(a[3], b[3]);
+            // https://docs.unity3d.com/ScriptReference/Quaternion-operator_eq.html
+            // > https://docs.unity3d.com/ScriptReference/Quaternion-operator_eq.html
+            return a == b;
         }
 
         public static bool EqualsWithDelta(Matrix4x4 a, Matrix4x4 b)

@@ -135,6 +135,7 @@ namespace VGltf.Unity
             return Matrix4x4.TRS(ConvertSpace(t), ConvertSpace(r), s);
         }
 
+        // NOTE: Deconstructed values will be BROKEN, when scales are less than or equal to zero.
         public static (Vector3 t, Quaternion r, Vector3 s) DeconstructTRS(Matrix4x4 m)
         {
             // X=RS then, X^t X=S^2
