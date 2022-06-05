@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VGltf;
 using VGltf.Unity;
+using System.Linq;
 
 namespace VGltfExamples.VRMExample
 {
@@ -17,9 +18,12 @@ namespace VGltfExamples.VRMExample
         [SerializeField] Button unloadButton;
 
         [SerializeField] InputField outputFilePathInput;
-        [SerializeField] Button exportButton;        
+        [SerializeField] Button exportButton;
 
         [SerializeField] public RuntimeAnimatorController RuntimeAnimatorController;
+
+        // デバッグ用
+        [SerializeField] AnimationClip[] Clips;
 
         sealed class VRMResource : IDisposable
         {
@@ -118,6 +122,11 @@ namespace VGltfExamples.VRMExample
 
         async UniTaskVoid UIOnLoadButtonClickAsync()
         {
+#if true
+            var context = await ImportClip("anim.glb"); // TODO: このままだとリソースリークするのでデバッグ終わったら消す
+            Clips = context.Resources.Animations.Map(clip => clip).Select(iv => iv.Value).ToArray();
+#endif
+
             var p0 = Common.MemoryProfile.Now;
             DebugLogProfile(p0);
 
@@ -166,6 +175,10 @@ namespace VGltfExamples.VRMExample
             var head = _vrmResources[0];
 
             var anim = head.Go.GetComponentInChildren<Animator>();
+
+            var info = anim.GetCurrentAnimatorClipInfo(0);
+            var clip = info[0].clip;
+
             var animCtrl = anim.runtimeAnimatorController;
             anim.runtimeAnimatorController = null; // Make the model to the rest pose
 
@@ -203,6 +216,56 @@ namespace VGltfExamples.VRMExample
 
                 Debug.Log("exported");
             });
+
+#if true
+            await ExportClip(clip, "anim.glb");
+#endif
+        }
+
+        async Task ExportClip(AnimationClip clip, string path)
+        {
+            GltfContainer gltfContainer = null;
+            using (var gltfExporter = new Exporter())
+            {
+                gltfExporter.Context.Exporters.Animations.AddHook(new VGltf.Unity.Ext.Helper.HumanoidAnimationExporter());
+
+                gltfExporter.ExportOnlyAnimationClips(new AnimationClip[] { clip });
+                gltfContainer = gltfExporter.IntoGlbContainer();
+            }
+
+            await Task.Run(() =>
+            {
+                using (var fs = new FileStream(path, FileMode.OpenOrCreate))
+                {
+                    GltfContainer.ToGlb(fs, gltfContainer);
+                }
+
+                Debug.Log("clip exported");
+            });
+        }
+
+        async Task<IImporterContext> ImportClip(string path)
+        {
+            // Read the glTF container (unity-independent)
+            var gltfContainer = await Task.Run(() =>
+            {
+                using (var fs = new FileStream(path, FileMode.Open))
+                {
+                    return GltfContainer.FromGlb(fs);
+                }
+            });
+
+            // Create a glTF Importer for Unity.
+            // The resources will be cached in the internal Context of this Importer.
+            // Resources can be released by calling Dispose of the Importer (or the internal Context).
+            var timeSlicer = new Common.TimeSlicer();
+            using (var gltfImporter = new Importer(gltfContainer, timeSlicer))
+            {
+                gltfImporter.Context.Importers.Animations.AddHook(new VGltf.Unity.Ext.Helper.HumanoidAnimationImporter());
+
+                // Load the Scene.
+                return await gltfImporter.ImportOnlyAnimations(System.Threading.CancellationToken.None);
+            }
         }
 
         void DebugLogProfile(Common.MemoryProfile now, Common.MemoryProfile prev = null)
