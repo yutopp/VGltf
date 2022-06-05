@@ -22,9 +22,6 @@ namespace VGltfExamples.VRMExample
 
         [SerializeField] public RuntimeAnimatorController RuntimeAnimatorController;
 
-        // デバッグ用
-        [SerializeField] AnimationClip[] Clips;
-
         sealed class VRMResource : IDisposable
         {
             public IImporterContext Context;
@@ -42,6 +39,21 @@ namespace VGltfExamples.VRMExample
 
         readonly List<VRMResource> _vrmResources = new List<VRMResource>();
 
+        [Serializable]
+        sealed class ClipResource : IDisposable
+        {
+            public IImporterContext Context;
+            [SerializeField] public AnimationClip[] ClipRefs;
+
+            public void Dispose()
+            {
+                Context?.Dispose();
+            }
+        }
+
+        // デバッグ用
+        [SerializeField] List<ClipResource> _clipResources = new List<ClipResource>();
+
         void Start()
         {
             loadButton.onClick.AddListener(UIOnLoadButtonClick);
@@ -58,6 +70,11 @@ namespace VGltfExamples.VRMExample
         void OnDestroy()
         {
             foreach (var disposable in _vrmResources)
+            {
+                disposable.Dispose();
+            }
+
+            foreach(var disposable in  _clipResources)
             {
                 disposable.Dispose();
             }
@@ -122,9 +139,9 @@ namespace VGltfExamples.VRMExample
 
         async UniTaskVoid UIOnLoadButtonClickAsync()
         {
-#if true
-            var context = await ImportClip("anim.glb"); // TODO: このままだとリソースリークするのでデバッグ終わったら消す
-            Clips = context.Resources.Animations.Map(clip => clip).Select(iv => iv.Value).ToArray();
+#if false
+            var clipRes = await ImportClip("anim.glb");
+            _clipResources.Insert(0, clipRes);
 #endif
 
             var p0 = Common.MemoryProfile.Now;
@@ -222,6 +239,33 @@ namespace VGltfExamples.VRMExample
 #endif
         }
 
+        async Task<ClipResource> ImportClip(string path)
+        {
+            // Read the glTF container (unity-independent)
+            var gltfContainer = await Task.Run(() =>
+            {
+                using (var fs = new FileStream(path, FileMode.Open))
+                {
+                    return GltfContainer.FromGlb(fs);
+                }
+            });
+
+            var clipRefs = new List<AnimationClip>();
+
+            var timeSlicer = new Common.TimeSlicer();
+            using (var gltfImporter = new Importer(gltfContainer, timeSlicer))
+            {
+                gltfImporter.Context.Importers.Animations.AddHook(new VGltf.Unity.Ext.Helper.HumanoidAnimationImporter(clipRefs));
+
+                var context = await gltfImporter.ImportOnlyAnimations(System.Threading.CancellationToken.None);
+                return new ClipResource
+                {
+                    Context = context,
+                    ClipRefs = clipRefs.ToArray(),
+                };
+            }
+        }
+
         async Task ExportClip(AnimationClip clip, string path)
         {
             GltfContainer gltfContainer = null;
@@ -242,30 +286,6 @@ namespace VGltfExamples.VRMExample
 
                 Debug.Log("clip exported");
             });
-        }
-
-        async Task<IImporterContext> ImportClip(string path)
-        {
-            // Read the glTF container (unity-independent)
-            var gltfContainer = await Task.Run(() =>
-            {
-                using (var fs = new FileStream(path, FileMode.Open))
-                {
-                    return GltfContainer.FromGlb(fs);
-                }
-            });
-
-            // Create a glTF Importer for Unity.
-            // The resources will be cached in the internal Context of this Importer.
-            // Resources can be released by calling Dispose of the Importer (or the internal Context).
-            var timeSlicer = new Common.TimeSlicer();
-            using (var gltfImporter = new Importer(gltfContainer, timeSlicer))
-            {
-                gltfImporter.Context.Importers.Animations.AddHook(new VGltf.Unity.Ext.Helper.HumanoidAnimationImporter());
-
-                // Load the Scene.
-                return await gltfImporter.ImportOnlyAnimations(System.Threading.CancellationToken.None);
-            }
         }
 
         void DebugLogProfile(Common.MemoryProfile now, Common.MemoryProfile prev = null)
