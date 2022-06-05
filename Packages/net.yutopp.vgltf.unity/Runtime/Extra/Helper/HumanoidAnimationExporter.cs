@@ -34,33 +34,55 @@ namespace VGltf.Unity.Ext.Helper
 
             foreach (var binding in curveBindings)
             {
-                Debug.Log($"{binding.path} :: {binding.propertyName})");
                 var curve = AnimationUtility.GetEditorCurve(clip, binding);
-
-                // TODO: Support CUBICSPLINE
 
                 var timestamps = new float[curve.keys.Length];
                 var values = new float[curve.keys.Length];
+
+                var inTangents = new float[curve.keys.Length];
+                var inWeights = new float[curve.keys.Length];
+                var outTangents = new float[curve.keys.Length];
+                var outWeights = new float[curve.keys.Length];
 
                 foreach (var (keyframe, index) in curve.keys.Select((v, i) => (v, i)))
                 {
                     timestamps[index] = keyframe.time;
                     values[index] = keyframe.value;
+
+                    inTangents[index] = keyframe.inTangent;
+                    inWeights[index] = keyframe.inWeight;
+                    outTangents[index] = keyframe.outTangent;
+                    outWeights[index] = keyframe.outWeight;
+                    // keyframe.weightedMode
                 }
 
                 var inputAccessorId = ExportTimestamp(context, timestamps);
-                var outputAccessorId = ExportHumanoidValue(context, values);
+                var outputAccessorId = ExportHumanoidFloatScalarValue(context, values);
 
+                var inTangentAccessorId = ExportHumanoidFloatScalarValue(context, inTangents);
+                var inWeightAccessorId = ExportHumanoidFloatScalarValue(context, inWeights);
+                var outTangentAccessorId = ExportHumanoidFloatScalarValue(context, outTangents);
+                var outWeightAccessorId = ExportHumanoidFloatScalarValue(context, outWeights);
+
+                // sampler
                 var samplerId = samplers.Count;
 
                 var sampler = new VGltf.Types.Animation.SamplerType
                 {
                     Input = inputAccessorId,
-                    // Interpolation
+                    // Interpolation will not be used when "VGLTF_unity_humanoid_animation_sampler" specified
                     Output = outputAccessorId,
                 };
+                sampler.AddExtra(Types.HumanoidAnimationType.SamplerType.ExtraName, new Types.HumanoidAnimationType.SamplerType
+                {
+                    InTangent = inTangentAccessorId,
+                    InWeight = inWeightAccessorId,
+                    OutTangent = outTangentAccessorId,
+                    OutWeight = outWeightAccessorId,
+                });
                 samplers.Add(sampler);
 
+                // channel
                 var channel = new VGltf.Types.Animation.ChannelType
                 {
                     Sampler = samplerId,
@@ -72,10 +94,13 @@ namespace VGltf.Unity.Ext.Helper
                 };
                 channel.AddExtra(Types.HumanoidAnimationType.ChannelType.ExtraName, new Types.HumanoidAnimationType.ChannelType
                 {
+                    RelativePath = binding.path,
                     PropertyName = binding.propertyName
                 });
                 channels.Add(channel);
             }
+
+            // TODO: Append standard animations if needed.
 
             var gltfAnim = new VGltf.Types.Animation
             {
@@ -122,7 +147,7 @@ namespace VGltf.Unity.Ext.Helper
             return context.Gltf.AddAccessor(accessor);
         }
         
-        public static int ExportHumanoidValue(IExporterContext context, float[] values)
+        public static int ExportHumanoidFloatScalarValue(IExporterContext context, float[] values)
         {
             // Scalar | FLOAT
 

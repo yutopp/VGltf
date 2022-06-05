@@ -14,7 +14,7 @@ namespace VGltf.Unity
 {
     public abstract class AnimationImporterHook
     {
-        public abstract Task<IndexedResource<AnimationClip>> Import(IImporterContext context, int animIndex, CancellationToken ct);
+        public abstract Task<IndexedResource<IDisposable>> Import(IImporterContext context, int animIndex, CancellationToken ct);
     }
 
     public sealed class AnimationImporter : ImporterRefHookable<AnimationImporterHook>
@@ -26,7 +26,7 @@ namespace VGltf.Unity
             Context = context;
         }
 
-        public async Task<IndexedResource<AnimationClip>> Import(int animIndex, CancellationToken ct)
+        public async Task<IndexedResource<IDisposable>> Import(int animIndex, CancellationToken ct)
         {
             return await Context.Resources.Animations.GetOrCallAsync(animIndex, async () =>
             {
@@ -34,7 +34,7 @@ namespace VGltf.Unity
             });
         }
 
-        public async Task<IndexedResource<AnimationClip>> ForceImport(int animIndex, CancellationToken ct)
+        public async Task<IndexedResource<IDisposable>> ForceImport(int animIndex, CancellationToken ct)
         {
             foreach (var h in Hooks)
             {

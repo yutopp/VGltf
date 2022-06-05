@@ -6,6 +6,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -14,7 +15,14 @@ namespace VGltf.Unity.Ext.Helper
 {
     public sealed class HumanoidAnimationImporter : AnimationImporterHook
     {
-        public override Task<IndexedResource<AnimationClip>> Import(IImporterContext context, int animIndex, CancellationToken ct)
+        readonly List<AnimationClip> _clips;
+
+        public HumanoidAnimationImporter(List<AnimationClip> clips)
+        {
+            _clips = clips;
+        }
+
+        public override Task<IndexedResource<IDisposable>> Import(IImporterContext context, int animIndex, CancellationToken ct)
         {
             var gltf = context.Container.Gltf;
             var gltfAnim = gltf.Animations[animIndex];
@@ -29,32 +37,52 @@ namespace VGltf.Unity.Ext.Helper
             var animClip = new AnimationClip();
             animClip.name = gltfAnim.Name;
 
-            var resource = context.Resources.Animations.Add(animIndex, animIndex, animClip.name, animClip);
+            var resource = context.Resources.Animations.Add(animIndex, animIndex, animClip.name, new Utils.DestroyOnDispose<AnimationClip>(animClip));
 
             foreach (var channel in gltfAnim.Channels)
             {
-                var extra = default(Types.HumanoidAnimationType.ChannelType);
-                if (!channel.TryGetExtra(Types.HumanoidAnimationType.ChannelType.ExtraName, context.Container.JsonSchemas, out extra))
+                var channelExtra = default(Types.HumanoidAnimationType.ChannelType);
+                if (!channel.TryGetExtra(Types.HumanoidAnimationType.ChannelType.ExtraName, context.Container.JsonSchemas, out channelExtra))
                 {
-                    throw new NotImplementedException();
+                    throw new NotImplementedException($"Extras {Types.HumanoidAnimationType.ChannelType.ExtraName} is not given");
                 }
 
                 var sampler = gltfAnim.Samplers[channel.Sampler];
 
+                var samplerExtra = default(Types.HumanoidAnimationType.SamplerType);
+                if (!sampler.TryGetExtra(Types.HumanoidAnimationType.SamplerType.ExtraName, context.Container.JsonSchemas, out samplerExtra))
+                {
+                    throw new NotImplementedException($"Extras {Types.HumanoidAnimationType.SamplerType.ExtraName} is not given");
+                }
+
                 var timestamps = ImportTimestamp(context, sampler.Input);
-                var values = ImportHumanoidValue(context, sampler.Output);
+                var values = ImportHumanoidFloatScalarValue(context, sampler.Output);
                 Debug.Assert(timestamps.Length == values.Length);
+
+                var inTangents = ImportHumanoidFloatScalarValue(context, samplerExtra.InTangent);
+                var inWeights = ImportHumanoidFloatScalarValue(context, samplerExtra.InWeight);
+                var outTangents = ImportHumanoidFloatScalarValue(context, samplerExtra.OutTangent);
+                var outWeights = ImportHumanoidFloatScalarValue(context, samplerExtra.OutWeight);
 
                 // TODO: support interpolation
                 var keyframes = new Keyframe[timestamps.Length];
                 for (var i = 0; i < timestamps.Length; ++i)
                 {
-                    keyframes[i] = new Keyframe(timestamps[i], values[i]);
+                    var keyframe = new Keyframe(
+                        time: timestamps[i],
+                        value: values[i],
+                        inTangent: inTangents[i],
+                        outTangent: outTangents[i],
+                        inWeight: inWeights[i],
+                        outWeight: outWeights[i]);
+                    keyframes[i] = keyframe;
                 }
 
                 var curve = new AnimationCurve(keyframes);
-                animClip.SetCurve("", typeof(Animator), extra.PropertyName, curve);
+                animClip.SetCurve(channelExtra.RelativePath, typeof(Animator), channelExtra.PropertyName, curve);
             }
+
+            _clips.Add(animClip); // mutate the container
 
             return Task.FromResult(resource);
         }
@@ -77,7 +105,7 @@ namespace VGltf.Unity.Ext.Helper
             throw new NotImplementedException(); // TODO
         }
 
-        public static float[] ImportHumanoidValue(IImporterContext context, int index)
+        public static float[] ImportHumanoidFloatScalarValue(IImporterContext context, int index)
         {
             // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_animation_sampler_input
 
