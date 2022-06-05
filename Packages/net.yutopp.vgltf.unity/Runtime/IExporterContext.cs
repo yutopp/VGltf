@@ -27,5 +27,6 @@ namespace VGltf.Unity
         public MaterialExporter Materials;
         public TextureExporter Textures;
         public ImageExporter Images;
+        public AnimationExporter Animations;
     }
 }
