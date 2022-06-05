@@ -29,6 +29,7 @@ namespace VGltf.Unity
         public MaterialImporter Materials;
         public TextureImporter Textures;
         public ImageImporter Images;
+        public AnimationImporter Animations;
     }
 
     public sealed class ImportingSetting
