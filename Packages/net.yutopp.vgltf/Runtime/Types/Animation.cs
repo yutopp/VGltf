@@ -26,7 +26,7 @@ namespace VGltf.Types
         //
 
         [JsonSchema(Id = "animation.channel.schema.json")]
-        public class ChannelType : GltfProperty
+        public sealed class ChannelType : GltfProperty
         {
             [JsonField(Name = "sampler")]
             [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
@@ -39,11 +39,11 @@ namespace VGltf.Types
             //
 
             [JsonSchema(Id = "animation.channel.target.schema.json")]
-            public class TargetType : GltfProperty
+            public sealed class TargetType : GltfProperty
             {
-                [JsonField(Name = "node")]
+                [JsonField(Name = "node"), JsonFieldIgnorable]
                 [JsonSchemaRef(typeof(GltfID))]
-                public int Node;
+                public int? Node;
 
                 [JsonField(Name = "path")]
                 [JsonSchemaRequired]
@@ -67,7 +67,7 @@ namespace VGltf.Types
         }
 
         [JsonSchema(Id = "animation.sampler.schema.json")]
-        public class SamplerType
+        public sealed class SamplerType : GltfProperty
         {
             [JsonField(Name = "input")]
             [JsonSchemaRequired, JsonSchemaRef(typeof(GltfID))]
