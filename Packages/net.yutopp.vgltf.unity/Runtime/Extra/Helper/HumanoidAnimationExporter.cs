@@ -82,6 +82,15 @@ namespace VGltf.Unity.Ext.Helper
                 });
                 samplers.Add(sampler);
 
+                // node (dummy)
+                var dummyNode = context.Gltf.AddNode(new VGltf.Types.Node
+                {
+                    Matrix = null,
+                    Translation = null,
+                    Rotation = null,
+                    Scale = null,
+                });
+
                 // channel
                 var channel = new VGltf.Types.Animation.ChannelType
                 {
@@ -89,7 +98,8 @@ namespace VGltf.Unity.Ext.Helper
                     // NOTE: Target will not be used when "VGLTF_unity_humanoid_animation_channel" specified
                     Target = new VGltf.Types.Animation.ChannelType.TargetType
                     {
-                        Path = VGltf.Types.Animation.ChannelType.TargetType.PathEnum.Translation,
+                        Node = dummyNode, // Specify the dummy node to suppress validation errors...
+                        Path = "", // Never used for Unity humanoid
                     },
                 };
                 channel.AddExtra(Types.HumanoidAnimationType.ChannelType.ExtraName, new Types.HumanoidAnimationType.ChannelType
@@ -129,10 +139,7 @@ namespace VGltf.Unity.Ext.Helper
             // Scalar | FLOAT
 
             byte[] buffer = PrimitiveExporter.Marshal(timestamps);
-            var viewIndex = context.BufferBuilder.AddView(
-                new ArraySegment<byte>(buffer),
-                null,
-                VGltf.Types.BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER);
+            var viewIndex = context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
 
             var viewComponentType = VGltf.Types.Accessor.ComponentTypeEnum.FLOAT;
 
@@ -142,6 +149,8 @@ namespace VGltf.Unity.Ext.Helper
                 ByteOffset = 0,
                 ComponentType = viewComponentType,
                 Count = timestamps.Length,
+                Min = new float[]{ Mathf.Min(timestamps) },
+                Max = new float[]{ Mathf.Max(timestamps) },
                 Type = VGltf.Types.Accessor.TypeEnum.Scalar,
             };
             return context.Gltf.AddAccessor(accessor);
@@ -152,10 +161,7 @@ namespace VGltf.Unity.Ext.Helper
             // Scalar | FLOAT
 
             byte[] buffer = PrimitiveExporter.Marshal(values);
-            var viewIndex = context.BufferBuilder.AddView(
-                new ArraySegment<byte>(buffer),
-                null,
-                VGltf.Types.BufferView.TargetEnum.ELEMENT_ARRAY_BUFFER);
+            var viewIndex = context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
 
             var viewComponentType = VGltf.Types.Accessor.ComponentTypeEnum.FLOAT;
 
@@ -165,6 +171,8 @@ namespace VGltf.Unity.Ext.Helper
                 ByteOffset = 0,
                 ComponentType = viewComponentType,
                 Count = values.Length,
+                Min = new float[]{ Mathf.Min(values) },
+                Max = new float[]{ Mathf.Max(values) },
                 Type = VGltf.Types.Accessor.TypeEnum.Scalar,
             };
             return context.Gltf.AddAccessor(accessor);

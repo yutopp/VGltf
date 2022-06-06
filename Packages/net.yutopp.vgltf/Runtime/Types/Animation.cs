@@ -41,28 +41,18 @@ namespace VGltf.Types
             [JsonSchema(Id = "animation.channel.target.schema.json")]
             public sealed class TargetType : GltfProperty
             {
+                public const string PathEnumTranslation = "translation";
+                public const string PathEnumRotation = "rotation";
+                public const string PathEnumScale = "scale";
+                public const string PathEnumWeights = "weights";
+
                 [JsonField(Name = "node"), JsonFieldIgnorable]
                 [JsonSchemaRef(typeof(GltfID))]
                 public int? Node;
 
                 [JsonField(Name = "path")]
                 [JsonSchemaRequired]
-                public PathEnum Path;
-
-                //
-
-                [Json(EnumConversion = EnumConversionType.AsString)]
-                public enum PathEnum
-                {
-                    [JsonField(Name = "translation")]
-                    Translation,
-                    [JsonField(Name = "rotation")]
-                    Rotation,
-                    [JsonField(Name = "scale")]
-                    Scale,
-                    [JsonField(Name = "weights")]
-                    Weights,
-                }
+                public string Path;
             }
         }
 
