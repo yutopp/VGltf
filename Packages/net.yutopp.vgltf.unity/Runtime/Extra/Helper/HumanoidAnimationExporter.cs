@@ -16,7 +16,7 @@ using VGltf.Types.Extensions;
 
 namespace VGltf.Unity.Ext.Helper
 {
-    public sealed class HumanoidAnimationExporter : AnimationExporterHook
+    public sealed class HumanoidAnimationExporter : AnimationClipExporterHook
     {
 #if UNITY_EDITOR
         public override IndexedResource<AnimationClip> Export(IExporterContext context, AnimationClip clip)

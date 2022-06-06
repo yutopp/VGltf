@@ -13,16 +13,9 @@ using UnityEngine;
 
 namespace VGltf.Unity.Ext.Helper
 {
-    public sealed class HumanoidAnimationImporter : AnimationImporterHook
+    public sealed class HumanoidAnimationImporter : AnimationClipImporterHook
     {
-        readonly List<AnimationClip> _clips;
-
-        public HumanoidAnimationImporter(List<AnimationClip> clips)
-        {
-            _clips = clips;
-        }
-
-        public override Task<IndexedResource<IDisposable>> Import(IImporterContext context, int animIndex, CancellationToken ct)
+        public override Task<IndexedResource<AnimationClip>> Import(IImporterContext context, int animIndex, CancellationToken ct)
         {
             var gltf = context.Container.Gltf;
             var gltfAnim = gltf.Animations[animIndex];
@@ -38,6 +31,8 @@ namespace VGltf.Unity.Ext.Helper
             animClip.name = gltfAnim.Name;
 
             var resource = context.Resources.Animations.Add(animIndex, animIndex, animClip.name, new Utils.DestroyOnDispose<AnimationClip>(animClip));
+            // Ownership is already held by "context.Resources". This is just a reference.
+            var resourceTyped = new IndexedResource<AnimationClip>(resource.Index, animClip);
 
             foreach (var channel in gltfAnim.Channels)
             {
@@ -82,9 +77,7 @@ namespace VGltf.Unity.Ext.Helper
                 animClip.SetCurve(channelExtra.RelativePath, typeof(Animator), channelExtra.PropertyName, curve);
             }
 
-            _clips.Add(animClip); // mutate the container
-
-            return Task.FromResult(resource);
+            return Task.FromResult(resourceTyped);
         }
 
         public static float[] ImportTimestamp(IImporterContext context, int index)

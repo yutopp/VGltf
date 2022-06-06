@@ -95,7 +95,6 @@ namespace VGltf.Unity
                     Materials = new MaterialImporter(this, materialImporterConfig),
                     Textures = new TextureImporter(this),
                     Images = new ImageImporter(this),
-                    Animations = new AnimationImporter(this),
                 };
             }
 
@@ -171,16 +170,8 @@ namespace VGltf.Unity
             return TakeContext();
         }
 
-        public async Task<IImporterContext> ImportOnlyAnimations(CancellationToken ct)
+        public async Task<IImporterContext> ImportEmpty(CancellationToken ct)
         {
-            var gltf = Context.Container.Gltf;
-
-            for(var i=0; i<gltf.Animations.Count; ++i)
-            {
-                await Context.Importers.Animations.Import(i, ct);
-                await _context.TimeSlicer.Slice(ct);
-            }
-
             foreach (var hook in Hooks)
             {
                 await hook.PostHook(Context, ct);

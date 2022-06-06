@@ -69,7 +69,6 @@ namespace VGltf.Unity
                     Materials = new MaterialExporter(this, materialExporterConfig),
                     Textures = new TextureExporter(this),
                     Images = new ImageExporter(this),
-                    Animations = new AnimationExporter(this),
                 };
             }
 
@@ -103,33 +102,31 @@ namespace VGltf.Unity
             };
         }
 
-        public void ExportGameObjectAsScene(GameObject go, AnimationClip[] clips = null)
+        public void ExportGameObjectAsScene(GameObject go)
         {
             if (_config.UseNormalizedTransforms)
             {
                 using (var normalizer = new VGltf.Unity.Ext.TransformNormalizer())
                 {
                     normalizer.Normalize(go);
-                    ExportGameObjectAsSceneWithoutNormalize(normalizer.Go, clips);
+                    ExportGameObjectAsSceneWithoutNormalize(normalizer.Go);
                 }
             }
             else
             {
-                ExportGameObjectAsSceneWithoutNormalize(go, clips);
+                ExportGameObjectAsSceneWithoutNormalize(go);
             }
         }
 
-        public void ExportOnlyAnimationClips(AnimationClip[] clips)
+        public void ExportEmpty()
         {
-            ExportAnimationClipsInternal(clips);
-
             foreach (var hook in Hooks)
             {
                 hook.PostHook(this, null);
             }
         }
 
-        void ExportGameObjectAsSceneWithoutNormalize(GameObject go, AnimationClip[] clips)
+        void ExportGameObjectAsSceneWithoutNormalize(GameObject go)
         {
             Func<IndexedResource<GameObject>[]> generator = () =>
             {
@@ -156,22 +153,9 @@ namespace VGltf.Unity
             });
             Context.Gltf.Scene = rootSceneIndex;
 
-            if (clips != null)
-            {
-                ExportAnimationClipsInternal(clips);
-            }
-
             foreach (var hook in Hooks)
             {
                 hook.PostHook(this, go);
-            }
-        }
-
-        void ExportAnimationClipsInternal(AnimationClip[] clips)
-        {
-            foreach(var clip in clips)
-            {
-                Context.Exporters.Animations.Export(clip);
             }
         }
 

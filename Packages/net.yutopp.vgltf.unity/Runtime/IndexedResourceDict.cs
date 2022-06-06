@@ -81,20 +81,18 @@ namespace VGltf.Unity
 
         static IndexedResource<Utils.DestroyOnDispose<V>> Wrap(IndexedResource<V> wres)
         {
-            return new IndexedResource<Utils.DestroyOnDispose<V>>
-            {
-                Index = wres.Index,
-                Value = new Utils.DestroyOnDispose<V>(wres.Value),
-            };
+            return new IndexedResource<Utils.DestroyOnDispose<V>>(
+                index: wres.Index,
+                value: new Utils.DestroyOnDispose<V>(wres.Value)
+            );
         }
 
         static IndexedResource<V> Unwrap(IndexedResource<Utils.DestroyOnDispose<V>> wres)
         {
-            return new IndexedResource<V>
-            {
-                Index = wres.Index,
-                Value = wres.Value.Value,
-            };
+            return new IndexedResource<V>(
+                index: wres.Index,
+                value: wres.Value.Value
+            );
         }
     }
 
@@ -105,11 +103,7 @@ namespace VGltf.Unity
 
         public IndexedResource<V> Add(K k, int index, string name, V v)
         {
-            var resource = new IndexedResource<V>
-            {
-                Index = index,
-                Value = v,
-            };
+            var resource = new IndexedResource<V>(index, v);
             _dict.Add(k, resource);
 
             if (!string.IsNullOrEmpty(name))
