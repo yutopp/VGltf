@@ -226,7 +226,7 @@ namespace VGltfExamples.VRMExample
             var filePath = outputFilePathInput.text;
             await Task.Run(() =>
             {
-                using (var fs = new FileStream(filePath, FileMode.OpenOrCreate))
+                using (var fs = new FileStream(filePath, FileMode.Create))
                 {
                     GltfContainer.ToGlb(fs, gltfContainer);
                 }
@@ -289,7 +289,7 @@ namespace VGltfExamples.VRMExample
 
             await Task.Run(() =>
             {
-                using (var fs = new FileStream(path, FileMode.OpenOrCreate))
+                using (var fs = new FileStream(path, FileMode.Create))
                 {
                     GltfContainer.ToGlb(fs, gltfContainer);
                 }
