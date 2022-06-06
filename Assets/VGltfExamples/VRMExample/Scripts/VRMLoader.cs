@@ -234,7 +234,7 @@ namespace VGltfExamples.VRMExample
                 Debug.Log("exported");
             });
 
-#if true
+#if false
             await ExportClip(clip, "anim.glb");
 #endif
         }
@@ -255,9 +255,14 @@ namespace VGltfExamples.VRMExample
             var timeSlicer = new Common.TimeSlicer();
             using (var gltfImporter = new Importer(gltfContainer, timeSlicer))
             {
-                gltfImporter.Context.Importers.Animations.AddHook(new VGltf.Unity.Ext.Helper.HumanoidAnimationImporter(clipRefs));
+                gltfImporter.AddHook(new VGltf.Unity.Ext.Helper.AnimationClipImporter(
+                    hooks: new VGltf.Unity.Ext.Helper.AnimationClipImporterHook[] {
+                        new VGltf.Unity.Ext.Helper.HumanoidAnimationImporter(),
+                    },
+                    clipRefs: clipRefs
+                ));
 
-                var context = await gltfImporter.ImportOnlyAnimations(System.Threading.CancellationToken.None);
+                var context = await gltfImporter.ImportEmpty(System.Threading.CancellationToken.None);
                 return new ClipResource
                 {
                     Context = context,
@@ -271,9 +276,14 @@ namespace VGltfExamples.VRMExample
             GltfContainer gltfContainer = null;
             using (var gltfExporter = new Exporter())
             {
-                gltfExporter.Context.Exporters.Animations.AddHook(new VGltf.Unity.Ext.Helper.HumanoidAnimationExporter());
+                gltfExporter.AddHook(new VGltf.Unity.Ext.Helper.AnimationClipExporter(
+                    clips: new AnimationClip[] { clip },
+                    hooks: new VGltf.Unity.Ext.Helper.AnimationClipExporterHook[] {
+                        new VGltf.Unity.Ext.Helper.HumanoidAnimationExporter(),
+                    }
+                ));
 
-                gltfExporter.ExportOnlyAnimationClips(new AnimationClip[] { clip });
+                gltfExporter.ExportEmpty();
                 gltfContainer = gltfExporter.IntoGlbContainer();
             }
 
