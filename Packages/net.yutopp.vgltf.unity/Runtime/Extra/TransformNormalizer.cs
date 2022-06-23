@@ -59,13 +59,15 @@ namespace VGltf.Unity.Ext
                 return;
             }
 
-            BakeMeshes(nGo);
+            BakeMeshes(nGo, true);
             NormalizeTransforms(nGo.transform, Matrix4x4.identity);
             UpdateBonePoses(nGo);
         }
 
-        public void BakeMeshes(GameObject go)
+        public void BakeMeshes(GameObject go, bool isAncestorUniform)
         {
+            var isUniform = IsUniform(go.transform.localScale);
+
             // Fix TRS to origin ans bake meshes because skined meshes will be transformed by bindposes.
             var smr = go.GetComponent<SkinnedMeshRenderer>();
             if (smr != null)
@@ -143,10 +145,25 @@ namespace VGltf.Unity.Ext
                 smr.sharedMesh = mesh;
             }
 
+            var mf = go.GetComponent<MeshFilter>();
+            if (mf != null)
+            {
+                if (!isAncestorUniform && !Mathf.Approximately(Quaternion.Angle(Quaternion.identity, go.transform.localRotation), 0.0f))
+                {
+                    // NOTE: Could not apply rotations for children of the node which has non-uniformed scale.
+                    throw new Exception($"{go.name} has ancestors which have a non-uniformed scale");
+                }
+
+                // go.transform.localPosition = Vector3.zero;
+                //  go.transform.localRotation = Quaternion.identity;
+
+                mf.sharedMesh = BakeMeshAndMemoize(mf.sharedMesh, go.transform);
+            }
+
             for (var i = 0; i < go.transform.childCount; ++i)
             {
                 var ct = go.transform.GetChild(i);
-                BakeMeshes(ct.gameObject);
+                BakeMeshes(ct.gameObject, !(!isUniform || !isAncestorUniform));
             }
         }
 
@@ -223,6 +240,25 @@ namespace VGltf.Unity.Ext
                 var ct = go.transform.GetChild(i);
                 UpdateBonePoses(ct.gameObject);
             }
+        }
+
+        Mesh BakeMeshAndMemoize(Mesh m, Transform t)
+        {
+            var mesh = UnityEngine.Object.Instantiate(m);
+            bakedMeshes.Add(mesh);
+
+            mesh.name = m.name;
+
+            mesh.vertices = mesh.vertices.Select(t.TransformVector).ToArray();
+            mesh.normals = mesh.normals.Select(t.TransformDirection).ToArray();
+            // mesh.tangents = mesh.tangents.Select(go.transform.TransformVector).ToArray();
+
+            return mesh;
+        }
+
+        static bool IsUniform(Vector3 v)
+        {
+            return Mathf.Approximately(v.x, v.y) && Mathf.Approximately(v.y, v.z);
         }
     }
 }
