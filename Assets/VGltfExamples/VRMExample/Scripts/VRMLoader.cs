@@ -64,13 +64,14 @@ namespace VGltfExamples.VRMExample
             var filePath = filePathInput.text;
 
             // Read the glTF container (unity-independent)
-            var gltfContainer = await Task.Run(() =>
+            var gltfContainer = default(GltfContainer);
+            using (var sr = Common.StreamReaderFactory.Create(filePath)) // get-path can be called on only main-thread...
             {
-                using (var fs = new FileStream(filePath, FileMode.Open))
+                gltfContainer = await Task.Run(() =>
                 {
-                    return GltfContainer.FromGlb(fs);
-                }
-            });
+                    return GltfContainer.FromGlb(sr);
+                });
+            }
 
             var res = new VRMResource();
             try

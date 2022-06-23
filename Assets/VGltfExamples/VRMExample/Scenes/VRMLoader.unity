@@ -1124,7 +1124,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: Assets/StreamingAssets/SampleModels/Alicia/VRM/AliciaSolid-0.51.vrm
+  m_Text: SampleModels/Alicia/VRM/AliciaSolid-0.51.vrm
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -1554,6 +1554,7 @@ MonoBehaviour:
   exportButton: {fileID: 2058808287}
   RuntimeAnimatorController: {fileID: 9100000, guid: 2cea6e6c09d444995bfbd16d68eaeb49,
     type: 2}
+  _clipResources: []
 --- !u!1 &1934839698
 GameObject:
   m_ObjectHideFlags: 0
@@ -1987,7 +1988,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Assets/StreamingAssets/SampleModels/Alicia/VRM/AliciaSoli
+  m_Text: SampleModels/Alicia/VRM/AliciaSolid-0.51.vrm
 --- !u!222 &2093987082
 CanvasRenderer:
   m_ObjectHideFlags: 0
