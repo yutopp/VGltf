@@ -59,15 +59,13 @@ namespace VGltf.Unity.Ext
                 return;
             }
 
-            BakeMeshes(nGo, true);
+            BakeMeshes(nGo);
             NormalizeTransforms(nGo.transform, Matrix4x4.identity);
             UpdateBonePoses(nGo);
         }
 
-        public void BakeMeshes(GameObject go, bool isAncestorUniform)
+        public void BakeMeshes(GameObject go)
         {
-            var isUniform = IsUniform(go.transform.localScale);
-
             // Fix TRS to origin ans bake meshes because skined meshes will be transformed by bindposes.
             var smr = go.GetComponent<SkinnedMeshRenderer>();
             if (smr != null)
@@ -148,22 +146,13 @@ namespace VGltf.Unity.Ext
             var mf = go.GetComponent<MeshFilter>();
             if (mf != null)
             {
-                if (!isAncestorUniform && !Mathf.Approximately(Quaternion.Angle(Quaternion.identity, go.transform.localRotation), 0.0f))
-                {
-                    // NOTE: Could not apply rotations for children of the node which has non-uniformed scale.
-                    throw new Exception($"{go.name} has ancestors which have a non-uniformed scale");
-                }
-
-                // go.transform.localPosition = Vector3.zero;
-                //  go.transform.localRotation = Quaternion.identity;
-
                 mf.sharedMesh = BakeMeshAndMemoize(mf.sharedMesh, go.transform);
             }
 
             for (var i = 0; i < go.transform.childCount; ++i)
             {
                 var ct = go.transform.GetChild(i);
-                BakeMeshes(ct.gameObject, !(!isUniform || !isAncestorUniform));
+                BakeMeshes(ct.gameObject);
             }
         }
 
@@ -254,11 +243,6 @@ namespace VGltf.Unity.Ext
             // mesh.tangents = mesh.tangents.Select(go.transform.TransformVector).ToArray();
 
             return mesh;
-        }
-
-        static bool IsUniform(Vector3 v)
-        {
-            return Mathf.Approximately(v.x, v.y) && Mathf.Approximately(v.y, v.z);
         }
     }
 }
