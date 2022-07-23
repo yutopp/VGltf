@@ -28,7 +28,15 @@ As for importing and exporting resources, you can use it in the following situat
 - [ ] Editor import
 - [x] Editor export
 
-We have checked that it works with IL2CPP builds on Windows, Linux, MacOS (Intel and ARM), iOS, and Android.
+We have checked that VGltf runs on these platforms.
+
+- Windows (Mono, IL2CPP)
+- Linux (Mono, IL2CPP)
+- MacOS (Intel and ARM) (Mono, IL2CPP)
+- iOS
+- Android
+- WebGL
+  - ([this](https://github.com/yutopp/webgl-vgltf-sample) is a sample project for WebGL with Unity 2022.1)
 
 ## Installation
 
