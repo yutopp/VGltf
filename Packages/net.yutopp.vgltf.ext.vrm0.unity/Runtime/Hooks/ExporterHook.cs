@@ -99,7 +99,7 @@ namespace VGltf.Ext.Vrm0.Unity.Hooks
                 vrmHumBone.Bone = h.humanName.AsHumanBoneNameToVrm();
 
                 var boneTrans = nodeTransMap[h.boneName];
-                if (!exporter.Context.Resources.Nodes.TryGetValueByName(boneTrans.name, out var boneNode))
+                if (!exporter.Context.Resources.Nodes.TryGetValueByName(h.boneName, out var boneNode))
                 {
                     throw new Exception($"bone transform is not found: name={boneTrans.name}");
                 }
