@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
+using VGltf.Ext.KhrMaterialsEmissiveStrength.Types;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
@@ -178,13 +180,25 @@ namespace VGltf.Unity
                     break;
             }
 
-            // RGB component and NOT [HDR]
-            var emissionColor = ValueConv.ColorFromLinear(PrimitiveImporter.AsVector3(gltfMat.EmissiveFactor));
-            if (emissionColor != Color.black)
+            // RGB component
+            var emissionColorLinear = PrimitiveImporter.AsVector3(gltfMat.EmissiveFactor);
+            if (emissionColorLinear != Vector3.zero) // NOT black
             {
                 mat.EnableKeyword("_EMISSION");
                 mat.globalIlluminationFlags &= ~MaterialGlobalIlluminationFlags.EmissiveIsBlack;
-                mat.SetColor("_EmissionColor", emissionColor);
+
+                // Support HDR
+                var emissiveStrengthExtName = KhrMaterialsEmissiveStrength.ExtensionName;
+                if (context.Container.Gltf.ContainsExtensionUsed(emissiveStrengthExtName))
+                {
+                    var reg = context.Container.JsonSchemas;
+                    if (gltfMat.TryGetExtension<KhrMaterialsEmissiveStrength>(emissiveStrengthExtName, reg, out var gltfEmissiveStrength))
+                    {
+                        emissionColorLinear *= gltfEmissiveStrength.EmissiveStrength;
+                    }
+                }
+
+                mat.SetColor("_EmissionColor", ValueConv.ColorFromLinear(emissionColorLinear));
             }
 
             if (gltfMat.EmissiveTexture != null)
