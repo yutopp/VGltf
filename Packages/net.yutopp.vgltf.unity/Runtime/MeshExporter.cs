@@ -54,6 +54,9 @@ namespace VGltf.Unity
                 materialIndices.Add(materialResource.Index);
             }
 
+            // TODO: share things other than materials if only materials differ.
+            // (cache mesh and AccIndices, then use the AccIndices when export same mesh)
+
             // Convert to right-handed coordinate system
             var positionAccIndex = ExportPositions(mesh.vertices);
 
