@@ -82,7 +82,7 @@
       "dependencies": {}
     },
     "net.yutopp.vjson": {
-      "version": "0.9.10",
+      "version": "0.9.12",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
