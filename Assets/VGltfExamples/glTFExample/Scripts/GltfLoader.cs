@@ -72,35 +72,44 @@ namespace VGltfExamples.GltfExamples
             }
         }
 
-        async UniTask<GltfResource> LoadGltf(string filePath, string name)
+        async UniTask<GltfResource> LoadGltf(string filePath, string name, System.Threading.CancellationToken ct)
         {
-            // Read the glTF container (unity-independent)
+            // Read the glTF container.
+            // Task.Run is used to avoid blocking the main thread.
+            // GltfContainer is not dependent on Unity, so it can be used in other threads not only in the main thread.
             var gltfContainer = await Task.Run(() =>
             {
                 using (var fs = new FileStream(filePath, FileMode.Open))
                 {
                     return GltfContainer.FromGlb(fs);
                 }
-            });
+            }, ct);
 
+            // GltfResource is a wrapper of the resources only used in examples.
+            // It is used for avoid resource leaks when an exception occurs.
             var res = new GltfResource();
             try
             {
                 // Create a GameObject that points to root nodes in the glTF scene.
-                // The GameObject of the glTF's child Node will be created under this object.
+                // GameObjects of the glTF's child node will be created under the this object.
                 var go = new GameObject();
                 go.name = name;
 
                 res.Go = go;
 
-                // Create a glTF Importer for Unity.
-                // The resources will be cached in the internal Context of this Importer.
-                // Resources can be released by calling Dispose of the Importer (or the internal Context).
+                // Create a TimeSlicer for Unity.
+                // TimeSlicer is used to control the time spent in the main thread.
                 var timeSlicer = new Common.TimeSlicer();
+
+                // Create a glTF Importer for Unity.
+                // The resources will be stored in the Context in this Importer.
+                // Resources can be released by calling Dispose of the Importer (or the Context).
                 using (var gltfImporter = new Importer(gltfContainer, timeSlicer))
                 {
                     // Load the Scene.
-                    res.Context = await gltfImporter.ImportSceneNodes(System.Threading.CancellationToken.None);
+                    // ImportSceneNodes moves ownership of the Context from the Importer, so resources will not be released when the Importer is disposed.
+                    // The Context must be disposed by the caller.
+                    res.Context = await gltfImporter.ImportSceneNodes(ct);
                 }
 
                 foreach (var rootNodeIndex in gltfContainer.Gltf.RootNodesIndices)
@@ -165,7 +174,7 @@ namespace VGltfExamples.GltfExamples
             var loc = _modelLocs[filePathInput.value];
             var filePath = SampleAssetPath(loc); // TODO: Support Android
 
-            var res = await LoadGltf(filePath, "glTF");
+            var res = await LoadGltf(filePath, "glTF", System.Threading.CancellationToken.None);
             _modelResources.Insert(0, res);
 
             var p1 = Common.MemoryProfile.Now;
