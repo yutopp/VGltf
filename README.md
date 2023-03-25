@@ -22,7 +22,7 @@ VGltf is a library that simplifies the import and export of glTF 2.0 assets in y
 
 ### Unity Compatibility
 
-VGltf is compatible with `Unity 2019.4` or higher and supports the following:
+VGltf is compatible with `Unity 2019.4` or `higher` and supports the following:
 
 - ⭕ Run-time import
 - ⭕ Run-time export
@@ -80,7 +80,7 @@ Passing [Lantern.glb](https://github.com/KhronosGroup/glTF-Sample-Models/tree/ma
 
 For a more practical example, see [Assets/Assets/VGltfExamples/glTFExample/Scripts/GltfLoader.cs](./Assets/VGltfExamples/glTFExample/Scripts/GltfLoader.cs).
 
-As another topic, animated glTF with Unity Mecanim is supported by default when using either the VRM 0.x extension or VGltf's [VGLTF_unity_avatar extension](/Packages/net.yutopp.vgltf.unity/Runtime/Extra/AvatarTypes.cs).
+As another topic, skinned meshes with Unity Mecanim is supported by default when using either the VRM 0.x extension or VGltf's [VGLTF_unity_avatar extension](/Packages/net.yutopp.vgltf.unity/Runtime/Extra/AvatarTypes.cs).
 
 ![VroidAvatarSample_A](/docs/vroid-avatar-sample_a.gif)
 
