@@ -7,9 +7,9 @@
 [![gltf-2.0](https://camo.githubusercontent.com/4a2bc1263a5da1ed3190e23186521ffd9a2d51b0/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f676c54462d32253245302d677265656e2e7376673f7374796c653d666c6174)](https://github.com/KhronosGroup/glTF/tree/master/specification/2.0)
 ![unity](https://img.shields.io/badge/unity-2019.4%2B-blue.svg)
 
-![layer](/docs/layer.png)
-
 VGltf is a library that simplifies the import and export of glTF 2.0 assets in your C# standard and Unity projects.
+
+<p align="center"><img src="docs/layer.png" alt="VGltf package structure"/></p>
 
 ## Key Features
 
