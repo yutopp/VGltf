@@ -64,13 +64,7 @@ var timeSlicer = new DefaultTimeSlicer();
 var context = default(IImporterContext);
 using (var gltfImporter = new Importer(gltfContainer, timeSlicer))
 {
-    context = await gltfImporter.ImportSceneNodes(System.Threading.CancellationToken.None);
-}
-
-foreach (var rootNodeIndex in gltfContainer.Gltf.RootNodesIndices)
-{
-    var rootNode = context.Resources.Nodes[rootNodeIndex];
-    rootNode.Value.transform.SetParent(go.transform, false);
+    context = await gltfImporter.ImportSceneNodes(go, System.Threading.CancellationToken.None);
 }
 ```
 

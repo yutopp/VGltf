@@ -152,14 +152,14 @@ namespace VGltf.Unity
         {
         }
 
-        public async Task<IImporterContext> ImportSceneNodes(CancellationToken ct)
+        public async Task<IImporterContext> ImportSceneNodes(GameObject parentGo, CancellationToken ct = default)
         {
             var gltf = Context.Container.Gltf;
             var gltfScene = VGltf.Types.Extensions.GltfExtensions.GetSceneObject(gltf);
 
             foreach (var nodeIndex in gltfScene.Nodes)
             {
-                await Context.Importers.Nodes.ImportGameObjects(nodeIndex, null, ct);
+                await Context.Importers.Nodes.ImportGameObjects(nodeIndex, parentGo, ct);
                 await _context.TimeSlicer.Slice(ct);
             }
             foreach (var nodeIndex in gltfScene.Nodes)
@@ -177,6 +177,11 @@ namespace VGltf.Unity
             _context.SetRendererEnabled(true);
 
             return TakeContext();
+        }
+
+        public Task<IImporterContext> ImportSceneNodes(CancellationToken ct = default)
+        {
+            return ImportSceneNodes(null, ct);
         }
 
         // Take ownership of Context from importer.

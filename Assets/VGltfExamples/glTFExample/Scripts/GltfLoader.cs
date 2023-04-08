@@ -109,13 +109,7 @@ namespace VGltfExamples.GltfExamples
                     // Load the Scene.
                     // ImportSceneNodes moves ownership of the Context from the Importer, so resources will not be released when the Importer is disposed.
                     // The Context must be disposed by the caller.
-                    res.Context = await gltfImporter.ImportSceneNodes(ct);
-                }
-
-                foreach (var rootNodeIndex in gltfContainer.Gltf.RootNodesIndices)
-                {
-                    var rootNode = res.Context.Resources.Nodes[rootNodeIndex];
-                    rootNode.Value.transform.SetParent(go.transform, false);
+                    res.Context = await gltfImporter.ImportSceneNodes(go, ct);
                 }
             }
             catch (Exception)
