@@ -108,7 +108,7 @@ namespace VGltf.Unity
 
             // helper functions
 
-            public void SetRendererEnebled(bool value)
+            public void SetRendererEnabled(bool value)
             {
                 foreach (var go in Resources.Nodes.Map(r => r.Value))
                 {
@@ -124,6 +124,12 @@ namespace VGltf.Unity
                         smr.enabled = value;
                     }
                 }
+            }
+
+            [Obsolete("Use SetRendererEn'a'bled instead")]
+            public void SetRendererEnebled(bool value)
+            {
+                SetRendererEnabled(value);
             }
         }
 
@@ -168,7 +174,7 @@ namespace VGltf.Unity
                 await _context.TimeSlicer.Slice(ct);
             }
 
-            _context.SetRendererEnebled(true);
+            _context.SetRendererEnabled(true);
 
             return TakeContext();
         }
