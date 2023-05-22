@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VGltf;
 using VGltf.Unity;
+using System.Linq;
 
 namespace VGltfExamples.VRMExample
 {
@@ -39,6 +40,21 @@ namespace VGltfExamples.VRMExample
 
         readonly List<VRMResource> _vrmResources = new List<VRMResource>();
 
+        [Serializable]
+        sealed class ClipResource : IDisposable
+        {
+            public IImporterContext Context;
+            [SerializeField] public AnimationClip[] ClipRefs;
+
+            public void Dispose()
+            {
+                Context?.Dispose();
+            }
+        }
+
+        // デバッグ用
+        [SerializeField] List<ClipResource> _clipResources = new List<ClipResource>();
+
         void Start()
         {
             loadButton.onClick.AddListener(UIOnLoadButtonClick);
@@ -55,6 +71,11 @@ namespace VGltfExamples.VRMExample
         void OnDestroy()
         {
             foreach (var disposable in _vrmResources)
+            {
+                disposable.Dispose();
+            }
+
+            foreach(var disposable in  _clipResources)
             {
                 disposable.Dispose();
             }
@@ -120,6 +141,11 @@ namespace VGltfExamples.VRMExample
 
         async UniTaskVoid UIOnLoadButtonClickAsync()
         {
+#if false
+            var clipRes = await ImportClip("anim.glb");
+            _clipResources.Insert(0, clipRes);
+#endif
+
             var p0 = Common.MemoryProfile.Now;
             DebugLogProfile(p0);
 
@@ -168,6 +194,10 @@ namespace VGltfExamples.VRMExample
             var head = _vrmResources[0];
 
             var anim = head.Go.GetComponentInChildren<Animator>();
+
+            var info = anim.GetCurrentAnimatorClipInfo(0);
+            var clip = info[0].clip;
+
             var animCtrl = anim.runtimeAnimatorController;
             anim.runtimeAnimatorController = null; // Make the model to the rest pose
 
@@ -210,6 +240,69 @@ namespace VGltfExamples.VRMExample
                 }
 
                 Debug.Log("exported");
+            });
+
+#if false
+            await ExportClip(clip, "anim.glb");
+#endif
+        }
+
+        async Task<ClipResource> ImportClip(string path)
+        {
+            // Read the glTF container (unity-independent)
+            var gltfContainer = await Task.Run(() =>
+            {
+                using (var fs = new FileStream(path, FileMode.Open))
+                {
+                    return GltfContainer.FromGlb(fs);
+                }
+            });
+
+            var clipRefs = new List<AnimationClip>();
+
+            var timeSlicer = new Common.TimeSlicer();
+            using (var gltfImporter = new Importer(gltfContainer, timeSlicer))
+            {
+                gltfImporter.AddHook(new VGltf.Unity.Ext.Helper.AnimationClipImporter(
+                    hooks: new VGltf.Unity.Ext.Helper.AnimationClipImporterHook[] {
+                        new VGltf.Unity.Ext.Helper.HumanoidAnimationImporter(),
+                    },
+                    clipRefs: clipRefs
+                ));
+
+                var context = await gltfImporter.ImportEmpty(System.Threading.CancellationToken.None);
+                return new ClipResource
+                {
+                    Context = context,
+                    ClipRefs = clipRefs.ToArray(),
+                };
+            }
+        }
+
+        async Task ExportClip(AnimationClip clip, string path)
+        {
+            GltfContainer gltfContainer = null;
+            using (var gltfExporter = new Exporter())
+            {
+                gltfExporter.AddHook(new VGltf.Unity.Ext.Helper.AnimationClipExporter(
+                    clips: new AnimationClip[] { clip },
+                    hooks: new VGltf.Unity.Ext.Helper.AnimationClipExporterHook[] {
+                        new VGltf.Unity.Ext.Helper.HumanoidAnimationExporter(),
+                    }
+                ));
+
+                gltfExporter.ExportEmpty();
+                gltfContainer = gltfExporter.IntoGlbContainer();
+            }
+
+            await Task.Run(() =>
+            {
+                using (var fs = new FileStream(path, FileMode.Create))
+                {
+                    GltfContainer.ToGlb(fs, gltfContainer);
+                }
+
+                Debug.Log("clip exported");
             });
         }
 

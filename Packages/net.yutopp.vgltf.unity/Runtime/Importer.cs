@@ -184,6 +184,17 @@ namespace VGltf.Unity
             return ImportSceneNodes(null, ct);
         }
 
+        public async Task<IImporterContext> ImportEmpty(CancellationToken ct)
+        {
+            foreach (var hook in Hooks)
+            {
+                await hook.PostHook(Context, ct);
+                await _context.TimeSlicer.Slice(ct);
+            }
+
+            return TakeContext();
+        }
+
         // Take ownership of Context from importer.
         public IImporterContext TakeContext()
         {
