@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
+using VGltf.Ext.KhrMaterialsEmissiveStrength.Types;
+using VGltf.Types.Extensions;
 
 namespace VGltf.Unity
 {
@@ -178,13 +180,25 @@ namespace VGltf.Unity
                     break;
             }
 
-            // RGB component and NOT [HDR]
-            var emissionColor = ValueConv.ColorFromLinear(PrimitiveImporter.AsVector3(gltfMat.EmissiveFactor));
-            if (emissionColor != Color.black)
+            // RGB component
+            var emissionColorLinear = PrimitiveImporter.AsVector3(gltfMat.EmissiveFactor);
+            if (emissionColorLinear != Vector3.zero) // NOT black
             {
                 mat.EnableKeyword("_EMISSION");
                 mat.globalIlluminationFlags &= ~MaterialGlobalIlluminationFlags.EmissiveIsBlack;
-                mat.SetColor("_EmissionColor", emissionColor);
+
+                // Support HDR
+                var emissiveStrengthExtName = KhrMaterialsEmissiveStrength.ExtensionName;
+                if (context.Container.Gltf.ContainsExtensionUsed(emissiveStrengthExtName))
+                {
+                    var reg = context.Container.JsonSchemas;
+                    if (gltfMat.TryGetExtension<KhrMaterialsEmissiveStrength>(emissiveStrengthExtName, reg, out var gltfEmissiveStrength))
+                    {
+                        emissionColorLinear *= gltfEmissiveStrength.EmissiveStrength;
+                    }
+                }
+
+                mat.SetColor("_EmissionColor", ValueConv.ColorFromLinear(emissionColorLinear));
             }
 
             if (gltfMat.EmissiveTexture != null)
@@ -299,6 +313,15 @@ namespace VGltf.Unity
                 }
                 else
                 {
+                    var key = new NormalTexKey // TODO: support multi-set
+                    {
+                        Index = index,
+                    };
+                    if (context.Resources.AuxResources.TryGetValue(key, out var auxRes))
+                    {
+                        return (auxRes as Utils.DestroyOnDispose<Texture2D>).Value;
+                    }
+
                     var src = await context.Importers.Textures.RawImport(index, true, ct);
                     using (var srcRes = new Utils.DestroyOnDispose<Texture2D>(src))
                     {
@@ -310,10 +333,7 @@ namespace VGltf.Unity
                             context.ImportingSetting.TextureUpdateMipmaps,
                             context.ImportingSetting.TextureMakeNoLongerReadable,
                             compressHighQual);
-                        context.Resources.AuxResources.Add(new NormalTexKey // TODO: support multi-set
-                        {
-                            Index = index,
-                        }, new Utils.DestroyOnDispose<Texture2D>(texture));
+                        context.Resources.AuxResources.Add(key, new Utils.DestroyOnDispose<Texture2D>(texture));
 
                         await context.TimeSlicer.Slice(ct);
 
@@ -375,6 +395,15 @@ namespace VGltf.Unity
                     return res.Value;
                 }
 
+                var key = new OcclusionTexKey // TODO: support multi-set
+                {
+                    Index = index,
+                };
+                if (context.Resources.AuxResources.TryGetValue(key, out var auxRes))
+                {
+                    return (auxRes as Utils.DestroyOnDispose<Texture2D>).Value;
+                }
+
                 var src = await context.Importers.Textures.RawImport(index, false, ct);
                 using (var srcRes = new Utils.DestroyOnDispose<Texture2D>(src))
                 {
@@ -386,10 +415,7 @@ namespace VGltf.Unity
                         context.ImportingSetting.TextureUpdateMipmaps,
                         context.ImportingSetting.TextureMakeNoLongerReadable,
                         compressHighQual);
-                    context.Resources.AuxResources.Add(new OcclusionTexKey // TODO: support multi-set
-                    {
-                        Index = index,
-                    }, new Utils.DestroyOnDispose<Texture2D>(texture));
+                    context.Resources.AuxResources.Add(key, new Utils.DestroyOnDispose<Texture2D>(texture));
 
                     await context.TimeSlicer.Slice(ct);
 
@@ -457,6 +483,15 @@ namespace VGltf.Unity
                     return res.Value;
                 }
 
+                var key = new MetallicRoughnessTexKey // TODO: support multi-set
+                {
+                    Index = index,
+                };
+                if (context.Resources.AuxResources.TryGetValue(key, out var auxRes))
+                {
+                    return (auxRes as Utils.DestroyOnDispose<Texture2D>).Value;
+                }
+
                 var src = await context.Importers.Textures.RawImport(index, true, ct);
                 using (var srcRes = new Utils.DestroyOnDispose<Texture2D>(src))
                 {
@@ -470,10 +505,7 @@ namespace VGltf.Unity
                         context.ImportingSetting.TextureUpdateMipmaps,
                         context.ImportingSetting.TextureMakeNoLongerReadable,
                         compressHighQual);
-                    context.Resources.AuxResources.Add(new MetallicRoughnessTexKey // TODO: support multi-set
-                    {
-                        Index = index,
-                    }, new Utils.DestroyOnDispose<Texture2D>(texture));
+                    context.Resources.AuxResources.Add(key, new Utils.DestroyOnDispose<Texture2D>(texture));
 
                     await context.TimeSlicer.Slice(ct);
 
