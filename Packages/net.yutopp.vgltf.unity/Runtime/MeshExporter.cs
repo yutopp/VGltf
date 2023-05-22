@@ -27,9 +27,10 @@ namespace VGltf.Unity
 
         public IndexedResource<Mesh> Export(Renderer r, Mesh mesh)
         {
-            return Context.Resources.Meshes.GetOrCall(mesh, () =>
+            var materials = r.sharedMaterials;
+            return Context.Resources.Meshes.GetOrCall((mesh, materials), () =>
             {
-                return ForceExport(r, mesh);
+                return ForceExport(mesh, materials);
             });
         }
 
@@ -44,14 +45,17 @@ namespace VGltf.Unity
             public float Weight;
         }
 
-        public IndexedResource<Mesh> ForceExport(Renderer r, Mesh mesh)
+        public IndexedResource<Mesh> ForceExport(Mesh mesh, Material[] materials)
         {
             var materialIndices = new List<int>();
-            foreach (var m in r.sharedMaterials)
+            foreach (var m in materials)
             {
                 var materialResource = Context.Exporters.Materials.Export(m);
                 materialIndices.Add(materialResource.Index);
             }
+
+            // TODO: share things other than materials if only materials differ.
+            // (cache mesh and AccIndices, then use the AccIndices when export same mesh)
 
             // Convert to right-handed coordinate system
             var positionAccIndex = ExportPositions(mesh.vertices);
@@ -239,7 +243,7 @@ namespace VGltf.Unity
             }
 
             var meshIndex = Context.Gltf.AddMesh(gltfMesh);
-            var resource = Context.Resources.Meshes.Add(mesh, meshIndex, mesh.name, mesh);
+            var resource = Context.Resources.Meshes.Add((mesh, materials), meshIndex, mesh.name, mesh);
 
             return resource;
         }
@@ -348,7 +352,10 @@ namespace VGltf.Unity
 
             // VEC3! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(vec3);
-            var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+            var viewIndex = Context.BufferBuilder.AddView(
+                new ArraySegment<byte>(buffer),
+                null,
+                Types.BufferView.TargetEnum.ARRAY_BUFFER);
 
             componentType = Types.Accessor.ComponentTypeEnum.FLOAT;
 
@@ -361,7 +368,10 @@ namespace VGltf.Unity
 
             // VEC3! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(vec3);
-            var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+            var viewIndex = Context.BufferBuilder.AddView(
+                new ArraySegment<byte>(buffer),
+                null,
+                Types.BufferView.TargetEnum.ARRAY_BUFFER);
 
             var accessor = new Types.Accessor
             {
@@ -380,7 +390,10 @@ namespace VGltf.Unity
 
             // VEC4! | FLOAT!
             byte[] buffer = PrimitiveExporter.Marshal(vec4);
-            var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+            var viewIndex = Context.BufferBuilder.AddView(
+                new ArraySegment<byte>(buffer),
+                null,
+                Types.BufferView.TargetEnum.ARRAY_BUFFER);
 
             var accessor = new Types.Accessor
             {
@@ -401,7 +414,10 @@ namespace VGltf.Unity
             //       | UNSIGNED_BYTE  (normalized) 
             //       | UNSIGNED_SHORT (normalized)
             byte[] buffer = PrimitiveExporter.Marshal(uv);
-            var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+            var viewIndex = Context.BufferBuilder.AddView(
+                new ArraySegment<byte>(buffer),
+                null,
+                Types.BufferView.TargetEnum.ARRAY_BUFFER);
 
             var accessor = new Types.Accessor
             {
@@ -420,7 +436,10 @@ namespace VGltf.Unity
             // VEC4! | UNSIGNED_BYTE  (normalized)
             //       | UNSIGNED_SHORT (normalized)
             byte[] buffer = PrimitiveExporter.Marshal(colors);
-            var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+            var viewIndex = Context.BufferBuilder.AddView(
+                new ArraySegment<byte>(buffer),
+                null,
+                Types.BufferView.TargetEnum.ARRAY_BUFFER);
 
             var accessor = new Types.Accessor
             {
@@ -442,7 +461,10 @@ namespace VGltf.Unity
                 .Select(v => new Vec4<ushort>((ushort)v.x, (ushort)v.y, (ushort)v.z, (ushort)v.w))
                 .ToArray()
                 );
-            var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+            var viewIndex = Context.BufferBuilder.AddView(
+                new ArraySegment<byte>(buffer),
+                null,
+                Types.BufferView.TargetEnum.ARRAY_BUFFER);
 
             var accessor = new Types.Accessor
             {
@@ -461,7 +483,10 @@ namespace VGltf.Unity
             //       | UNSIGNED_BYTE  (normalized)
             //       | UNSIGNED_SHORT (normalized)
             byte[] buffer = PrimitiveExporter.Marshal(weights);
-            var viewIndex = Context.BufferBuilder.AddView(new ArraySegment<byte>(buffer));
+            var viewIndex = Context.BufferBuilder.AddView(
+                new ArraySegment<byte>(buffer),
+                null,
+                Types.BufferView.TargetEnum.ARRAY_BUFFER);
 
             var accessor = new Types.Accessor
             {

@@ -14,8 +14,12 @@ namespace VGltf.Unity
 {
     public sealed class IndexedResourceDict<K, V> : IDisposable where V : UnityEngine.Object
     {
-        readonly IndexedDisposableResourceDict<K, Utils.DestroyOnDispose<V>> _internal =
-            new IndexedDisposableResourceDict<K, Utils.DestroyOnDispose<V>>();
+        readonly IndexedDisposableResourceDict<K, Utils.DestroyOnDispose<V>> _internal;
+
+        public IndexedResourceDict(IEqualityComparer<K> equalityComparer = default)
+        {
+            _internal = new IndexedDisposableResourceDict<K, Utils.DestroyOnDispose<V>>(equalityComparer);
+        }
 
         public IndexedResource<V> Add(K k, int index, string name, V v)
         {
@@ -98,8 +102,13 @@ namespace VGltf.Unity
 
     public sealed class IndexedDisposableResourceDict<K, V> : IDisposable where V : IDisposable
     {
-        readonly Dictionary<K, IndexedResource<V>> _dict = new Dictionary<K, IndexedResource<V>>();
-        readonly Dictionary<string, IndexedResource<V>> _nameDict = new Dictionary<string, IndexedResource<V>>();
+        readonly Dictionary<K, IndexedResource<V>> _dict;
+        readonly MultiMap<string, IndexedResource<V>> _nameDict = new MultiMap<string, IndexedResource<V>>();
+
+        public IndexedDisposableResourceDict(IEqualityComparer<K> equalityComparer = default)
+        {
+            _dict = new Dictionary<K, IndexedResource<V>>(equalityComparer);
+        }
 
         public IndexedResource<V> Add(K k, int index, string name, V v)
         {
@@ -156,14 +165,23 @@ namespace VGltf.Unity
             return _dict.TryGetValue(k, out res);
         }
 
-        public bool ContainsByName(string k)
-        {
-            return _nameDict.ContainsKey(k);
-        }
-
         public bool TryGetValueByName(string k, out IndexedResource<V> res)
         {
-            return _nameDict.TryGetValue(k, out res);
+            if (!_nameDict.TryGetValues(k, out var resList))
+            {
+                res = default;
+                return false;
+            }
+
+            // Can not distinguish that there is no element or more elements... (bad interface)
+            if (resList.Count != 1)
+            {
+                res = default;
+                return false;
+            }
+
+            res = resList.First();
+            return true;
         }
 
         public void Dispose()
@@ -175,6 +193,33 @@ namespace VGltf.Unity
 
             _dict.Clear();
             _nameDict.Clear();
+        }
+    }
+
+    sealed class MultiMap<K, V>
+    {
+        readonly Dictionary<K, List<V>> _dict = new Dictionary<K, List<V>>();
+
+        public void Add(K key, V value)
+        {
+            if (_dict.TryGetValue(key, out var values))
+            {
+                values.Add(value);
+
+                return;
+            }
+
+            _dict.Add(key, new List<V>{ value });
+        }
+
+        public bool TryGetValues(K key, out List<V> values)
+        {
+            return _dict.TryGetValue(key, out values);
+        }
+
+        public void Clear()
+        {
+            _dict.Clear();
         }
     }
 }

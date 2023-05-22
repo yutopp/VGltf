@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -85,13 +86,14 @@ namespace VGltfExamples.VRMExample
             var filePath = filePathInput.text;
 
             // Read the glTF container (unity-independent)
-            var gltfContainer = await Task.Run(() =>
+            var gltfContainer = default(GltfContainer);
+            using (var sr = Common.StreamReaderFactory.Create(filePath)) // get-path can be called on only main-thread...
             {
-                using (var fs = new FileStream(filePath, FileMode.Open))
+                gltfContainer = await Task.Run(() =>
                 {
-                    return GltfContainer.FromGlb(fs);
-                }
-            });
+                    return GltfContainer.FromGlb(sr);
+                });
+            }
 
             var res = new VRMResource();
             try
@@ -213,7 +215,13 @@ namespace VGltfExamples.VRMExample
                     var bridge = new VRM0ExporterBridge();
                     gltfExporter.AddHook(new VGltf.Ext.Vrm0.Unity.Hooks.ExporterHook(bridge));
 
-                    gltfExporter.ExportGameObjectAsScene(head.Go);
+                    // In some implementations of VRM, specifying multiple shape keys in the blendshape proxy may not work correctly, so they should be unified.
+                    using (var unifier = new VGltf.Ext.Vrm0.Unity.Filter.BlendshapeUnifier())
+                    {
+                        unifier.Unify(head.Go);
+
+                        gltfExporter.ExportGameObjectAsScene(unifier.Go);
+                    }
 
                     gltfContainer = gltfExporter.IntoGlbContainer();
                 }
@@ -226,7 +234,7 @@ namespace VGltfExamples.VRMExample
             var filePath = outputFilePathInput.text;
             await Task.Run(() =>
             {
-                using (var fs = new FileStream(filePath, FileMode.Create))
+                using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
                 {
                     GltfContainer.ToGlb(fs, gltfContainer);
                 }
@@ -311,3 +319,4 @@ namespace VGltfExamples.VRMExample
         }
     }
 }
+
